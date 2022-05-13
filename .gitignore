@@ -1,0 +1,8 @@
+.idea/
+.swp
+tables_scale_1/
+*.tbl
+*.o
+dbgen
+.venv/
+__pycache__/

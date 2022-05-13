@@ -1,0 +1,106 @@
+import polars as pl
+
+h_nation = """n_nationkey
+n_name
+n_regionkey
+n_comment""".split(
+    "\n"
+)
+
+h_region = """r_regionkey
+r_name
+r_comment""".split(
+    "\n"
+)
+
+h_part = """p_partkey
+p_name
+p_mfgr
+p_brand
+p_type
+p_size
+p_container
+p_retailprice
+p_comment""".split(
+    "\n"
+)
+
+h_supplier = """s_suppkey
+s_name
+s_address
+s_nationkey
+s_phone
+s_acctbal
+s_comment""".split(
+    "\n"
+)
+
+h_partsupp = """ps_partkey
+ps_suppkey
+ps_availqty
+ps_supplycost
+ps_comment""".split(
+    "\n"
+)
+
+h_customer = """c_name
+c_address
+c_nationkey
+c_phone
+c_acctbal
+c_mktsegment
+c_comment""".split(
+    "\n"
+)
+
+h_orders = """o_orderkey
+o_custkey
+o_orderstatus
+o_totalprice
+o_orderdate
+o_orderpriority
+o_clerk
+o_shippriority
+o_comment""".split(
+    "\n"
+)
+
+h_lineitem = """l_orderkey
+l_partkey
+l_suppkey
+l_linenumber
+l_quantity
+l_extendedprice
+l_discount
+l_tax
+l_returnflag
+l_linestatus
+l_shipdate
+l_commitdate
+l_receiptdate
+l_shipinstruct
+l_shipmode
+comments""".split(
+    "\n"
+)
+
+for name in [
+    "nation",
+    "region",
+    "part",
+    "supplier",
+    "partsupp",
+    "customer",
+    "orders",
+    "lineitem",
+]:
+    print("process table:", name)
+    df = pl.read_csv(
+        f"tables_scale_1/{name}.tbl",
+        has_header=False,
+        sep="|",
+        new_columns=eval(f"h_{name}"),
+    )
+    df.write_parquet(
+        f"tables_scale_1/{name}.parquet", statistics=True, compression="snappy"
+    )
