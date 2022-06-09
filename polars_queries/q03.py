@@ -6,7 +6,7 @@ from polars_queries import datasets
 
 @linetimer(name="Query 03", unit='s')
 def q03():
-    var1 = var2 = pl.datatypes.datetime(1995, 3, 15)
+    var1 = var2 = "1995-03-15"
     var3 = "BUILDING"
 
     customer_ds = datasets.get_customer_ds()
