@@ -26,7 +26,7 @@ def q03():
           .groupby(["o_orderkey", "o_orderdate", "o_shippriority"])
           .agg([pl.sum("revenue")])
           .select([pl.col("o_orderkey").alias("l_orderkey"), "revenue", "o_orderdate", "o_shippriority"])
-          # .sort([pl.col("revenue").sort_by(), "o_orderdate"])
+          .sort(by=["revenue", "o_orderdate"], reverse=[True, False]).collect()
           .limit(10)
           )
 
