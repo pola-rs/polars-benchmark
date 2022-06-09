@@ -43,7 +43,8 @@ ps_comment""".split(
     "\n"
 )
 
-h_customer = """c_name
+h_customer = """c_custkey
+c_name
 c_address
 c_nationkey
 c_phone
