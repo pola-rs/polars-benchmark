@@ -36,3 +36,15 @@ def get_orders_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
 
 def get_customer_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "customer.parquet"))
+
+
+def get_region_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+    return __scan_parquet_ds(join(base_dir, "region.parquet"))
+
+
+def get_nation_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+    return __scan_parquet_ds(join(base_dir, "nation.parquet"))
+
+
+def get_supplier_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+    return __scan_parquet_ds(join(base_dir, "supplier.parquet"))
