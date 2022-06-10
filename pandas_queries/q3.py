@@ -9,7 +9,7 @@ Q_NUM = 3
 
 
 @linetimer(name=f"Overall execution of Query {Q_NUM}", unit='s')
-def q3():
+def q():
     var1 = var2 = datetime.datetime.strptime('1995-03-15', '%Y-%m-%d').date()
     var3 = "BUILDING"
 
@@ -43,4 +43,4 @@ def q3():
 
 
 if __name__ == '__main__':
-    q3()
+    q()

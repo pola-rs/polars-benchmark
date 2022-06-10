@@ -8,7 +8,7 @@ Q_NUM = 4
 
 
 @linetimer(name=f"Overall execution of Query {Q_NUM}", unit='s')
-def q4():
+def q():
     var1 = "1993-07-01"
     var2 = "1993-10-01"
 
@@ -32,4 +32,4 @@ def q4():
 
 
 if __name__ == '__main__':
-    q4()
+    q()
