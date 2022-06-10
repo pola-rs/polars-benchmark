@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import polars as pl
 from linetimer import CodeTimer
 from linetimer import linetimer
@@ -10,8 +12,8 @@ Q_NUM = 5
 @linetimer(name=f"Overall execution of Query {Q_NUM}", unit='s')
 def q():
     var1 = "ASIA"
-    var2 = "1994-01-01"
-    var3 = "1995-01-01"
+    var2 = datetime(1994, 1, 1)
+    var3 = datetime(1995, 1, 1)
 
     region_ds = polars_tpch_utils.get_region_ds()
     nation_ds = polars_tpch_utils.get_nation_ds()

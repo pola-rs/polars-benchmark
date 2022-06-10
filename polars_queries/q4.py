@@ -1,3 +1,5 @@
+from datetime import datetime
+
 import polars as pl
 from linetimer import CodeTimer
 from linetimer import linetimer
@@ -9,8 +11,8 @@ Q_NUM = 4
 
 @linetimer(name=f"Overall execution of Query {Q_NUM}", unit='s')
 def q():
-    var1 = "1993-07-01"
-    var2 = "1993-10-01"
+    var1 = datetime(1993, 7, 1)
+    var2 = datetime(1993, 10, 1)
 
     line_item_ds = polars_tpch_utils.get_line_item_ds()
     orders_ds = polars_tpch_utils.get_orders_ds()
