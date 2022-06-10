@@ -36,7 +36,7 @@ def q():
             .sum()
             .sort_values(["revenue"], ascending=False)
         )
-        result_df = total[:10].reset_index(drop=True).loc[:, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]]
+        result_df = total[:10].loc[:, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]]
         print(result_df.head(10))
 
     pandas_tpch_utils.test_results(Q_NUM, result_df)
