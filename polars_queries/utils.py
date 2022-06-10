@@ -12,7 +12,7 @@ def __scan_parquet_ds(path: str):
 
 
 def get_query_answer(query: int, base_dir: str = __default_answers_base_dir) -> pl.LazyFrame:
-    answer_ldf = pl.scan_csv(join(base_dir, f"q{query}.out"), sep="|", has_header=True)
+    answer_ldf = pl.scan_csv(join(base_dir, f"q{query}.out"), sep="|", has_header=True, parse_dates=True)
     return answer_ldf.select([pl.col(c).alias(c.strip()) for c in answer_ldf.columns])
 
 

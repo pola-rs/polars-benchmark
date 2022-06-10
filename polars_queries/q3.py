@@ -1,6 +1,9 @@
+from datetime import datetime
+
 import polars as pl
 from linetimer import CodeTimer
 from linetimer import linetimer
+from polars.datatypes import Date
 
 from polars_queries import utils
 
@@ -9,7 +12,7 @@ Q_NUM = 3
 
 @linetimer(name=f"Overall execution of Query {Q_NUM}", unit='s')
 def q3():
-    var1 = var2 = "1995-03-15"
+    var1 = var2 = datetime(1995, 3, 15)
     var3 = "BUILDING"
 
     customer_ds = utils.get_customer_ds()
@@ -21,11 +24,13 @@ def q3():
                      .filter(pl.col("c_mktsegment") == var3)
                      .join(orders_ds, left_on="c_custkey", right_on="o_custkey")
                      .join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
+                     .with_column(pl.col("o_orderdate").str.strptime(Date))
+                     .with_column(pl.col("l_shipdate").str.strptime(Date))
                      .filter(pl.col("o_orderdate") < var2)
                      .filter(pl.col("l_shipdate") > var1)
                      .with_column((pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue"))
                      .groupby(["o_orderkey", "o_orderdate", "o_shippriority"])
-                     .agg([pl.sum("revenue").round(2)])
+                     .agg([pl.sum("revenue")])
                      .select([pl.col("o_orderkey").alias("l_orderkey"), "revenue", "o_orderdate", "o_shippriority"])
                      .sort(by=["revenue", "o_orderdate"], reverse=[True, False])
                      .limit(10)
