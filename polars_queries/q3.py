@@ -4,7 +4,7 @@ import polars as pl
 from linetimer import CodeTimer
 from linetimer import linetimer
 
-from polars_queries import utils
+from polars_queries import polars_tpch_utils
 
 Q_NUM = 3
 
@@ -14,9 +14,9 @@ def q3():
     var1 = var2 = datetime(1995, 3, 15)
     var3 = "BUILDING"
 
-    customer_ds = utils.get_customer_ds()
-    line_item_ds = utils.get_line_item_ds()
-    orders_ds = utils.get_orders_ds()
+    customer_ds = polars_tpch_utils.get_customer_ds()
+    line_item_ds = polars_tpch_utils.get_line_item_ds()
+    orders_ds = polars_tpch_utils.get_orders_ds()
 
     with CodeTimer(name=f"Get result of Query {Q_NUM}", unit='s'):
         result_df = (customer_ds
@@ -35,7 +35,7 @@ def q3():
 
         print(result_df)
 
-    utils.test_results(Q_NUM, result_df)
+    polars_tpch_utils.test_results(Q_NUM, result_df)
 
 
 if __name__ == '__main__':
