@@ -100,8 +100,7 @@ for name in [
         f"tables_scale_1/{name}.tbl",
         has_header=False,
         sep="|",
+        parse_dates=True,
         new_columns=eval(f"h_{name}"),
     )
-    df.write_parquet(
-        f"tables_scale_1/{name}.parquet", statistics=True, compression="snappy"
-    )
+    df.write_parquet(f"tables_scale_1/{name}.parquet", statistics=True)
