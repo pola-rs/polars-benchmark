@@ -22,12 +22,12 @@ def test_results(q_num: int, result_df: PandasDF):
         answer = get_query_answer(q_num).reset_index(drop=True)
 
         for c, t in answer.dtypes.items():
-            s1 = answer[c]
-            s2 = result_df[c]
+            s1 = result_df[c]
+            s2 = answer[c]
 
             if t.name == 'object':
-                s1 = s1.astype("string")
-                s2 = s2.astype("string")
+                s1 = s1.astype("string").apply(lambda x: x.strip())
+                s2 = s2.astype("string").apply(lambda x: x.strip())
 
             pd.testing.assert_series_equal(left=s1, right=s2)
 
