@@ -48,3 +48,11 @@ def get_nation_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
 
 def get_supplier_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "supplier.parquet"))
+
+
+def get_part_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+    return __scan_parquet_ds(join(base_dir, "part.parquet"))
+
+
+def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+    return __scan_parquet_ds(join(base_dir, "partsupp.parquet"))
