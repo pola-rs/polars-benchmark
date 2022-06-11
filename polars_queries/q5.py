@@ -37,7 +37,7 @@ def q():
                      .agg([pl.sum("revenue")])
                      .sort(by="revenue", reverse=True)
                      ).collect()
-        #
+
         print(result_df)
         polars_tpch_utils.test_results(Q_NUM, result_df)
 
