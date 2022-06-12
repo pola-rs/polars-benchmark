@@ -1,7 +1,10 @@
+import os
 from os.path import join
 
 import polars as pl
-from linetimer import CodeTimer
+from linetimer import CodeTimer, linetimer
+
+SHOW_PLAN = os.environ.get("SHOW_PLAN", False)
 
 __default_dataset_base_dir = "tables_scale_1"
 __default_answers_base_dir = "tpch-dbgen/answers"
@@ -28,7 +31,7 @@ def get_query_answer(
 def test_results(q_num: int, result_df: pl.DataFrame):
     with CodeTimer(name=f"Testing result of Query {q_num}", unit="s"):
         answer = get_query_answer(q_num).collect()
-        pl.testing.assert_frame_equal(left=result_df, right=answer)
+        pl.testing.assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
 def get_line_item_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
@@ -61,3 +64,17 @@ def get_part_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
 
 def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "partsupp.parquet"))
+
+
+def run_query(q_num: str, lp: pl.LazyFrame):
+    @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
+    def query():
+        if SHOW_PLAN:
+            print(lp.describe_optimized_plan())
+
+        with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
+            result = lp.collect()
+
+        test_results(q_num, result)
+
+    query()
