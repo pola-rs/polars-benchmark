@@ -1,14 +1,16 @@
-from datetime import date
+from datetime import datetime
 
-from pandas_queries import pandas_tpch_utils
+import pandas as pd
+
+from dask_queries import utils
 
 Q_NUM = 1
 
 
 def q():
-    VAR1 = date(1998, 9, 2)
+    VAR1 = pd.Timestamp(datetime(1998, 9, 2))
 
-    lineitem = pandas_tpch_utils.get_line_item_ds
+    lineitem = utils.get_line_item_ds
     # first call one time to cache in case we don't include the IO times
     lineitem()
 
@@ -30,7 +32,7 @@ def q():
             ],
         ]
         sel = lineitem_filtered.l_shipdate <= VAR1
-        lineitem_filtered = lineitem_filtered[sel]
+        lineitem_filtered = lineitem_filtered[sel].copy()
         lineitem_filtered["sum_qty"] = lineitem_filtered.l_quantity
         lineitem_filtered["sum_base_price"] = lineitem_filtered.l_extendedprice
         lineitem_filtered["avg_qty"] = lineitem_filtered.l_quantity
@@ -60,11 +62,13 @@ def q():
             }
         )
 
-        result_df = total.reset_index().sort_values(["l_returnflag", "l_linestatus"])
+        result_df = (
+            total.reset_index().sort_values(["l_returnflag", "l_linestatus"]).compute()
+        )
 
         return result_df
 
-    pandas_tpch_utils.run_query(Q_NUM, query)
+    utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":

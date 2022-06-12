@@ -3,6 +3,9 @@ import os
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
 print("include io:", INCLUDE_IO)
 
+__default_dataset_base_dir = "tables_scale_1"
+__default_answers_base_dir = "tpch-dbgen/answers"
+
 
 def on_second_call(func):
     def helper(*args, **kwargs):
