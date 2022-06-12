@@ -4,6 +4,8 @@ from os.path import join
 import polars as pl
 from linetimer import CodeTimer, linetimer
 
+from utils import INCLUDE_IO
+
 SHOW_PLAN = os.environ.get("SHOW_PLAN", False)
 
 __default_dataset_base_dir = "tables_scale_1"
@@ -11,7 +13,10 @@ __default_answers_base_dir = "tpch-dbgen/answers"
 
 
 def __scan_parquet_ds(path: str):
-    return pl.scan_parquet(path)
+    scan = pl.scan_parquet(path)
+    if INCLUDE_IO:
+        return scan
+    return scan.collect().lazy()
 
 
 def get_query_answer(
@@ -35,35 +40,35 @@ def test_results(q_num: int, result_df: pl.DataFrame):
 
 
 def get_line_item_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "lineitem.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "lineitem.parquet"))
 
 
 def get_orders_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "orders.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "orders.parquet"))
 
 
 def get_customer_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "customer.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "customer.parquet"))
 
 
 def get_region_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "region.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "region.parquet"))
 
 
 def get_nation_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "nation.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "nation.parquet"))
 
 
 def get_supplier_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "supplier.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "supplier.parquet"))
 
 
 def get_part_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "part.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "part.parquet"))
 
 
 def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
-    return __scan_parquet_ds(join(base_dir, "partsupp.parquet")).collect().lazy()
+    return __scan_parquet_ds(join(base_dir, "partsupp.parquet"))
 
 
 def run_query(q_num: str, lp: pl.LazyFrame):
