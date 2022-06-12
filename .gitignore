@@ -6,3 +6,4 @@ tables_scale_1/
 dbgen
 .venv/
 __pycache__/
+qgen
