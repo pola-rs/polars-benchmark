@@ -4,12 +4,9 @@ from os.path import join
 import polars as pl
 from linetimer import CodeTimer, linetimer
 
-from utils import INCLUDE_IO
+from utils import INCLUDE_IO, __default_answers_base_dir, __default_dataset_base_dir
 
 SHOW_PLAN = os.environ.get("SHOW_PLAN", False)
-
-__default_dataset_base_dir = "tables_scale_1"
-__default_answers_base_dir = "tpch-dbgen/answers"
 
 
 def __scan_parquet_ds(path: str):
