@@ -8,9 +8,10 @@ Q_NUM = 1
 
 
 def q():
+    VAR1 = datetime(1998, 9, 2)
     q = polars_tpch_utils.get_line_item_ds()
     q_final = (
-        q.filter(pl.col("l_shipdate") <= datetime(1998, 9, 2))
+        q.filter(pl.col("l_shipdate") <= VAR1)
         .groupby(["l_returnflag", "l_linestatus"])
         .agg(
             [
@@ -21,7 +22,8 @@ def q():
                 .alias("sum_disc_price"),
                 (
                     pl.col("l_extendedprice")
-                    * (1.0 - pl.col("l_discount") * (1.0 - pl.col("l_tax")))
+                    * (1.0 - pl.col("l_discount"))
+                    * (1.0 + pl.col("l_tax"))
                 )
                 .sum()
                 .alias("sum_charge"),
