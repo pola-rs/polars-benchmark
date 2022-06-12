@@ -75,6 +75,8 @@ def run_query(q_num: str, lp: pl.LazyFrame):
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
             result = lp.collect()
 
+        print(result)
+
         test_results(q_num, result)
 
     query()
