@@ -9,10 +9,19 @@ def q():
     date1 = datetime.datetime.strptime("1993-10-01", "%Y-%m-%d").date()
     date2 = datetime.datetime.strptime("1993-07-01", "%Y-%m-%d").date()
 
-    line_item_ds = pandas_tpch_utils.get_line_item_ds()
-    orders_ds = pandas_tpch_utils.get_orders_ds()
+    line_item_ds = pandas_tpch_utils.get_line_item_ds
+    orders_ds = pandas_tpch_utils.get_orders_ds
+
+    # first call one time to cache in case we don't include the IO times
+    line_item_ds()
+    orders_ds()
 
     def query():
+        nonlocal line_item_ds
+        nonlocal orders_ds
+        line_item_ds = line_item_ds()
+        orders_ds = orders_ds()
+
         lsel = line_item_ds.l_commitdate < line_item_ds.l_receiptdate
         osel = (orders_ds.o_orderdate < date1) & (orders_ds.o_orderdate >= date2)
         flineitem = line_item_ds[lsel]

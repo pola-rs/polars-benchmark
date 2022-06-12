@@ -9,11 +9,23 @@ def q():
     var1 = var2 = datetime.datetime.strptime("1995-03-15", "%Y-%m-%d").date()
     var3 = "BUILDING"
 
-    customer_ds = pandas_tpch_utils.get_customer_ds()
-    line_item_ds = pandas_tpch_utils.get_line_item_ds()
-    orders_ds = pandas_tpch_utils.get_orders_ds()
+    customer_ds = pandas_tpch_utils.get_customer_ds
+    line_item_ds = pandas_tpch_utils.get_line_item_ds
+    orders_ds = pandas_tpch_utils.get_orders_ds
+
+    # first call one time to cache in case we don't include the IO times
+    customer_ds()
+    line_item_ds()
+    orders_ds()
 
     def query():
+        nonlocal customer_ds
+        nonlocal line_item_ds
+        nonlocal orders_ds
+        customer_ds = customer_ds()
+        line_item_ds = line_item_ds()
+        orders_ds = orders_ds()
+
         lineitem_filtered = line_item_ds.loc[
             :, ["l_orderkey", "l_extendedprice", "l_discount", "l_shipdate"]
         ]

@@ -12,9 +12,15 @@ def q():
     date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
     var3 = 24
 
-    line_item_ds = pandas_tpch_utils.get_line_item_ds()
+    line_item_ds = pandas_tpch_utils.get_line_item_ds
+
+    # first call one time to cache in case we don't include the IO times
+    line_item_ds()
 
     def query():
+        nonlocal line_item_ds
+        line_item_ds = line_item_ds()
+
         lineitem_filtered = line_item_ds.loc[
             :, ["l_quantity", "l_extendedprice", "l_discount", "l_shipdate"]
         ]
