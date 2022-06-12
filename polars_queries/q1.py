@@ -1,5 +1,3 @@
-import os
-import time
 from datetime import datetime
 
 import polars as pl
@@ -12,7 +10,7 @@ Q_NUM = 1
 def q():
     q = polars_tpch_utils.get_line_item_ds()
     q_final = (
-        q.filter(pl.col("l_shipdate") <= datetime(1998, 12, 1))
+        q.filter(pl.col("l_shipdate") <= datetime(1998, 9, 2))
         .groupby(["l_returnflag", "l_linestatus"])
         .agg(
             [

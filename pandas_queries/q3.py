@@ -1,13 +1,10 @@
 import datetime
 
-from linetimer import CodeTimer, linetimer
-
 from pandas_queries import pandas_tpch_utils
 
 Q_NUM = 3
 
 
-@linetimer(name=f"Overall execution of Query {Q_NUM}", unit="s")
 def q():
     var1 = var2 = datetime.datetime.strptime("1995-03-15", "%Y-%m-%d").date()
     var3 = "BUILDING"
@@ -16,7 +13,7 @@ def q():
     line_item_ds = pandas_tpch_utils.get_line_item_ds()
     orders_ds = pandas_tpch_utils.get_orders_ds()
 
-    with CodeTimer(name=f"Get result of Query {Q_NUM}", unit="s"):
+    def query():
         lineitem_filtered = line_item_ds.loc[
             :, ["l_orderkey", "l_extendedprice", "l_discount", "l_shipdate"]
         ]
@@ -44,9 +41,9 @@ def q():
         result_df = total[:10].loc[
             :, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]
         ]
-        print(result_df.head(10))
+        return result_df
 
-    pandas_tpch_utils.test_results(Q_NUM, result_df)
+    pandas_tpch_utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":
