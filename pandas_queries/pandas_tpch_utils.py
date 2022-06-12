@@ -1,7 +1,8 @@
 from os.path import join
+from typing import Callable
 
 import pandas as pd
-from linetimer import CodeTimer
+from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
 __default_dataset_base_dir = "tables_scale_1"
@@ -69,3 +70,15 @@ def get_part_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
 
 def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
     return __scan_parquet_ds(join(base_dir, "partsupp.parquet"))
+
+
+def run_query(q_num: str, query: Callable):
+    @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
+    def run():
+        with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
+            result = query()
+
+        print(result)
+        test_results(q_num, result)
+
+    run()

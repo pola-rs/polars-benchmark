@@ -1,13 +1,10 @@
 import datetime
 
-from linetimer import CodeTimer, linetimer
-
 from pandas_queries import pandas_tpch_utils
 
 Q_NUM = 5
 
 
-@linetimer(name=f"Overall execution of Query {Q_NUM}", unit="s")
 def q():
     date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d").date()
     date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
@@ -19,7 +16,7 @@ def q():
     orders_ds = pandas_tpch_utils.get_orders_ds()
     supplier_ds = pandas_tpch_utils.get_supplier_ds()
 
-    with CodeTimer(name=f"Get result of Query {Q_NUM}", unit="s"):
+    def query():
         rsel = region_ds.r_name == "ASIA"
         osel = (orders_ds.o_orderdate >= date1) & (orders_ds.o_orderdate < date2)
         forders = orders_ds[osel]
@@ -36,9 +33,9 @@ def q():
         jn5["revenue"] = jn5.l_extendedprice * (1.0 - jn5.l_discount)
         gb = jn5.groupby("n_name", as_index=False)["revenue"].sum()
         result_df = gb.sort_values("revenue", ascending=False)
-        print(result_df.head(10))
+        return result_df
 
-    pandas_tpch_utils.test_results(Q_NUM, result_df)
+    pandas_tpch_utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":

@@ -5,7 +5,6 @@ from pandas_queries import pandas_tpch_utils
 Q_NUM = 2
 
 
-@linetimer(name=f"Overall execution of Query {Q_NUM}", unit="s")
 def q():
     var1 = 15
     var2 = "BRASS"
@@ -17,7 +16,7 @@ def q():
     part_ds = pandas_tpch_utils.get_part_ds()
     part_supp_ds = pandas_tpch_utils.get_part_supp_ds()
 
-    with CodeTimer(name=f"Get result of Query {Q_NUM}", unit="s"):
+    def query():
         nation_filtered = nation_ds.loc[:, ["n_nationkey", "n_name", "n_regionkey"]]
         region_filtered = region_ds[(region_ds["r_name"] == var3)]
         region_filtered = region_filtered.loc[:, ["r_regionkey"]]
@@ -134,9 +133,10 @@ def q():
                 True,
             ],
         )[:100]
-        print(result_df.head())
 
-    pandas_tpch_utils.test_results(Q_NUM, result_df)
+        return result_df
+
+    pandas_tpch_utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":
