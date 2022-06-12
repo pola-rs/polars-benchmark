@@ -9,14 +9,36 @@ def q():
     date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d").date()
     date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
 
-    region_ds = pandas_tpch_utils.get_region_ds()
-    nation_ds = pandas_tpch_utils.get_nation_ds()
-    customer_ds = pandas_tpch_utils.get_customer_ds()
-    line_item_ds = pandas_tpch_utils.get_line_item_ds()
-    orders_ds = pandas_tpch_utils.get_orders_ds()
-    supplier_ds = pandas_tpch_utils.get_supplier_ds()
+    region_ds = pandas_tpch_utils.get_region_ds
+    nation_ds = pandas_tpch_utils.get_nation_ds
+    customer_ds = pandas_tpch_utils.get_customer_ds
+    line_item_ds = pandas_tpch_utils.get_line_item_ds
+    orders_ds = pandas_tpch_utils.get_orders_ds
+    supplier_ds = pandas_tpch_utils.get_supplier_ds
+
+    # first call one time to cache in case we don't include the IO times
+    region_ds()
+    nation_ds()
+    customer_ds()
+    line_item_ds()
+    orders_ds()
+    supplier_ds()
 
     def query():
+        nonlocal region_ds
+        nonlocal nation_ds
+        nonlocal customer_ds
+        nonlocal line_item_ds
+        nonlocal orders_ds
+        nonlocal supplier_ds
+
+        region_ds = region_ds()
+        nation_ds = nation_ds()
+        customer_ds = customer_ds()
+        line_item_ds = line_item_ds()
+        orders_ds = orders_ds()
+        supplier_ds = supplier_ds()
+
         rsel = region_ds.r_name == "ASIA"
         osel = (orders_ds.o_orderdate >= date1) & (orders_ds.o_orderdate < date2)
         forders = orders_ds[osel]

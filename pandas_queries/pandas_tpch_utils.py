@@ -1,3 +1,4 @@
+from functools import cache
 from os.path import join
 from typing import Callable
 
@@ -5,11 +6,18 @@ import pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
+from utils import INCLUDE_IO, on_second_call
+
 __default_dataset_base_dir = "tables_scale_1"
 __default_answers_base_dir = "tpch-dbgen/answers"
 
 
-def __scan_parquet_ds(path: str) -> PandasDF:
+@cache
+def __read_parquet_ds_cached(path: str) -> PandasDF:
+    return pd.read_parquet(path)
+
+
+def __read_parquet_ds(path: str) -> PandasDF:
     return pd.read_parquet(path)
 
 
@@ -40,36 +48,44 @@ def test_results(q_num: int, result_df: PandasDF):
             pd.testing.assert_series_equal(left=s1, right=s2, check_index=False)
 
 
+@on_second_call
 def get_line_item_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "lineitem.parquet"))
+    return __read_parquet_ds(join(base_dir, "lineitem.parquet"))
 
 
+@on_second_call
 def get_orders_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "orders.parquet"))
+    return __read_parquet_ds(join(base_dir, "orders.parquet"))
 
 
+@on_second_call
 def get_customer_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "customer.parquet"))
+    return __read_parquet_ds(join(base_dir, "customer.parquet"))
 
 
+@on_second_call
 def get_region_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "region.parquet"))
+    return __read_parquet_ds(join(base_dir, "region.parquet"))
 
 
+@on_second_call
 def get_nation_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "nation.parquet"))
+    return __read_parquet_ds(join(base_dir, "nation.parquet"))
 
 
+@on_second_call
 def get_supplier_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "supplier.parquet"))
+    return __read_parquet_ds(join(base_dir, "supplier.parquet"))
 
 
+@on_second_call
 def get_part_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "part.parquet"))
+    return __read_parquet_ds(join(base_dir, "part.parquet"))
 
 
+@on_second_call
 def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
-    return __scan_parquet_ds(join(base_dir, "partsupp.parquet"))
+    return __read_parquet_ds(join(base_dir, "partsupp.parquet"))
 
 
 def run_query(q_num: str, query: Callable):

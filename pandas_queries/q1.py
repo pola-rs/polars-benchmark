@@ -8,10 +8,12 @@ Q_NUM = 1
 def q():
     VAR1 = date(1998, 9, 2)
 
-    lineitem = pandas_tpch_utils.get_line_item_ds()
+    lineitem = pandas_tpch_utils.get_line_item_ds
+    # first call one time to cache in case we don't include the IO times
+    lineitem()
 
     def query():
-        lineitem_filtered = lineitem.loc[
+        lineitem_filtered = lineitem().loc[
             :,
             [
                 "l_quantity",

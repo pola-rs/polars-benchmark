@@ -1,5 +1,3 @@
-from linetimer import CodeTimer, linetimer
-
 from pandas_queries import pandas_tpch_utils
 
 Q_NUM = 2
@@ -10,13 +8,31 @@ def q():
     var2 = "BRASS"
     var3 = "EUROPE"
 
-    region_ds = pandas_tpch_utils.get_region_ds()
-    nation_ds = pandas_tpch_utils.get_nation_ds()
-    supplier_ds = pandas_tpch_utils.get_supplier_ds()
-    part_ds = pandas_tpch_utils.get_part_ds()
-    part_supp_ds = pandas_tpch_utils.get_part_supp_ds()
+    region_ds = pandas_tpch_utils.get_region_ds
+    nation_ds = pandas_tpch_utils.get_nation_ds
+    supplier_ds = pandas_tpch_utils.get_supplier_ds
+    part_ds = pandas_tpch_utils.get_part_ds
+    part_supp_ds = pandas_tpch_utils.get_part_supp_ds
+
+    # first call one time to cache in case we don't include the IO times
+    region_ds()
+    nation_ds()
+    supplier_ds()
+    part_ds()
+    part_supp_ds()
 
     def query():
+        nonlocal region_ds
+        nonlocal nation_ds
+        nonlocal supplier_ds
+        nonlocal part_ds
+        nonlocal part_supp_ds
+        region_ds = region_ds()
+        nation_ds = nation_ds()
+        supplier_ds = supplier_ds()
+        part_ds = part_ds()
+        part_supp_ds = part_supp_ds()
+
         nation_filtered = nation_ds.loc[:, ["n_nationkey", "n_name", "n_regionkey"]]
         region_filtered = region_ds[(region_ds["r_name"] == var3)]
         region_filtered = region_filtered.loc[:, ["r_regionkey"]]
