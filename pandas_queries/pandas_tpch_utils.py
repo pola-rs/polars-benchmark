@@ -89,6 +89,6 @@ def run_query(q_num: str, query: Callable):
             result = query()
 
         print(result)
-        # test_results(q_num, result)
+        test_results(q_num, result)
 
     run()
