@@ -106,4 +106,5 @@ for name in [
         parse_dates=True,
         new_columns=eval(f"h_{name}"),
     )
+    print(df.shape)
     df.write_parquet(f"tables_scale_{scale_fac}/{name}.parquet", statistics=True)
