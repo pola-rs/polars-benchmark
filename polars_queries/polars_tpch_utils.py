@@ -68,7 +68,7 @@ def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame
     return __scan_parquet_ds(join(base_dir, "partsupp.parquet"))
 
 
-def run_query(q_num: str, lp: pl.LazyFrame):
+def run_query(q_num: int, lp: pl.LazyFrame):
     @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
     def query():
         if SHOW_PLAN:

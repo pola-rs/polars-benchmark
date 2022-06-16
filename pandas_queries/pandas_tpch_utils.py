@@ -32,9 +32,6 @@ def test_results(q_num: int, result_df: PandasDF):
             s1 = result_df[c]
             s2 = answer[c]
 
-            print("HIER", s1.dtypes)
-            print(s2.dtypes)
-
             if t.name == "object":
                 s1 = s1.astype("string").apply(lambda x: x.strip())
                 s2 = s2.astype("string").apply(lambda x: x.strip())
@@ -82,7 +79,7 @@ def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "partsupp.parquet"))
 
 
-def run_query(q_num: str, query: Callable):
+def run_query(q_num: int, query: Callable):
     @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
     def run():
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
