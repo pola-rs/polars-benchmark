@@ -1,3 +1,4 @@
+import timeit
 from os.path import join
 from typing import Callable
 
@@ -6,9 +7,11 @@ from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
 from utils import (
+    ANSWERS_BASE_DIR,
+    DATASET_BASE_DIR,
+    LOG_TIMINGS,
     SHOW_RESULTS,
-    __default_answers_base_dir,
-    __default_dataset_base_dir,
+    append_row,
     on_second_call,
 )
 
@@ -17,9 +20,7 @@ def __read_parquet_ds(path: str) -> PandasDF:
     return pd.read_parquet(path)
 
 
-def get_query_answer(
-    query: int, base_dir: str = __default_answers_base_dir
-) -> PandasDF:
+def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
     answer_df = pd.read_csv(
         join(base_dir, f"q{query}.out"),
         sep="|",
@@ -45,42 +46,42 @@ def test_results(q_num: int, result_df: PandasDF):
 
 
 @on_second_call
-def get_line_item_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "lineitem.parquet"))
 
 
 @on_second_call
-def get_orders_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "orders.parquet"))
 
 
 @on_second_call
-def get_customer_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "customer.parquet"))
 
 
 @on_second_call
-def get_region_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "region.parquet"))
 
 
 @on_second_call
-def get_nation_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "nation.parquet"))
 
 
 @on_second_call
-def get_supplier_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "supplier.parquet"))
 
 
 @on_second_call
-def get_part_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "part.parquet"))
 
 
 @on_second_call
-def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> PandasDF:
+def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "partsupp.parquet"))
 
 
@@ -88,7 +89,12 @@ def run_query(q_num: int, query: Callable):
     @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
     def run():
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
+            t0 = timeit.default_timer()
             result = query()
+            secs = timeit.default_timer() - t0
+
+        if LOG_TIMINGS:
+            append_row(solution="pandas", q=f"q{q_num}", secs=secs)
 
         if SHOW_RESULTS:
             print(result)

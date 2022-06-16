@@ -2,12 +2,22 @@ import os
 
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
 SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
+LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
 print("include io:", INCLUDE_IO)
-print("show results::", INCLUDE_IO)
+print("show results:", INCLUDE_IO)
+print("log timings:", LOG_TIMINGS)
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-__default_dataset_base_dir = os.path.join(CWD, "tables_scale_1")
-__default_answers_base_dir = os.path.join(CWD, "tpch-dbgen/answers")
+DATASET_BASE_DIR = os.path.join(CWD, "tables_scale_1")
+ANSWERS_BASE_DIR = os.path.join(CWD, "tpch-dbgen/answers")
+TIMINGS_FILE = os.path.join(CWD, "timings.csv")
+
+
+def append_row(solution: str, q: str, secs: float):
+    with open(TIMINGS_FILE, "a") as f:
+        if f.tell() == 0:
+            f.write("solution,query_no,duration[s],include_io\n")
+        f.write(f"{solution},{q},{secs},{INCLUDE_IO}\n")
 
 
 def on_second_call(func):

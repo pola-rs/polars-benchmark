@@ -1,14 +1,17 @@
 import os
+import timeit
 from os.path import join
 
 import polars as pl
 from linetimer import CodeTimer, linetimer
 
 from utils import (
+    ANSWERS_BASE_DIR,
+    DATASET_BASE_DIR,
     INCLUDE_IO,
+    LOG_TIMINGS,
     SHOW_RESULTS,
-    __default_answers_base_dir,
-    __default_dataset_base_dir,
+    append_row,
 )
 
 SHOW_PLAN = os.environ.get("SHOW_PLAN", False)
@@ -21,9 +24,7 @@ def __scan_parquet_ds(path: str):
     return scan.collect().lazy()
 
 
-def get_query_answer(
-    query: int, base_dir: str = __default_answers_base_dir
-) -> pl.LazyFrame:
+def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFrame:
     answer_ldf = pl.scan_csv(
         join(base_dir, f"q{query}.out"), sep="|", has_header=True, parse_dates=True
     )
@@ -41,35 +42,35 @@ def test_results(q_num: int, result_df: pl.DataFrame):
         pl.testing.assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
-def get_line_item_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "lineitem.parquet"))
 
 
-def get_orders_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "orders.parquet"))
 
 
-def get_customer_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "customer.parquet"))
 
 
-def get_region_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "region.parquet"))
 
 
-def get_nation_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "nation.parquet"))
 
 
-def get_supplier_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "supplier.parquet"))
 
 
-def get_part_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "part.parquet"))
 
 
-def get_part_supp_ds(base_dir: str = __default_dataset_base_dir) -> pl.LazyFrame:
+def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
     return __scan_parquet_ds(join(base_dir, "partsupp.parquet"))
 
 
@@ -80,10 +81,16 @@ def run_query(q_num: int, lp: pl.LazyFrame):
             print(lp.describe_optimized_plan())
 
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
+            t0 = timeit.default_timer()
             result = lp.collect()
+
+            secs = timeit.default_timer() - t0
 
         if SHOW_RESULTS:
             print(result)
+
+        if LOG_TIMINGS:
+            append_row(solution="polars", q=f"q{q_num}", secs=secs)
 
         test_results(q_num, result)
 
