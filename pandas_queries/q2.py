@@ -1,4 +1,4 @@
-from pandas_queries import pandas_tpch_utils
+from pandas_queries import utils
 
 Q_NUM = 2
 
@@ -8,11 +8,11 @@ def q():
     var2 = "BRASS"
     var3 = "EUROPE"
 
-    region_ds = pandas_tpch_utils.get_region_ds
-    nation_ds = pandas_tpch_utils.get_nation_ds
-    supplier_ds = pandas_tpch_utils.get_supplier_ds
-    part_ds = pandas_tpch_utils.get_part_ds
-    part_supp_ds = pandas_tpch_utils.get_part_supp_ds
+    region_ds = utils.get_region_ds
+    nation_ds = utils.get_nation_ds
+    supplier_ds = utils.get_supplier_ds
+    part_ds = utils.get_part_ds
+    part_supp_ds = utils.get_part_supp_ds
 
     # first call one time to cache in case we don't include the IO times
     region_ds()
@@ -152,7 +152,7 @@ def q():
 
         return result_df
 
-    pandas_tpch_utils.run_query(Q_NUM, query)
+    utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":

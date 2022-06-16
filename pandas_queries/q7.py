@@ -3,17 +3,17 @@ from datetime import datetime
 
 import pandas as pd
 
-from pandas_queries import pandas_tpch_utils
+from pandas_queries import utils
 
 Q_NUM = 7
 
 
 def q():
-    nation_ds = pandas_tpch_utils.get_nation_ds
-    customer_ds = pandas_tpch_utils.get_customer_ds
-    line_item_ds = pandas_tpch_utils.get_line_item_ds
-    orders_ds = pandas_tpch_utils.get_orders_ds
-    supplier_ds = pandas_tpch_utils.get_supplier_ds
+    nation_ds = utils.get_nation_ds
+    customer_ds = utils.get_customer_ds
+    line_item_ds = utils.get_line_item_ds
+    orders_ds = utils.get_orders_ds
+    supplier_ds = utils.get_supplier_ds
 
     # first call one time to cache in case we don't include the IO times
     nation_ds()
@@ -37,32 +37,32 @@ def q():
 
         lineitem_filtered = line_item_ds[
             (
-                    line_item_ds["l_shipdate"]
-                    >= datetime.strptime("1995-01-01", "%Y-%m-%d").date()
+                line_item_ds["l_shipdate"]
+                >= datetime.strptime("1995-01-01", "%Y-%m-%d").date()
             )
             & (
-                    line_item_ds["l_shipdate"]
-                    < datetime.strptime("1997-01-01", "%Y-%m-%d").date()
+                line_item_ds["l_shipdate"]
+                < datetime.strptime("1997-01-01", "%Y-%m-%d").date()
             )
-            ]
+        ]
         lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].apply(
             lambda x: x.year
         )
         lineitem_filtered["revenue"] = lineitem_filtered["l_extendedprice"] * (
-                1.0 - lineitem_filtered["l_discount"]
+            1.0 - lineitem_filtered["l_discount"]
         )
         lineitem_filtered = lineitem_filtered.loc[
-                            :, ["l_orderkey", "l_suppkey", "l_year", "revenue"]
-                            ]
+            :, ["l_orderkey", "l_suppkey", "l_year", "revenue"]
+        ]
         supplier_filtered = supplier_ds.loc[:, ["s_suppkey", "s_nationkey"]]
         orders_filtered = orders_ds.loc[:, ["o_orderkey", "o_custkey"]]
         customer_filtered = customer_ds.loc[:, ["c_custkey", "c_nationkey"]]
         n1 = nation_ds[(nation_ds["n_name"] == "FRANCE")].loc[
-             :, ["n_nationkey", "n_name"]
-             ]
+            :, ["n_nationkey", "n_name"]
+        ]
         n2 = nation_ds[(nation_ds["n_name"] == "GERMANY")].loc[
-             :, ["n_nationkey", "n_name"]
-             ]
+            :, ["n_nationkey", "n_name"]
+        ]
 
         # ----- do nation 1 -----
         N1_C = customer_filtered.merge(
@@ -139,7 +139,7 @@ def q():
         )
         return result_df
 
-    pandas_tpch_utils.run_query(Q_NUM, query)
+    utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":

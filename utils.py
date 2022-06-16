@@ -1,7 +1,9 @@
 import os
 
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
+SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
 print("include io:", INCLUDE_IO)
+print("show results::", INCLUDE_IO)
 
 CWD = os.path.dirname(os.path.realpath(__file__))
 __default_dataset_base_dir = os.path.join(CWD, "tables_scale_1")

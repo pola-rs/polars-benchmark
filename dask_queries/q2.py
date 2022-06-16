@@ -1,5 +1,3 @@
-import pandas as pd
-
 from dask_queries import utils
 
 Q_NUM = 2
