@@ -1,6 +1,6 @@
 .idea/
 .swp
-tables_scale_1/
+tables_scale_1*/
 *.tbl
 *.o
 dbgen

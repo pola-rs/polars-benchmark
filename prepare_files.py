@@ -1,4 +1,7 @@
 import polars as pl
+import sys
+
+scale_fac = int(sys.argv[1])
 
 h_nation = """n_nationkey
 n_name
@@ -97,10 +100,10 @@ for name in [
 ]:
     print("process table:", name)
     df = pl.read_csv(
-        f"tables_scale_1/{name}.tbl",
+        f"tables_scale_{scale_fac}/{name}.tbl",
         has_header=False,
         sep="|",
         parse_dates=True,
         new_columns=eval(f"h_{name}"),
     )
-    df.write_parquet(f"tables_scale_1/{name}.parquet", statistics=True)
+    df.write_parquet(f"tables_scale_{scale_fac}/{name}.parquet", statistics=True)
