@@ -3,12 +3,13 @@ import os
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
 SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
 LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
+SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
 print("include io:", INCLUDE_IO)
 print("show results:", INCLUDE_IO)
 print("log timings:", LOG_TIMINGS)
 
 CWD = os.path.dirname(os.path.realpath(__file__))
-DATASET_BASE_DIR = os.path.join(CWD, "tables_scale_1")
+DATASET_BASE_DIR = os.path.join(CWD, f"tables_scale_{SCALE_FACTOR}")
 ANSWERS_BASE_DIR = os.path.join(CWD, "tpch-dbgen/answers")
 TIMINGS_FILE = os.path.join(CWD, "timings.csv")
 
