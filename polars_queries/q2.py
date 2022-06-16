@@ -2,7 +2,7 @@ import os
 
 import polars as pl
 
-from polars_queries import polars_tpch_utils
+from polars_queries import utils
 
 Q_NUM = 2
 
@@ -12,11 +12,11 @@ def q():
     var2 = "BRASS"
     var3 = "EUROPE"
 
-    region_ds = polars_tpch_utils.get_region_ds()
-    nation_ds = polars_tpch_utils.get_nation_ds()
-    supplier_ds = polars_tpch_utils.get_supplier_ds()
-    part_ds = polars_tpch_utils.get_part_ds()
-    part_supp_ds = polars_tpch_utils.get_part_supp_ds()
+    region_ds = utils.get_region_ds()
+    nation_ds = utils.get_nation_ds()
+    supplier_ds = utils.get_supplier_ds()
+    part_ds = utils.get_part_ds()
+    part_supp_ds = utils.get_part_supp_ds()
 
     result_q1 = (
         part_ds.join(part_supp_ds, left_on="p_partkey", right_on="ps_partkey")
@@ -56,7 +56,7 @@ def q():
         .with_column(pl.col(pl.datatypes.Utf8).str.strip().keep_name())
     )
 
-    polars_tpch_utils.run_query(Q_NUM, q_final)
+    utils.run_query(Q_NUM, q_final)
 
 
 if __name__ == "__main__":

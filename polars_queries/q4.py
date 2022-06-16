@@ -2,7 +2,7 @@ from datetime import datetime
 
 import polars as pl
 
-from polars_queries import polars_tpch_utils
+from polars_queries import utils
 
 Q_NUM = 4
 
@@ -11,8 +11,8 @@ def q():
     var1 = datetime(1993, 7, 1)
     var2 = datetime(1993, 10, 1)
 
-    line_item_ds = polars_tpch_utils.get_line_item_ds()
-    orders_ds = polars_tpch_utils.get_orders_ds()
+    line_item_ds = utils.get_line_item_ds()
+    orders_ds = utils.get_orders_ds()
 
     q_final = (
         line_item_ds.join(orders_ds, left_on="l_orderkey", right_on="o_orderkey")
@@ -26,7 +26,7 @@ def q():
         .with_column(pl.col("order_count").cast(pl.datatypes.Int64))
     )
 
-    polars_tpch_utils.run_query(Q_NUM, q_final)
+    utils.run_query(Q_NUM, q_final)
 
 
 if __name__ == "__main__":

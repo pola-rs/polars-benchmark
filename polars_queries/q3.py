@@ -2,7 +2,7 @@ from datetime import datetime
 
 import polars as pl
 
-from polars_queries import polars_tpch_utils
+from polars_queries import utils
 
 Q_NUM = 3
 
@@ -11,9 +11,9 @@ def q():
     var1 = var2 = datetime(1995, 3, 15)
     var3 = "BUILDING"
 
-    customer_ds = polars_tpch_utils.get_customer_ds()
-    line_item_ds = polars_tpch_utils.get_line_item_ds()
-    orders_ds = polars_tpch_utils.get_orders_ds()
+    customer_ds = utils.get_customer_ds()
+    line_item_ds = utils.get_line_item_ds()
+    orders_ds = utils.get_orders_ds()
 
     q_final = (
         customer_ds.filter(pl.col("c_mktsegment") == var3)
@@ -38,7 +38,7 @@ def q():
         .limit(10)
     )
 
-    polars_tpch_utils.run_query(Q_NUM, q_final)
+    utils.run_query(Q_NUM, q_final)
 
 
 if __name__ == "__main__":

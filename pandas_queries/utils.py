@@ -5,7 +5,12 @@ import pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
-from utils import __default_answers_base_dir, __default_dataset_base_dir, on_second_call
+from utils import (
+    SHOW_RESULTS,
+    __default_answers_base_dir,
+    __default_dataset_base_dir,
+    on_second_call,
+)
 
 
 def __read_parquet_ds(path: str) -> PandasDF:
@@ -85,7 +90,8 @@ def run_query(q_num: int, query: Callable):
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
             result = query()
 
-        print(result)
+        if SHOW_RESULTS:
+            print(result)
         test_results(q_num, result)
 
     run()

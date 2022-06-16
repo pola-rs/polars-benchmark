@@ -2,17 +2,17 @@ from datetime import datetime
 
 import polars as pl
 
-from polars_queries import polars_tpch_utils
+from polars_queries import utils
 
 Q_NUM = 7
 
 
 def q():
-    nation_ds = polars_tpch_utils.get_nation_ds()
-    customer_ds = polars_tpch_utils.get_customer_ds()
-    line_item_ds = polars_tpch_utils.get_line_item_ds()
-    orders_ds = polars_tpch_utils.get_orders_ds()
-    supplier_ds = polars_tpch_utils.get_supplier_ds()
+    nation_ds = utils.get_nation_ds()
+    customer_ds = utils.get_customer_ds()
+    line_item_ds = utils.get_line_item_ds()
+    orders_ds = utils.get_orders_ds()
+    supplier_ds = utils.get_supplier_ds()
 
     n1 = nation_ds.filter(pl.col("n_name") == "FRANCE")
     n2 = nation_ds.filter(pl.col("n_name") == "GERMANY")
@@ -50,7 +50,7 @@ def q():
         .sort(by=["supp_nation", "cust_nation", "l_year"])
     )
 
-    polars_tpch_utils.run_query(Q_NUM, q_final)
+    utils.run_query(Q_NUM, q_final)
 
 
 if __name__ == "__main__":

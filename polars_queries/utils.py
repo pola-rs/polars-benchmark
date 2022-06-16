@@ -4,7 +4,12 @@ from os.path import join
 import polars as pl
 from linetimer import CodeTimer, linetimer
 
-from utils import INCLUDE_IO, __default_answers_base_dir, __default_dataset_base_dir
+from utils import (
+    INCLUDE_IO,
+    SHOW_RESULTS,
+    __default_answers_base_dir,
+    __default_dataset_base_dir,
+)
 
 SHOW_PLAN = os.environ.get("SHOW_PLAN", False)
 
@@ -77,7 +82,8 @@ def run_query(q_num: int, lp: pl.LazyFrame):
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
             result = lp.collect()
 
-        print(result)
+        if SHOW_RESULTS:
+            print(result)
 
         test_results(q_num, result)
 

@@ -1,6 +1,6 @@
 from datetime import date
 
-from pandas_queries import pandas_tpch_utils
+from pandas_queries import utils
 
 Q_NUM = 1
 
@@ -8,7 +8,7 @@ Q_NUM = 1
 def q():
     VAR1 = date(1998, 9, 2)
 
-    lineitem = pandas_tpch_utils.get_line_item_ds
+    lineitem = utils.get_line_item_ds
     # first call one time to cache in case we don't include the IO times
     lineitem()
 
@@ -64,7 +64,7 @@ def q():
 
         return result_df
 
-    pandas_tpch_utils.run_query(Q_NUM, query)
+    utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":

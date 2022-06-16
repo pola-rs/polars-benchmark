@@ -1,6 +1,6 @@
 import datetime
 
-from pandas_queries import pandas_tpch_utils
+from pandas_queries import utils
 
 Q_NUM = 5
 
@@ -9,12 +9,12 @@ def q():
     date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d").date()
     date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
 
-    region_ds = pandas_tpch_utils.get_region_ds
-    nation_ds = pandas_tpch_utils.get_nation_ds
-    customer_ds = pandas_tpch_utils.get_customer_ds
-    line_item_ds = pandas_tpch_utils.get_line_item_ds
-    orders_ds = pandas_tpch_utils.get_orders_ds
-    supplier_ds = pandas_tpch_utils.get_supplier_ds
+    region_ds = utils.get_region_ds
+    nation_ds = utils.get_nation_ds
+    customer_ds = utils.get_customer_ds
+    line_item_ds = utils.get_line_item_ds
+    orders_ds = utils.get_orders_ds
+    supplier_ds = utils.get_supplier_ds
 
     # first call one time to cache in case we don't include the IO times
     region_ds()
@@ -57,7 +57,7 @@ def q():
         result_df = gb.sort_values("revenue", ascending=False)
         return result_df
 
-    pandas_tpch_utils.run_query(Q_NUM, query)
+    utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":

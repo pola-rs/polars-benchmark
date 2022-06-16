@@ -2,14 +2,14 @@ from datetime import datetime
 
 import polars as pl
 
-from polars_queries import polars_tpch_utils
+from polars_queries import utils
 
 Q_NUM = 1
 
 
 def q():
     VAR1 = datetime(1998, 9, 2)
-    q = polars_tpch_utils.get_line_item_ds()
+    q = utils.get_line_item_ds()
     q_final = (
         q.filter(pl.col("l_shipdate") <= VAR1)
         .groupby(["l_returnflag", "l_linestatus"])
@@ -36,7 +36,7 @@ def q():
         .sort(["l_returnflag", "l_linestatus"])
     )
 
-    polars_tpch_utils.run_query(Q_NUM, q_final)
+    utils.run_query(Q_NUM, q_final)
 
 
 if __name__ == "__main__":

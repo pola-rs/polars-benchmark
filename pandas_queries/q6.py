@@ -2,7 +2,7 @@ import datetime
 
 import pandas as pd
 
-from pandas_queries import pandas_tpch_utils
+from pandas_queries import utils
 
 Q_NUM = 6
 
@@ -12,7 +12,7 @@ def q():
     date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
     var3 = 24
 
-    line_item_ds = pandas_tpch_utils.get_line_item_ds
+    line_item_ds = utils.get_line_item_ds
 
     # first call one time to cache in case we don't include the IO times
     line_item_ds()
@@ -37,7 +37,7 @@ def q():
         result_df = pd.DataFrame({"revenue": [result_value]})
         return result_df
 
-    pandas_tpch_utils.run_query(Q_NUM, query)
+    utils.run_query(Q_NUM, query)
 
 
 if __name__ == "__main__":
