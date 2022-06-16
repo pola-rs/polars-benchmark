@@ -4,4 +4,5 @@ isort==5.10.1
 linetimer
 pandas
 pyarrow
-dask
+dask[distributed]
+modin

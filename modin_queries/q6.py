@@ -2,14 +2,14 @@ import datetime
 
 import pandas as pd
 
-from dask_queries import utils
+from pandas_queries import utils
 
 Q_NUM = 6
 
 
 def q():
-    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d")
-    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d")
+    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d").date()
+    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
     var3 = 24
 
     line_item_ds = utils.get_line_item_ds
@@ -33,9 +33,7 @@ def q():
         )
 
         flineitem = lineitem_filtered[sel]
-        result_value = (
-            (flineitem.l_extendedprice * flineitem.l_discount).sum().compute()
-        )
+        result_value = (flineitem.l_extendedprice * flineitem.l_discount).sum()
         result_df = pd.DataFrame({"revenue": [result_value]})
         return result_df
 

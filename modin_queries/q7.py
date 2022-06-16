@@ -1,16 +1,14 @@
 import datetime
 from datetime import datetime
 
-import dask.dataframe as dd
+import pandas as pd
 
-from dask_queries import utils
+from pandas_queries import utils
 
 Q_NUM = 7
 
 
 def q():
-    var1 = datetime.strptime("1995-01-01", "%Y-%m-%d")
-    var2 = datetime.strptime("1997-01-01", "%Y-%m-%d")
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
@@ -38,7 +36,14 @@ def q():
         supplier_ds = supplier_ds()
 
         lineitem_filtered = line_item_ds[
-            (line_item_ds["l_shipdate"] >= var1) & (line_item_ds["l_shipdate"] < var2)
+            (
+                line_item_ds["l_shipdate"]
+                >= datetime.strptime("1995-01-01", "%Y-%m-%d").date()
+            )
+            & (
+                line_item_ds["l_shipdate"]
+                < datetime.strptime("1997-01-01", "%Y-%m-%d").date()
+            )
         ]
         lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].apply(
             lambda x: x.year
@@ -116,7 +121,7 @@ def q():
         total2 = total2.drop(columns=["o_orderkey", "l_orderkey"])
 
         # concat results
-        total = dd.concat([total1, total2])
+        total = pd.concat([total1, total2])
         result_df = (
             total.groupby(["supp_nation", "cust_nation", "l_year"])
             .revenue.agg("sum")
@@ -124,7 +129,7 @@ def q():
         )
         result_df.columns = ["supp_nation", "cust_nation", "l_year", "revenue"]
 
-        result_df = result_df.compute().sort_values(
+        result_df = result_df.sort_values(
             by=["supp_nation", "cust_nation", "l_year"],
             ascending=[
                 True,

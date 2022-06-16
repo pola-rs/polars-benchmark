@@ -108,4 +108,6 @@ for name in [
         new_columns=eval(f"h_{name}"),
     )
     print(df.shape)
-    df.write_parquet(f"tables_scale_{scale_fac}/{name}.parquet", statistics=True)
+    df.with_columns([pl.col(pl.Date).cast(pl.Datetime)]).write_parquet(
+        f"tables_scale_{scale_fac}/{name}.parquet", statistics=True
+    )

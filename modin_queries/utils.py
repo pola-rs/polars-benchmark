@@ -1,17 +1,14 @@
 import timeit
 from os.path import join
-from typing import Callable, Union
+from typing import Callable
 
-import dask.dataframe as dd
-import pandas as pd
-import polars as pl
-from dask.distributed import Client
+import modin as pd
 from linetimer import CodeTimer, linetimer
+from pandas.core.frame import DataFrame as PandasDF
 
 from utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
-    INCLUDE_IO,
     LOG_TIMINGS,
     SHOW_RESULTS,
     append_row,
@@ -19,13 +16,11 @@ from utils import (
 )
 
 
-def __read_parquet_ds(path: str) -> Union:
-    if INCLUDE_IO:
-        return dd.read_parquet(path)
-    return dd.from_pandas(pl.read_parquet(path).to_pandas(), npartitions=12)
+def __read_parquet_ds(path: str) -> PandasDF:
+    return pd.read_parquet(path)
 
 
-def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> dd.DataFrame:
+def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
     answer_df = pd.read_csv(
         join(base_dir, f"q{query}.out"),
         sep="|",
@@ -35,7 +30,7 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> dd.DataFra
     return answer_df.rename(columns=lambda x: x.strip())
 
 
-def test_results(q_num: int, result_df: pd.DataFrame):
+def test_results(q_num: int, result_df: PandasDF):
     with CodeTimer(name=f"Testing result of Query {q_num}", unit="s"):
         answer = get_query_answer(q_num)
 
@@ -51,59 +46,55 @@ def test_results(q_num: int, result_df: pd.DataFrame):
 
 
 @on_second_call
-def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "lineitem.parquet"))
 
 
 @on_second_call
-def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "orders.parquet"))
 
 
 @on_second_call
-def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "customer.parquet"))
 
 
 @on_second_call
-def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "region.parquet"))
 
 
 @on_second_call
-def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "nation.parquet"))
 
 
 @on_second_call
-def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "supplier.parquet"))
 
 
 @on_second_call
-def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "part.parquet"))
 
 
 @on_second_call
-def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
     return __read_parquet_ds(join(base_dir, "partsupp.parquet"))
 
 
-def run_query(q_num: str, query: Callable):
+def run_query(q_num: int, query: Callable):
     @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
     def run():
-        import dask
-
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
-            dask.config.set(scheduler="threads")
             t0 = timeit.default_timer()
-
             result = query()
             secs = timeit.default_timer() - t0
 
         if LOG_TIMINGS:
-            append_row(solution="dask", q=f"q{q_num}", secs=secs)
+            append_row(solution="pandas", q=f"q{q_num}", secs=secs)
         else:
             test_results(q_num, result)
 

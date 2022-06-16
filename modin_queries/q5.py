@@ -1,13 +1,13 @@
 import datetime
 
-from dask_queries import utils
+from pandas_queries import utils
 
 Q_NUM = 5
 
 
 def q():
-    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d")
-    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d")
+    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d").date()
+    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
 
     region_ds = utils.get_region_ds
     nation_ds = utils.get_nation_ds
@@ -53,8 +53,8 @@ def q():
             right_on=["l_suppkey", "n_nationkey"],
         )
         jn5["revenue"] = jn5.l_extendedprice * (1.0 - jn5.l_discount)
-        gb = jn5.groupby("n_name")["revenue"].sum()
-        result_df = gb.compute().reset_index().sort_values("revenue", ascending=False)
+        gb = jn5.groupby("n_name", as_index=False)["revenue"].sum()
+        result_df = gb.sort_values("revenue", ascending=False)
         return result_df
 
     utils.run_query(Q_NUM, query)
