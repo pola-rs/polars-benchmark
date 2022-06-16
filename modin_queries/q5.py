@@ -1,13 +1,13 @@
 import datetime
 
-from pandas_queries import utils
+from modin_queries import utils
 
 Q_NUM = 5
 
 
 def q():
-    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d").date()
-    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
+    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d")
+    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d")
 
     region_ds = utils.get_region_ds
     nation_ds = utils.get_nation_ds

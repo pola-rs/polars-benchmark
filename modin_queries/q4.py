@@ -1,13 +1,13 @@
 import datetime
 
-from pandas_queries import utils
+from modin_queries import utils
 
 Q_NUM = 4
 
 
 def q():
-    date1 = datetime.datetime.strptime("1993-10-01", "%Y-%m-%d").date()
-    date2 = datetime.datetime.strptime("1993-07-01", "%Y-%m-%d").date()
+    date1 = datetime.datetime.strptime("1993-10-01", "%Y-%m-%d")
+    date2 = datetime.datetime.strptime("1993-07-01", "%Y-%m-%d")
 
     line_item_ds = utils.get_line_item_ds
     orders_ds = utils.get_orders_ds

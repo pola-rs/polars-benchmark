@@ -58,6 +58,15 @@ run_dask: .venv
 	.venv/bin/python -m dask_queries.q6
 	.venv/bin/python -m dask_queries.q7
 
+run_modin: .venv
+	.venv/bin/python -m modin_queries.q1
+	.venv/bin/python -m modin_queries.q2
+	.venv/bin/python -m modin_queries.q3
+	.venv/bin/python -m modin_queries.q4
+	.venv/bin/python -m modin_queries.q5
+	.venv/bin/python -m modin_queries.q6
+	.venv/bin/python -m modin_queries.q7
+
 run_all: run_polars run_pandas run_dask
 
 pre-commit:

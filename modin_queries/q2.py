@@ -1,4 +1,4 @@
-from pandas_queries import utils
+from modin_queries import utils
 
 Q_NUM = 2
 

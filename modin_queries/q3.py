@@ -1,12 +1,12 @@
 import datetime
 
-from pandas_queries import utils
+from modin_queries import utils
 
 Q_NUM = 3
 
 
 def q():
-    var1 = var2 = datetime.datetime.strptime("1995-03-15", "%Y-%m-%d").date()
+    var1 = var2 = datetime.datetime.strptime("1995-03-15", "%Y-%m-%d")
     var3 = "BUILDING"
 
     customer_ds = utils.get_customer_ds

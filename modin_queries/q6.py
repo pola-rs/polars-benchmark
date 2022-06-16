@@ -1,15 +1,15 @@
 import datetime
 
-import pandas as pd
+import modin.pandas as pd
 
-from pandas_queries import utils
+from modin_queries import utils
 
 Q_NUM = 6
 
 
 def q():
-    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d").date()
-    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d").date()
+    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d")
+    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d")
     var3 = 24
 
     line_item_ds = utils.get_line_item_ds

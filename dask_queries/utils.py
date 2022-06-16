@@ -5,7 +5,6 @@ from typing import Callable, Union
 import dask.dataframe as dd
 import pandas as pd
 import polars as pl
-from dask.distributed import Client
 from linetimer import CodeTimer, linetimer
 
 from utils import (
@@ -93,10 +92,11 @@ def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
 def run_query(q_num: str, query: Callable):
     @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
     def run():
-        import dask
+        from dask.distributed import Client
+
+        Client(scheduler="processes", num_workers=12)
 
         with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
-            dask.config.set(scheduler="threads")
             t0 = timeit.default_timer()
 
             result = query()
