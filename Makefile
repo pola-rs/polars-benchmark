@@ -13,7 +13,7 @@ clean-venv:
 	rm -r .venv
 
 clean-tables:
-	rm -r tables_scale_1
+	rm -r tables_scale_*
 
 clean: clean-tpch-dbgen clean-venv
 
@@ -22,7 +22,14 @@ tables_scale_1: .venv
 	cd tpch-dbgen && ./dbgen -vf -s 1 && cd ..
 	mkdir -p "tables_scale_1"
 	mv tpch-dbgen/*.tbl tables_scale_1/
-	.venv/bin/python prepare_files.py
+	.venv/bin/python prepare_files.py 1
+
+tables_scale_10: .venv
+	$(MAKE) -C tpch-dbgen all
+	cd tpch-dbgen && ./dbgen -vf -s 10 && cd ..
+	mkdir -p "tables_scale_10"
+	mv tpch-dbgen/*.tbl tables_scale_10/
+	.venv/bin/python prepare_files.py 10
 
 run_polars: .venv tables_scale_1
 	.venv/bin/python -m polars_queries.q1
