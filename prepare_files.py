@@ -1,5 +1,6 @@
-import polars as pl
 import sys
+
+import polars as pl
 
 scale_fac = int(sys.argv[1])
 

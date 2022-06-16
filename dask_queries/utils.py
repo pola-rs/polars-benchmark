@@ -99,9 +99,10 @@ def run_query(q_num: str, query: Callable):
 
         if LOG_TIMINGS:
             append_row(solution="dask", q=f"q{q_num}", secs=secs)
+        else:
+            test_results(q_num, result)
 
         if SHOW_RESULTS:
             print(result)
-        test_results(q_num, result)
 
     run()
