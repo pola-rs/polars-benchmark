@@ -6,7 +6,7 @@ import pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
-from utils import (
+from common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     LOG_TIMINGS,
@@ -31,7 +31,7 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
 
 
 def test_results(q_num: int, result_df: PandasDF):
-    with CodeTimer(name=f"Testing result of Query {q_num}", unit="s"):
+    with CodeTimer(name=f"Testing result of pandas Query {q_num}", unit="s"):
         answer = get_query_answer(q_num)
 
         for c, t in answer.dtypes.items():
@@ -86,9 +86,9 @@ def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
 
 
 def run_query(q_num: int, query: Callable):
-    @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
+    @linetimer(name=f"Overall execution of pandas Query {q_num}", unit="s")
     def run():
-        with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
+        with CodeTimer(name=f"Get result of pandas Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
             result = query()
             secs = timeit.default_timer() - t0

@@ -5,7 +5,7 @@ from os.path import join
 import polars as pl
 from linetimer import CodeTimer, linetimer
 
-from utils import (
+from common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     INCLUDE_IO,
@@ -37,7 +37,7 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFra
 
 
 def test_results(q_num: int, result_df: pl.DataFrame):
-    with CodeTimer(name=f"Testing result of Query {q_num}", unit="s"):
+    with CodeTimer(name=f"Testing result of polars Query {q_num}", unit="s"):
         answer = get_query_answer(q_num).collect()
         pl.testing.assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
@@ -75,12 +75,12 @@ def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
 
 
 def run_query(q_num: int, lp: pl.LazyFrame):
-    @linetimer(name=f"Overall execution of Query {q_num}", unit="s")
+    @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")
     def query():
         if SHOW_PLAN:
             print(lp.describe_optimized_plan())
 
-        with CodeTimer(name=f"Get result of Query {q_num}", unit="s"):
+        with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
             result = lp.collect()
 

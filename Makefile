@@ -32,42 +32,18 @@ tables_scale_10: .venv
 	.venv/bin/python prepare_files.py 10
 
 run_polars: .venv
-	.venv/bin/python -m polars_queries.q1
-	.venv/bin/python -m polars_queries.q2
-	.venv/bin/python -m polars_queries.q3
-	.venv/bin/python -m polars_queries.q4
-	.venv/bin/python -m polars_queries.q5
-	.venv/bin/python -m polars_queries.q6
-	.venv/bin/python -m polars_queries.q7
+	.venv/bin/python -m polars_queries.executor
 
 run_pandas: .venv
-	.venv/bin/python -m pandas_queries.q1
-	.venv/bin/python -m pandas_queries.q2
-	.venv/bin/python -m pandas_queries.q3
-	.venv/bin/python -m pandas_queries.q4
-	.venv/bin/python -m pandas_queries.q5
-	.venv/bin/python -m pandas_queries.q6
-	.venv/bin/python -m pandas_queries.q7
+	.venv/bin/python -m pandas_queries.executor
 
 run_dask: .venv
-	.venv/bin/python -m dask_queries.q1
-	.venv/bin/python -m dask_queries.q2
-	.venv/bin/python -m dask_queries.q3
-	.venv/bin/python -m dask_queries.q4
-	.venv/bin/python -m dask_queries.q5
-	.venv/bin/python -m dask_queries.q6
-	.venv/bin/python -m dask_queries.q7
+	.venv/bin/python -m dask_queries.executor
 
 run_modin: .venv
-	.venv/bin/python -m modin_queries.q1
-	.venv/bin/python -m modin_queries.q2
-	.venv/bin/python -m modin_queries.q3
-	.venv/bin/python -m modin_queries.q4
-	.venv/bin/python -m modin_queries.q5
-	.venv/bin/python -m modin_queries.q6
-	.venv/bin/python -m modin_queries.q7
+	.venv/bin/python -m modin_queries.executor
 
-run_all: run_polars run_pandas run_dask
+run_all: run_polars run_pandas run_dask run_modin
 
 pre-commit:
 	.venv/bin/python -m isort .
