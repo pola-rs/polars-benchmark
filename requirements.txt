@@ -6,3 +6,4 @@ pandas
 pyarrow
 dask[distributed]
 modin
+plotly
