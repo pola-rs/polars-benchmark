@@ -1,11 +1,15 @@
 import os
+import sys
+from subprocess import run
+
+from linetimer import CodeTimer
 
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
 SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
 LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
 SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
 print("include io:", INCLUDE_IO)
-print("show results:", INCLUDE_IO)
+print("show results:", SHOW_RESULTS)
 print("log timings:", LOG_TIMINGS)
 
 CWD = os.path.dirname(os.path.realpath(__file__))
@@ -43,3 +47,12 @@ def on_second_call(func):
     helper.result = None
 
     return helper
+
+
+def execute_all(solution: str):
+    package_name = f"{solution}_queries"
+    num_queries = 7
+
+    with CodeTimer(name=f"Overall execution of ALL {solution} queries", unit="s"):
+        for i in range(1, num_queries + 1):
+            run([sys.executable, "-m", f"{package_name}.q{i}"])
