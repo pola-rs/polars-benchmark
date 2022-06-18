@@ -95,7 +95,7 @@ def run_query(q_num: str, query: Callable):
     def run():
         from dask.distributed import Client
 
-        Client(scheduler="processes", num_workers=12)
+        Client()
 
         with CodeTimer(name=f"Get result of dask Query {q_num}", unit="s"):
             t0 = timeit.default_timer()

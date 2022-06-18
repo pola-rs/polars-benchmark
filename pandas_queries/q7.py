@@ -1,4 +1,3 @@
-import datetime
 from datetime import datetime
 
 import pandas as pd
@@ -36,14 +35,8 @@ def q():
         supplier_ds = supplier_ds()
 
         lineitem_filtered = line_item_ds[
-            (
-                line_item_ds["l_shipdate"]
-                >= datetime.strptime("1995-01-01", "%Y-%m-%d").date()
-            )
-            & (
-                line_item_ds["l_shipdate"]
-                < datetime.strptime("1997-01-01", "%Y-%m-%d").date()
-            )
+            (line_item_ds["l_shipdate"] >= datetime(1995, 1, 1))
+            & (line_item_ds["l_shipdate"] < datetime(1997, 1, 1))
         ]
         lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].apply(
             lambda x: x.year

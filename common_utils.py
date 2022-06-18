@@ -18,11 +18,11 @@ ANSWERS_BASE_DIR = os.path.join(CWD, "tpch-dbgen/answers")
 TIMINGS_FILE = os.path.join(CWD, "timings.csv")
 
 
-def append_row(solution: str, q: str, secs: float, version: str):
+def append_row(solution: str, q: str, secs: float):
     with open(TIMINGS_FILE, "a") as f:
         if f.tell() == 0:
-            f.write("solution,version,query_no,duration[s],include_io\n")
-        f.write(f"{solution},{version},{q},{secs},{INCLUDE_IO}\n")
+            f.write("solution,query_no,duration[s],include_io\n")
+        f.write(f"{solution},{q},{secs},{INCLUDE_IO}\n")
 
 
 def on_second_call(func):
