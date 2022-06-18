@@ -61,7 +61,7 @@ def q():
         )
 
         result_df = (
-            total.reset_index().sort_values(["l_returnflag", "l_linestatus"]).compute()
+            total.compute().reset_index().sort_values(["l_returnflag", "l_linestatus"])
         )
 
         return result_df

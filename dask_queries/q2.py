@@ -132,8 +132,8 @@ def q():
                 "s_phone",
                 "s_comment",
             ],
-        ]
-        result_df = result_df.compute().sort_values(
+        ].compute()
+        result_df = result_df.sort_values(
             by=[
                 "s_acctbal",
                 "n_name",
