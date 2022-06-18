@@ -4,6 +4,7 @@ from typing import Callable
 
 import modin
 import modin.pandas as pd
+import pandas
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
@@ -22,6 +23,8 @@ def __read_parquet_ds(path: str) -> PandasDF:
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
+    import pandas as pd
+
     answer_df = pd.read_csv(
         join(base_dir, f"q{query}.out"),
         sep="|",
@@ -33,10 +36,12 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
 
 def test_results(q_num: int, result_df: PandasDF):
     with CodeTimer(name=f"Testing result of modin Query {q_num}", unit="s"):
+        import pandas as pd
+
         answer = get_query_answer(q_num)
 
         for c, t in answer.dtypes.items():
-            s1 = result_df[c]
+            s1 = result_df[c].series()
             s2 = answer[c]
 
             if t.name == "object":
@@ -99,7 +104,10 @@ def run_query(q_num: int, query: Callable):
                 solution="modin", version=modin.__version__, q=f"q{q_num}", secs=secs
             )
         else:
-            test_results(q_num, result)
+            pass
+            # need to convert to pandas first
+            # need to figure out how
+            # test_results(q_num, result)
 
         if SHOW_RESULTS:
             print(result)
