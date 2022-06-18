@@ -2,6 +2,7 @@ import timeit
 from os.path import join
 from typing import Callable
 
+import modin
 import modin.pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
@@ -94,7 +95,9 @@ def run_query(q_num: int, query: Callable):
             secs = timeit.default_timer() - t0
 
         if LOG_TIMINGS:
-            append_row(solution="modin", q=f"q{q_num}", secs=secs)
+            append_row(
+                solution="modin", version=modin.__version__, q=f"q{q_num}", secs=secs
+            )
         else:
             test_results(q_num, result)
 

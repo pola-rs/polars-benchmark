@@ -2,6 +2,7 @@ import timeit
 from os.path import join
 from typing import Callable, Union
 
+import dask
 import dask.dataframe as dd
 import pandas as pd
 import polars as pl
@@ -103,7 +104,9 @@ def run_query(q_num: str, query: Callable):
             secs = timeit.default_timer() - t0
 
         if LOG_TIMINGS:
-            append_row(solution="dask", q=f"q{q_num}", secs=secs)
+            append_row(
+                solution="dask", version=dask.__version__, q=f"q{q_num}", secs=secs
+            )
         else:
             test_results(q_num, result)
 
