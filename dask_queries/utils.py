@@ -1,10 +1,10 @@
+import os
 import timeit
 from os.path import join
 from typing import Callable, Union
 
 import dask.dataframe as dd
 import pandas as pd
-import polars as pl
 from linetimer import CodeTimer, linetimer
 
 from common_utils import (
@@ -21,7 +21,8 @@ from common_utils import (
 def __read_parquet_ds(path: str) -> Union:
     if INCLUDE_IO:
         return dd.read_parquet(path)
-    return dd.from_pandas(pl.read_parquet(path).to_pandas(), npartitions=12)
+
+    return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> dd.DataFrame:
@@ -92,9 +93,9 @@ def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
 def run_query(q_num: str, query: Callable):
     @linetimer(name=f"Overall execution of dask Query {q_num}", unit="s")
     def run():
-        from dask.distributed import Client
+        import dask
 
-        Client(scheduler="processes", num_workers=12)
+        dask.config.set(scheduler="threads")
 
         with CodeTimer(name=f"Get result of dask Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
@@ -103,7 +104,9 @@ def run_query(q_num: str, query: Callable):
             secs = timeit.default_timer() - t0
 
         if LOG_TIMINGS:
-            append_row(solution="dask", q=f"q{q_num}", secs=secs)
+            append_row(
+                solution="dask", version=dask.__version__, q=f"q{q_num}", secs=secs
+            )
         else:
             test_results(q_num, result)
 

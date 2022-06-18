@@ -87,7 +87,9 @@ def run_query(q_num: int, lp: pl.LazyFrame):
             secs = timeit.default_timer() - t0
 
         if LOG_TIMINGS:
-            append_row(solution="polars", q=f"q{q_num}", secs=secs)
+            append_row(
+                solution="polars", version=pl.__version__, q=f"q{q_num}", secs=secs
+            )
         else:
             test_results(q_num, result)
 

@@ -4,6 +4,6 @@ isort==5.10.1
 linetimer
 pandas
 pyarrow
-dask[distributed]
-modin
+dask
+modin[ray]
 plotly
