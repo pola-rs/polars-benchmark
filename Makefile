@@ -43,6 +43,9 @@ run_dask: .venv
 run_modin: .venv
 	.venv/bin/python -m modin_queries.executor
 
+plot_results: .venv
+	.venv/bin/python -m scripts.plot_results
+
 run_all: run_polars run_pandas run_dask run_modin
 
 pre-commit:

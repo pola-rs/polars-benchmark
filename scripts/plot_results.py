@@ -7,15 +7,12 @@ To use this script run
 ```
 """
 
+import os
+
 import plotly.express as px
 import polars as pl
 
-from common_utils import TIMINGS_FILE
-
-# expected filepath of benchmark results csv
-# assumes csv is in parent directory
-
-DEFAULT_CSV_FILEPATH = TIMINGS_FILE
+from common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WRITE_PLOT
 
 # colors for each bar
 COLORS = {
@@ -60,6 +57,14 @@ def add_annotations(fig):
         )
 
 
+def write_plot_image(fig):
+    if not os.path.exists(DEFAULT_PLOTS_DIR):
+        os.mkdir(DEFAULT_PLOTS_DIR)
+
+    file_name = f"plot_with_io.html" if INCLUDE_IO else "plot_without_io.html"
+    fig.write_html(os.path.join(DEFAULT_PLOTS_DIR, file_name))
+
+
 def plot(
         df: pl.DataFrame,
         x: str = "query_no",
@@ -101,10 +106,15 @@ def plot(
 
     add_annotations(fig)
 
+    if WRITE_PLOT:
+        write_plot_image(fig)
+
     # display the object using available environment context
     fig.show()
 
 
 if __name__ == "__main__":
-    df = pl.read_csv(DEFAULT_CSV_FILEPATH)
+    print("write plot:", WRITE_PLOT)
+
+    df = pl.read_csv(TIMINGS_FILE)
     plot(df)

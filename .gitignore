@@ -10,3 +10,4 @@ qgen
 dask_user_space/
 dask-worker-space/
 timings.csv
+plots/
