@@ -49,12 +49,21 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
     # we look for the solutions that surpassed the limit
     # and create a text label for them
     df = (
-        df.filter(pl.col("duration[s]") > limit).with_column(
-            pl.format(
-                "{} took {} s", "solution", pl.col("duration[s]").cast(pl.Int32)
-            ).alias("labels")
+        df.filter(pl.col("duration[s]") > limit)
+        .with_column(
+            pl.when(pl.col("success"))
+            .then(
+                pl.format(
+                    "{} took {} s", "solution", pl.col("duration[s]").cast(pl.Int32)
+                ).alias("labels")
+            )
+            .otherwise(pl.format("{} had an internal error", "solution"))
         )
-    ).join(bar_order, on="solution")
+        .join(bar_order, on="solution")
+        .groupby("query_no")
+        .agg([pl.col("labels").list(), pl.col("index").min()])
+        .with_column(pl.col("labels").arr.join(",\n"))
+    )
 
     # then we create a dictionary similar to something like this:
     #     anno_data = {
@@ -100,6 +109,7 @@ def plot(
     x: str = "query_no",
     y: str = "duration[s]",
     group: str = "solution",
+    limit: int = 120,
 ):
     """Generate a Plotly Figure of a grouped bar chart diplaying
     benchmark results from a DataFrame.
@@ -113,7 +123,6 @@ def plot(
     Returns:
         px.Figure: Plotly Figure (histogram)
     """
-    LIMIT_IN_SECS = 120
 
     # build plotly figure object
     fig = px.histogram(
@@ -130,13 +139,13 @@ def plot(
     fig.update_layout(
         bargroupgap=0.1,
         paper_bgcolor="rgba(41,52,65,1)",
-        yaxis_range=[0, LIMIT_IN_SECS],
+        yaxis_range=[0, limit],
         plot_bgcolor="rgba(41,52,65,1)",
         margin=dict(t=100),
         legend=dict(orientation="h", xanchor="left", yanchor="top", x=0.37, y=-0.1),
     )
 
-    add_annotations(fig, LIMIT_IN_SECS, df)
+    add_annotations(fig, limit, df)
 
     if WRITE_PLOT:
         write_plot_image(fig)
@@ -148,6 +157,7 @@ def plot(
 if __name__ == "__main__":
     print("write plot:", WRITE_PLOT)
 
+    LIMIT = 120
     e = pl.col("solution") != "modin"
 
     if INCLUDE_IO:
@@ -155,5 +165,14 @@ if __name__ == "__main__":
     else:
         e = e & ~pl.col("include_io")
 
-    df = pl.scan_csv(TIMINGS_FILE).filter(e).collect()
-    plot(df)
+    df = (
+        pl.scan_csv(TIMINGS_FILE)
+        .filter(e)
+        .with_column(
+            pl.when(pl.col("success"))
+            .then(pl.col("duration[s]"))
+            .otherwise(LIMIT * 100)
+        )
+        .collect()
+    )
+    plot(df, limit=LIMIT)
