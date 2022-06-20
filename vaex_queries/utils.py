@@ -95,12 +95,23 @@ def run_query(q_num: int, query: Callable):
     def run():
         with CodeTimer(name=f"Get result of vaex Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
-            result = query()
+
+            try:
+                result = query()
+                success = True
+            except Exception as e:
+                print(f"vaex failed: {e}")
+                success = False
+
             secs = timeit.default_timer() - t0
 
         if LOG_TIMINGS:
             append_row(
-                solution="vaex", version=vaex.__version__, q=f"q{q_num}", secs=secs
+                solution="vaex",
+                version=vaex.__version__["vaex"],
+                q=f"q{q_num}",
+                secs=secs,
+                success=success,
             )
         else:
             test_results(q_num, result)

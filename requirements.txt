@@ -7,3 +7,5 @@ pyarrow
 dask
 modin[ray]
 plotly
+vaex
+

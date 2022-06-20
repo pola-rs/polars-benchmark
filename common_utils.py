@@ -20,10 +20,10 @@ TIMINGS_FILE = os.path.join(CWD, "timings.csv")
 DEFAULT_PLOTS_DIR = os.path.join(CWD, "plots")
 
 
-def append_row(solution: str, q: str, secs: float, version: str):
+def append_row(solution: str, q: str, secs: float, version: str, success=True):
     with open(TIMINGS_FILE, "a") as f:
         if f.tell() == 0:
-            f.write("solution,version,query_no,duration[s],include_io\n")
+            f.write("solution,version,query_no,duration[s],include_io,success\n")
         f.write(f"{solution},{version},{q},{secs},{INCLUDE_IO}\n")
 
 
