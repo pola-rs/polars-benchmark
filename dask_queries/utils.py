@@ -10,6 +10,7 @@ from linetimer import CodeTimer, linetimer
 from common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
+    FILE_TYPE,
     INCLUDE_IO,
     LOG_TIMINGS,
     SHOW_RESULTS,
@@ -18,9 +19,11 @@ from common_utils import (
 )
 
 
-def __read_parquet_ds(path: str) -> Union:
+def read_ds(path: str) -> Union:
     if INCLUDE_IO:
         return dd.read_parquet(path)
+    if FILE_TYPE == "feather":
+        raise ValueError("file type feather not supported for dask queries")
 
     return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
 
@@ -52,42 +55,42 @@ def test_results(q_num: int, result_df: pd.DataFrame):
 
 @on_second_call
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "lineitem.parquet"))
+    return read_ds(join(base_dir, "lineitem.parquet"))
 
 
 @on_second_call
 def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "orders.parquet"))
+    return read_ds(join(base_dir, "orders.parquet"))
 
 
 @on_second_call
 def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "customer.parquet"))
+    return read_ds(join(base_dir, "customer.parquet"))
 
 
 @on_second_call
 def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "region.parquet"))
+    return read_ds(join(base_dir, "region.parquet"))
 
 
 @on_second_call
 def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "nation.parquet"))
+    return read_ds(join(base_dir, "nation.parquet"))
 
 
 @on_second_call
 def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "supplier.parquet"))
+    return read_ds(join(base_dir, "supplier.parquet"))
 
 
 @on_second_call
 def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "part.parquet"))
+    return read_ds(join(base_dir, "part.parquet"))
 
 
 @on_second_call
 def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return __read_parquet_ds(join(base_dir, "partsupp.parquet"))
+    return read_ds(join(base_dir, "partsupp.parquet"))
 
 
 def run_query(q_num: str, query: Callable):

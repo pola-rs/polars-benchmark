@@ -52,7 +52,7 @@ def test_results(q_num: int, result_df: DataFrame):
 
 @on_second_call
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "lineitem.parquet"))
+    return __read_parquet_ds(join(base_dir, "lineitem.feather"))
 
 
 @on_second_call

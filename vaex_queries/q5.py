@@ -45,6 +45,9 @@ def q():
         osel = (orders_ds.o_orderdate >= date1) & (orders_ds.o_orderdate < date2)
         forders = orders_ds[osel]
         fregion = region_ds[rsel]
+        # see: https://github.com/vaexio/vaex/issues/1319
+        fregion = fregion.sort("r_regionkey")
+
         jn1 = fregion.join(
             nation_ds,
             left_on="r_regionkey",
@@ -71,7 +74,7 @@ def q():
             left_on="o_orderkey",
             right_on="l_orderkey",
             how="inner",
-            allow_duplicaiton=True,
+            allow_duplication=True,
         )
         jn5 = supplier_ds.join(
             jn4,
