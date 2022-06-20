@@ -96,6 +96,7 @@ def q():
             & (part_filtered["p_type"].str.endswith(var2))
         ]
         part_filtered = part_filtered[["p_partkey", "p_mfgr"]]
+
         merged_df = part_filtered.join(
             ps_s_r_n_merged,
             left_on="p_partkey",
@@ -117,7 +118,7 @@ def q():
             ]
         ]
         min_values = ps_s_r_n_merged.groupby("ps_partkey").agg({"ps_supplycost": "min"})
-        merged_df = merged_df.merge(
+        merged_df = merged_df.join(
             min_values,
             left_on=["p_partkey", "ps_supplycost"],
             right_on=["p_partkey", "ps_supplycost"],

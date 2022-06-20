@@ -119,6 +119,7 @@ def plot(
         x (str, optional): Column for X Axis. Defaults to "query_no".
         y (str, optional): Column for Y Axis. Defaults to "duration[s]".
         group (str, optional): Column for group. Defaults to "solution".
+        limit: height limit in seconds
 
     Returns:
         px.Figure: Plotly Figure (histogram)
@@ -169,9 +170,7 @@ if __name__ == "__main__":
         pl.scan_csv(TIMINGS_FILE)
         .filter(e)
         .with_column(
-            pl.when(pl.col("success"))
-            .then(pl.col("duration[s]"))
-            .otherwise(LIMIT * 100)
+            pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0)
         )
         .collect()
     )
