@@ -1,4 +1,3 @@
-from datetime import datetime
 import numpy as np
 
 from vaex_queries import utils
@@ -7,7 +6,7 @@ Q_NUM = 1
 
 
 def q():
-    VAR1 = np.datetime64('1998-09-02')
+    VAR1 = np.datetime64("1998-09-02")
 
     lineitem = utils.get_line_item_ds
     # first call one time to cache in case we don't include the IO times
@@ -45,22 +44,23 @@ def q():
         )
         lineitem_filtered["avg_disc"] = lineitem_filtered.l_discount
         lineitem_filtered["count_order"] = lineitem_filtered.l_orderkey
-        total = lineitem_filtered.groupby(["l_returnflag", "l_linestatus"],
-                                       agg=
-                                           {
-                                               "sum_qty": "sum",
-                                               "sum_base_price": "sum",
-                                               "sum_disc_price": "sum",
-                                               "sum_charge": "sum",
-                                               "avg_qty": "mean",
-                                               "avg_price": "mean",
-                                               "avg_disc": "mean",
-                                               "count_order": "count",
-                                           }
-                                       )
+        total = lineitem_filtered.groupby(
+            ["l_returnflag", "l_linestatus"],
+            agg={
+                "sum_qty": "sum",
+                "sum_base_price": "sum",
+                "sum_disc_price": "sum",
+                "sum_charge": "sum",
+                "avg_qty": "mean",
+                "avg_price": "mean",
+                "avg_disc": "mean",
+                "count_order": "count",
+            },
+        )
 
         result_df = total.sort(["l_returnflag", "l_linestatus"])
         return result_df
+
     utils.run_query(Q_NUM, query)
 
 

@@ -1,10 +1,10 @@
 import timeit
 from os.path import join
 from typing import Callable
-import vaex
-from vaex.dataframe import DataFrame
 
+import vaex
 from linetimer import CodeTimer, linetimer
+from vaex.dataframe import DataFrame
 
 from common_utils import (
     ANSWERS_BASE_DIR,
@@ -36,6 +36,7 @@ def test_results(q_num: int, result_df: DataFrame):
     with CodeTimer(name=f"Testing result of modin Query {q_num}", unit="s"):
         result_df = result_df.to_pandas_df()
         import pandas as pd
+
         answer = get_query_answer(q_num)
 
         for c, t in answer.dtypes.items():
