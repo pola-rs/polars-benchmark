@@ -96,6 +96,8 @@ def q():
             & (part_filtered["p_type"].str.endswith(var2))
         ]
         part_filtered = part_filtered[["p_partkey", "p_mfgr"]]
+        # see: https://github.com/vaexio/vaex/issues/1319
+        part_filtered = part_filtered.sort("p_partkey")
 
         merged_df = part_filtered.join(
             ps_s_r_n_merged,

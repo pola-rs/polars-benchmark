@@ -37,6 +37,9 @@ def q():
         flineitem = line_item_ds[lsel]
         forders = orders_ds[osel]
 
+        # see: https://github.com/vaexio/vaex/issues/1319
+        forders = forders.sort("o_orderkey")
+
         jn = forders.join(
             flineitem,
             left_on="o_orderkey",
@@ -44,9 +47,9 @@ def q():
             how="inner",
             allow_duplication=True,
         )
-        jn = drop_duplicates(jn, columns=["o_orderkey"])[
-            ["o_orderpriority", "o_orderkey"]
-        ]
+        # cannot finish this query because we cannot drop_duplicates by a subset
+        jn = drop_duplicates(jn, columns=["o_orderkey"])
+        [["o_orderpriority", "o_orderkey"]]
 
         result_df = (
             jn.groupby("o_orderpriority")

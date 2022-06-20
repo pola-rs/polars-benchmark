@@ -9,6 +9,7 @@ from vaex.dataframe import DataFrame
 from common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
+    FILE_TYPE,
     LOG_TIMINGS,
     SHOW_RESULTS,
     append_row,
@@ -16,7 +17,8 @@ from common_utils import (
 )
 
 
-def __read_parquet_ds(path: str) -> DataFrame:
+def _read_ds(path: str) -> DataFrame:
+    path = f"{path}.{FILE_TYPE}"
     return vaex.open(path)
 
 
@@ -52,42 +54,42 @@ def test_results(q_num: int, result_df: DataFrame):
 
 @on_second_call
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "lineitem.parquet"))
+    return _read_ds(join(base_dir, "lineitem"))
 
 
 @on_second_call
 def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "orders.parquet"))
+    return _read_ds(join(base_dir, "orders"))
 
 
 @on_second_call
 def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "customer.parquet"))
+    return _read_ds(join(base_dir, "customer"))
 
 
 @on_second_call
 def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "region.parquet"))
+    return _read_ds(join(base_dir, "region"))
 
 
 @on_second_call
 def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "nation.parquet"))
+    return _read_ds(join(base_dir, "nation"))
 
 
 @on_second_call
 def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "supplier.parquet"))
+    return _read_ds(join(base_dir, "supplier"))
 
 
 @on_second_call
 def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "part.parquet"))
+    return _read_ds(join(base_dir, "part"))
 
 
 @on_second_call
 def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> DataFrame:
-    return __read_parquet_ds(join(base_dir, "partsupp.parquet"))
+    return _read_ds(join(base_dir, "partsupp"))
 
 
 def run_query(q_num: int, query: Callable):
@@ -111,7 +113,7 @@ def run_query(q_num: int, query: Callable):
 
         if LOG_TIMINGS:
             append_row(
-                solution="vaex",
+                solution=f"vaex_{FILE_TYPE}",
                 version=vaex.__version__["vaex"],
                 q=f"q{q_num}",
                 secs=secs,

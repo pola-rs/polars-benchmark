@@ -38,7 +38,9 @@ def q():
         csel = customer_filtered.c_mktsegment == var3
         flineitem = lineitem_filtered[lsel]
         forders = orders_filtered[osel]
+        forders = forders.sort("o_custkey")
         fcustomer = customer_filtered[csel]
+        fcustomer = fcustomer.sort("c_custkey")
 
         jn1 = fcustomer.join(
             forders,
@@ -47,6 +49,8 @@ def q():
             how="inner",
             allow_duplication=True,
         )
+        flineitem = flineitem.sort("l_orderkey")
+        jn1 = jn1.sort("o_orderkey")
         jn2 = jn1.join(
             flineitem,
             left_on="o_orderkey",
