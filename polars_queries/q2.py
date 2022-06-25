@@ -24,7 +24,7 @@ def q():
         .join(nation_ds, left_on="s_nationkey", right_on="n_nationkey")
         .join(region_ds, left_on="n_regionkey", right_on="r_regionkey")
         .filter(pl.col("p_size") == var1)
-        .filter(pl.col("p_type").str.contains(f"{var2}$"))
+        .filter(pl.col("p_type").str.ends_with(var2))
         .filter(pl.col("r_name") == var3)
     ).cache()
 
