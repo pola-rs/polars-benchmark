@@ -87,7 +87,7 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
         fig.add_annotation(
             align="right",
             x=q_name,
-            y=120,
+            y=LIMIT,
             xshift=x_shift,
             yshift=30,
             font=dict(color="white"),
@@ -158,20 +158,25 @@ def plot(
 if __name__ == "__main__":
     print("write plot:", WRITE_PLOT)
 
-    LIMIT = 120
-    e = pl.col("solution") != "modin"
+    e = pl.lit(True)
 
     if INCLUDE_IO:
-        e = e & pl.col("include_io")
+        LIMIT = 120
+        e = e & pl.col("include_io") & ~(pl.col("solution") == "vaex_feather")
     else:
+        LIMIT = 40
         e = e & ~pl.col("include_io")
 
     df = (
         pl.scan_csv(TIMINGS_FILE)
         .filter(e)
-        .with_column(
-            pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0)
+        .with_columns(
+            [
+                pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0),
+                pl.format("{}-{}", "solution", "version").alias("solution-version"),
+            ]
         )
         .collect()
     )
-    plot(df, limit=LIMIT)
+
+    plot(df, limit=LIMIT, group="solution-version")
