@@ -155,7 +155,9 @@ def plot(
         ),
         xaxis_title=LABEL_UPDATES["x"],
         yaxis_title=LABEL_UPDATES["y"],
-    ).update_xaxes(title_font=dict(size=24)).update_yaxes(title_font=dict(size=24))
+    ).update_xaxes(tickfont_size=20, title_font=dict(size=24)).update_yaxes(
+        tickfont_size=20, title_font=dict(size=24)
+    )
     # labeling the left_side of the plot
     add_annotations(fig, limit, df)
 
