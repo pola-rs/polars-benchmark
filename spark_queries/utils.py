@@ -101,6 +101,15 @@ def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
     return __read_parquet_ds(join(base_dir, "partsupp.parquet"), "partsupp")
 
 
+def drop_temp_view():
+    spark = get_or_create_spark()
+    [
+        spark.catalog.dropTempView(t.name)
+        for t in spark.catalog.listTables()
+        if t.isTemporary
+    ]
+
+
 def run_query(q_num: int, result: SparkDF):
     @linetimer(name=f"Overall execution of Spark Query {q_num}", unit="s")
     def run():
