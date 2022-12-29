@@ -46,10 +46,13 @@ run_modin: .venv
 run_vaex: .venv
 	.venv/bin/python -m vaex_queries.executor
 
+run_spark: .venv
+	.venv/bin/python -m spark_queries.executor
+
 plot_results: .venv
 	.venv/bin/python -m scripts.plot_results
 
-run_all: run_polars run_pandas run_vaex run_dask run_modin
+run_all: run_polars run_pandas run_vaex run_dask run_modin run_spark
 
 pre-commit:
 	.venv/bin/python -m isort .
