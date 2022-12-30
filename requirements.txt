@@ -8,4 +8,5 @@ dask
 modin[ray]
 plotly
 vaex
+pyspark
 
