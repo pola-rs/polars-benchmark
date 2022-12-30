@@ -1,5 +1,6 @@
 from linetimer import CodeTimer
 
+# TODO: works for now, but need dynamic imports for this.
 from spark_queries import q1, q2, q3, q4, q5, q6, q7
 
 if __name__ == "__main__":
