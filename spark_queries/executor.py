@@ -1,5 +1,7 @@
 from linetimer import CodeTimer
 
+from spark_queries import q1, q2, q3, q4, q5, q6, q7
+
 if __name__ == "__main__":
     num_queries = 7
 
