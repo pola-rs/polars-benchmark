@@ -4,6 +4,7 @@ from os.path import join
 
 import polars as pl
 from linetimer import CodeTimer, linetimer
+from polars import testing as pl_test
 
 from common_utils import (
     ANSWERS_BASE_DIR,
@@ -46,7 +47,7 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFra
 def test_results(q_num: int, result_df: pl.DataFrame):
     with CodeTimer(name=f"Testing result of polars Query {q_num}", unit="s"):
         answer = get_query_answer(q_num).collect()
-        pl.testing.assert_frame_equal(left=result_df, right=answer, check_dtype=False)
+        pl_test.assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
