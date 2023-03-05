@@ -5,6 +5,7 @@ from typing import Callable
 import pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
+import polars as pl
 
 from common_utils import (
     ANSWERS_BASE_DIR,
@@ -20,11 +21,22 @@ from common_utils import (
 def _read_ds(path: str) -> PandasDF:
     path = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
-        return pd.read_parquet(path)
+        df = pl.read_parquet(path)
     elif FILE_TYPE == "feather":
-        return pd.read_feather(path)
-    else:
-        raise ValueError(f"file type: {FILE_TYPE} not expected")
+        df = pl.read_ipc(path)
+    import pyarrow as pa
+    import pyarrow.compute
+
+    tbl = df.to_arrow()
+    out = {}
+    for (name, col) in zip(df.columns, tbl.columns):
+        if (col.type == pa.large_string()):
+            out[name] = pd.Series(pa.compute.cast(col, pa.string()), dtype="string[pyarrow]")
+        else:
+            out[name] = col.to_pandas()
+
+    df = pd.DataFrame(out)
+    return df
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
