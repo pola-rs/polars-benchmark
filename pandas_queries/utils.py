@@ -21,22 +21,9 @@ from common_utils import (
 def _read_ds(path: str) -> PandasDF:
     path = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
-        df = pl.read_parquet(path)
+        return pd.read_parquet(path, engine="pyarrow", use_nullable_dtypes=True)
     elif FILE_TYPE == "feather":
-        df = pl.read_ipc(path)
-    import pyarrow as pa
-    import pyarrow.compute
-
-    tbl = df.to_arrow()
-    out = {}
-    for (name, col) in zip(df.columns, tbl.columns):
-        if (col.type == pa.large_string()):
-            out[name] = pd.Series(pa.compute.cast(col, pa.string()), dtype="string[pyarrow]")
-        else:
-            out[name] = col.to_pandas()
-
-    df = pd.DataFrame(out)
-    return df
+        return pd.read_feather(path, engine="pyarrow", use_nullable_dtypes=True)
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:

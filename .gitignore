@@ -9,6 +9,6 @@ __pycache__/
 qgen
 dask_user_space/
 dask-worker-space/
-timings.csv
+timings_old.csv
 plots/
 **/spark-warehouse

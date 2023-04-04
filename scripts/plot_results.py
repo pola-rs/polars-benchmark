@@ -164,7 +164,7 @@ if __name__ == "__main__":
         LIMIT = 120
         e = e & pl.col("include_io") & ~(pl.col("solution") == "vaex_feather")
     else:
-        LIMIT = 5
+        LIMIT = 1.8
         e = e & ~pl.col("include_io")
 
     df = (

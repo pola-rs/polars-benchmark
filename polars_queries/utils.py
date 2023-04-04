@@ -90,7 +90,7 @@ def run_query(q_num: int, lp: pl.LazyFrame):
 
         with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
-            result = lp.collect()
+            result = lp.collect(streaming=False)
 
             secs = timeit.default_timer() - t0
 
