@@ -38,9 +38,7 @@ def q():
             (line_item_ds["l_shipdate"] >= datetime(1995, 1, 1))
             & (line_item_ds["l_shipdate"] < datetime(1997, 1, 1))
         ]
-        lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].apply(
-            lambda x: x.year
-        )
+        lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].dt.year
         lineitem_filtered["revenue"] = lineitem_filtered["l_extendedprice"] * (
             1.0 - lineitem_filtered["l_discount"]
         )
