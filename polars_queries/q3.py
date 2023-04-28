@@ -21,7 +21,7 @@ def q():
         .join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
         .filter(pl.col("o_orderdate") < var2)
         .filter(pl.col("l_shipdate") > var1)
-        .with_column(
+        .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue")
         )
         .groupby(["o_orderkey", "o_orderdate", "o_shippriority"])

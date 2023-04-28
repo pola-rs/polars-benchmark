@@ -111,8 +111,8 @@ for name in [
     df = pl.scan_csv(
             f"tables_scale_{scale_fac}/{name}.tbl",
             has_header=False,
-            sep="|",
-            parse_dates=True,
+            separator="|",
+            try_parse_dates=True,
             with_column_names= lambda _: eval(f"h_{name}")
         )
 
