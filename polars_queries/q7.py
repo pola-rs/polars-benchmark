@@ -41,10 +41,10 @@ def q():
         pl.concat([df1, df2])
         .filter(pl.col("l_shipdate") >= datetime(1995, 1, 1))
         .filter(pl.col("l_shipdate") <= datetime(1996, 12, 31))
-        .with_column(
+        .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume")
         )
-        .with_column(pl.col("l_shipdate").dt.year().alias("l_year"))
+        .with_columns(pl.col("l_shipdate").dt.year().alias("l_year"))
         .groupby(["supp_nation", "cust_nation", "l_year"])
         .agg([pl.sum("volume").alias("revenue")])
         .sort(by=["supp_nation", "cust_nation", "l_year"])

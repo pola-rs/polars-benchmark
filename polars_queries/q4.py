@@ -23,7 +23,7 @@ def q():
         .groupby("o_orderpriority")
         .agg(pl.count().alias("order_count"))
         .sort(by="o_orderpriority")
-        .with_column(pl.col("order_count").cast(pl.datatypes.Int64))
+        .with_columns(pl.col("order_count").cast(pl.datatypes.Int64))
     )
 
     utils.run_query(Q_NUM, q_final)
