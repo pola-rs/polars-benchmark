@@ -103,8 +103,8 @@ for name in [
     df = pl.read_csv(
         f"tables_scale_{scale_fac}/{name}.tbl",
         has_header=False,
-        sep="|",
-        parse_dates=True,
+        separator="|",
+        try_parse_dates=True,
         new_columns=eval(f"h_{name}"),
     )
     print(df.shape)
