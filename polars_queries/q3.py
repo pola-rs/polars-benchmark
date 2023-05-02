@@ -34,7 +34,7 @@ def q():
                 "o_shippriority",
             ]
         )
-        .sort(by=["revenue", "o_orderdate"], reverse=[True, False])
+        .sort(by=["revenue", "o_orderdate"], descending=[True, False])
         .limit(10)
     )
 

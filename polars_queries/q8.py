@@ -43,7 +43,7 @@ def q():
                 pl.col("n_name").alias("nation"),
             ]
         )
-        .with_column(
+        .with_columns(
             pl.when(pl.col("nation") == "BRAZIL")
             .then(pl.col("volume"))
             .otherwise(0)

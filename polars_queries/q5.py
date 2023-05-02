@@ -37,7 +37,7 @@ def q():
         )
         .groupby("n_name")
         .agg([pl.sum("revenue")])
-        .sort(by="revenue", reverse=True)
+        .sort(by="revenue", descending=True)
     )
 
     utils.run_query(Q_NUM, q_final)

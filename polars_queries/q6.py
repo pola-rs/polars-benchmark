@@ -19,7 +19,7 @@ def q():
         .filter(pl.col("l_shipdate") < var2)
         .filter((pl.col("l_discount") >= 0.05) & (pl.col("l_discount") <= 0.07))
         .filter(pl.col("l_quantity") < var3)
-        .with_column(
+        .with_columns(
             (pl.col("l_extendedprice") * pl.col("l_discount")).alias("revenue")
         )
         .select(pl.sum("revenue").alias("revenue"))
