@@ -53,7 +53,7 @@ def q():
             reverse=[True, False, False, False],
         )
         .limit(100)
-        .with_column(pl.col(pl.datatypes.Utf8).str.strip().keep_name())
+        .with_columns(pl.col(pl.datatypes.Utf8).str.strip().keep_name())
     )
 
     utils.run_query(Q_NUM, q_final)

@@ -32,7 +32,7 @@ def q():
         .filter(pl.col("r_name") == var1)
         .filter(pl.col("o_orderdate") >= var2)
         .filter(pl.col("o_orderdate") < var3)
-        .with_column(
+        .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue")
         )
         .groupby("n_name")

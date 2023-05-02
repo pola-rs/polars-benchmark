@@ -50,7 +50,7 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
     # and create a text label for them
     df = (
         df.filter(pl.col("duration[s]") > limit)
-        .with_column(
+        .with_columns(
             pl.when(pl.col("success"))
             .then(
                 pl.format(
@@ -62,7 +62,7 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
         .join(bar_order, on="solution")
         .groupby("query_no")
         .agg([pl.col("labels").list(), pl.col("index").min()])
-        .with_column(pl.col("labels").arr.join(",\n"))
+        .with_columns(pl.col("labels").arr.join(",\n"))
     )
 
     # then we create a dictionary similar to something like this:
