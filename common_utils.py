@@ -55,7 +55,7 @@ def on_second_call(func):
 
 def execute_all(solution: str):
     package_name = f"{solution}_queries"
-    num_queries = 11
+    num_queries = 12
 
     with CodeTimer(name=f"Overall execution of ALL {solution} queries", unit="s"):
         for i in range(1, num_queries + 1):
