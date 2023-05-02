@@ -13,15 +13,15 @@ def q():
     line_item_ds = utils.get_line_item_ds()
     nation_ds = utils.get_nation_ds()
 
-    var1 = datetime(1993, 10, 1)
-    var2 = datetime(1994, 1, 1)
+    var_1 = datetime(1993, 10, 1)
+    var_2 = datetime(1994, 1, 1)
 
     q_final = (
         customer_ds.join(orders_ds, left_on="c_custkey", right_on="o_custkey")
         .join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
         .join(nation_ds, left_on="c_nationkey", right_on="n_nationkey")
-        .filter(pl.col("o_orderdate") >= var1)
-        .filter(pl.col("o_orderdate") < var2)
+        .filter(pl.col("o_orderdate") >= var_1)
+        .filter(pl.col("o_orderdate") < var_2)
         .filter(pl.col("l_returnflag") == "R")
         .groupby(
             [

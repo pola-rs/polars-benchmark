@@ -8,9 +8,9 @@ Q_NUM = 2
 
 
 def q():
-    var1 = 15
-    var2 = "BRASS"
-    var3 = "EUROPE"
+    var_1 = 15
+    var_2 = "BRASS"
+    var_3 = "EUROPE"
 
     region_ds = utils.get_region_ds()
     nation_ds = utils.get_nation_ds()
@@ -23,9 +23,9 @@ def q():
         .join(supplier_ds, left_on="ps_suppkey", right_on="s_suppkey")
         .join(nation_ds, left_on="s_nationkey", right_on="n_nationkey")
         .join(region_ds, left_on="n_regionkey", right_on="r_regionkey")
-        .filter(pl.col("p_size") == var1)
-        .filter(pl.col("p_type").str.ends_with(var2))
-        .filter(pl.col("r_name") == var3)
+        .filter(pl.col("p_size") == var_1)
+        .filter(pl.col("p_type").str.ends_with(var_2))
+        .filter(pl.col("r_name") == var_3)
     ).cache()
 
     final_cols = [
