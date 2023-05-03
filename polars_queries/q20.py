@@ -1,0 +1,52 @@
+from datetime import datetime
+
+import polars as pl
+
+from polars_queries import utils
+
+Q_NUM = 20
+
+
+def q():
+    line_item_ds = utils.get_line_item_ds()
+    nation_ds = utils.get_nation_ds()
+    supplier_ds = utils.get_supplier_ds()
+    part_ds = utils.get_part_ds()
+    part_supp_ds = utils.get_part_supp_ds()
+
+    var_1 = datetime(1994, 1, 1)
+    var_2 = datetime(1995, 1, 1)
+    var_3 = "CANADA"
+    var_4 = "forest"
+
+    res_1 = (
+        line_item_ds.filter(pl.col("l_shipdate") >= var_1)
+        .filter(pl.col("l_shipdate") < var_2)
+        .groupby("l_partkey", "l_suppkey")
+        .agg((pl.col("l_quantity").sum() * 0.5).alias("sum_quantity"))
+    )
+    res_2 = nation_ds.filter(pl.col("n_name") == var_3)
+    res_3 = supplier_ds.join(res_2, left_on="s_nationkey", right_on="n_nationkey")
+
+    q_final = (
+        part_ds.filter(pl.col("p_name").str.starts_with(var_4))
+        .select(pl.col("p_partkey").unique())
+        .join(part_supp_ds, left_on="p_partkey", right_on="ps_partkey")
+        .join(
+            res_1,
+            left_on=["ps_suppkey", "p_partkey"],
+            right_on=["l_suppkey", "l_partkey"],
+        )
+        .filter(pl.col("ps_availqty") > pl.col("sum_quantity"))
+        .select(pl.col("ps_suppkey").unique())
+        .join(res_3, left_on="ps_suppkey", right_on="s_suppkey")
+        .with_columns(pl.col("s_address").str.strip())
+        .select(["s_name", "s_address"])
+        .sort("s_name")
+    )
+
+    utils.run_query(Q_NUM, q_final)
+
+
+if __name__ == "__main__":
+    q()
