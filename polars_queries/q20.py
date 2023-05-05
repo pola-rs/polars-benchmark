@@ -20,7 +20,9 @@ def q():
     var_4 = "forest"
 
     res_1 = (
-        line_item_ds.filter(pl.col("l_shipdate").is_between(var_1, var_2, closed="left"))
+        line_item_ds.filter(
+            pl.col("l_shipdate").is_between(var_1, var_2, closed="left")
+        )
         .groupby("l_partkey", "l_suppkey")
         .agg((pl.col("l_quantity").sum() * 0.5).alias("sum_quantity"))
     )

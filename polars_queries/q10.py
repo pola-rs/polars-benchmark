@@ -41,8 +41,7 @@ def q():
                 .alias("revenue")
             ]
         )
-        .with_columns(pl.col("c_address").str.strip())
-        .with_columns(pl.col("c_comment").str.strip())
+        .with_columns(pl.col("c_address").str.strip(), pl.col("c_comment").str.strip())
         .select(
             [
                 "c_custkey",

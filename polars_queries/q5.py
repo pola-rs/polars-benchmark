@@ -39,7 +39,6 @@ def q():
         .sort(by="revenue", descending=True)
     )
 
-
     utils.run_query(Q_NUM, q_final)
 
 
