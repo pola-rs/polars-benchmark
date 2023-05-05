@@ -16,8 +16,7 @@ def q():
 
     q_final = (
         line_item_ds.join(part_ds, left_on="l_partkey", right_on="p_partkey")
-        .filter(pl.col("l_shipdate") >= var_1)
-        .filter(pl.col("l_shipdate") < var_2)
+        .filter(pl.col("l_shipdate").is_between(var_1, var_2, closed="left"))
         .select(
             (
                 100.00

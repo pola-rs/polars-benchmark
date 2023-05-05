@@ -16,8 +16,7 @@ def q():
 
     q_final = (
         line_item_ds.join(orders_ds, left_on="l_orderkey", right_on="o_orderkey")
-        .filter(pl.col("o_orderdate") >= var_1)
-        .filter(pl.col("o_orderdate") < var_2)
+        .filter(pl.col("o_orderdate").is_between(var_1, var_2, closed="left"))
         .filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))
         .unique(subset=["o_orderpriority", "l_orderkey"])
         .groupby("o_orderpriority")

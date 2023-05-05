@@ -30,8 +30,7 @@ def q():
             right_on=["s_suppkey", "s_nationkey"],
         )
         .filter(pl.col("r_name") == var_1)
-        .filter(pl.col("o_orderdate") >= var_2)
-        .filter(pl.col("o_orderdate") < var_3)
+        .filter(pl.col("o_orderdate").is_between(var_2, var_3, closed="left"))
         .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue")
         )
@@ -39,6 +38,7 @@ def q():
         .agg([pl.sum("revenue")])
         .sort(by="revenue", descending=True)
     )
+
 
     utils.run_query(Q_NUM, q_final)
 

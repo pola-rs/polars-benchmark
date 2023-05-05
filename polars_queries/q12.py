@@ -21,8 +21,7 @@ def q():
         .filter(pl.col("l_shipmode").is_in([var_1, var_2]))
         .filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))
         .filter(pl.col("l_shipdate") < pl.col("l_commitdate"))
-        .filter(pl.col("l_receiptdate") >= var_3)
-        .filter(pl.col("l_receiptdate") < var_4)
+        .filter(pl.col("l_receiptdate").is_between(var_3, var_4, closed="left"))
         .with_columns(
             [
                 pl.when(pl.col("o_orderpriority").is_in(["1-URGENT", "2-HIGH"]))

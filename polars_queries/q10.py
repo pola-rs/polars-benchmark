@@ -20,8 +20,7 @@ def q():
         customer_ds.join(orders_ds, left_on="c_custkey", right_on="o_custkey")
         .join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
         .join(nation_ds, left_on="c_nationkey", right_on="n_nationkey")
-        .filter(pl.col("o_orderdate") >= var_1)
-        .filter(pl.col("o_orderdate") < var_2)
+        .filter(pl.col("o_orderdate").is_between(var_1, var_2, closed="left"))
         .filter(pl.col("l_returnflag") == "R")
         .groupby(
             [

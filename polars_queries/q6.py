@@ -15,9 +15,9 @@ def q():
     line_item_ds = utils.get_line_item_ds()
 
     q_final = (
-        line_item_ds.filter(pl.col("l_shipdate") >= var_1)
-        .filter(pl.col("l_shipdate") < var_2)
-        .filter((pl.col("l_discount") >= 0.05) & (pl.col("l_discount") <= 0.07))
+        line_item_ds
+        .filter(pl.col("l_shipdate").is_between(var_1, var_2, closed="left"))
+        .filter(pl.col("l_discount").is_between(0.05, 0.07))
         .filter(pl.col("l_quantity") < var_3)
         .with_columns(
             (pl.col("l_extendedprice") * pl.col("l_discount")).alias("revenue")

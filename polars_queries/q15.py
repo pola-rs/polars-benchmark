@@ -15,8 +15,7 @@ def q():
     var_2 = datetime(1996, 4, 1)
 
     revenue_ds = (
-        line_item_ds.filter(pl.col("l_shipdate") >= var_1)
-        .filter(pl.col("l_shipdate") < var_2)
+        line_item_ds.filter(pl.col("l_shipdate").is_between(var_1, var_2, closed="left"))
         .groupby("l_suppkey")
         .agg(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
