@@ -19,7 +19,7 @@ from common_utils import (
 
 
 def __read_parquet_ds(path: str) -> PandasDF:
-    return pd.read_parquet(path)
+    return pd.read_parquet(path, engine="pyarrow", use_nullable_dtypes=True)
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
