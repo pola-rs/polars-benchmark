@@ -1,5 +1,5 @@
-import os
 import timeit
+from importlib.metadata import version
 from os.path import join
 from typing import Any
 
@@ -20,11 +20,17 @@ from common_utils import (
 
 
 def _scan_ds(path: str):
-    if not INCLUDE_IO:
-        raise ValueError("duckdb only support IO queries for now")
     path = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
-        duckdb.read_parquet(path)
+        if INCLUDE_IO:
+            duckdb.read_parquet(path)
+            return f"'{path}'"
+        else:
+            name = path.replace("/", "_").replace(".", "_")
+            duckdb.sql(
+                f"create temp table if not exists {name} as select * from read_parquet('{path}');"
+            )
+            return name
     elif FILE_TYPE == "feather":
         raise ValueError("duckdb does not support feather for now")
     else:
@@ -48,7 +54,7 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFra
 
 
 def test_results(q_num: int, result_df: pl.DataFrame):
-    with CodeTimer(name=f"Testing result of polars Query {q_num}", unit="s"):
+    with CodeTimer(name=f"Testing result of duckdb Query {q_num}", unit="s"):
         answer = get_query_answer(q_num).collect()
         pl_test.assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
@@ -98,7 +104,7 @@ def run_query(q_num: int, context: Any):
 
         if LOG_TIMINGS:
             append_row(
-                solution="duckdb", version=pl.__version__, q=f"q{q_num}", secs=secs
+                solution="duckdb", version=version("duckdb"), q=f"q{q_num}", secs=secs
             )
         else:
             test_results(q_num, result)

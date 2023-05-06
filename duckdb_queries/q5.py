@@ -18,12 +18,12 @@ def q():
         n_name,
         sum(l_extendedprice * (1 - l_discount)) as revenue
     from
-        '{customer_ds}',
-        '{orders_ds}',
-        '{line_item_ds}',
-        '{supplier_ds}',
-        '{nation_ds}',
-        '{region_ds}'
+        {customer_ds},
+        {orders_ds},
+        {line_item_ds},
+        {supplier_ds},
+        {nation_ds},
+        {region_ds}
     where
         c_custkey = o_custkey
         and l_orderkey = o_orderkey

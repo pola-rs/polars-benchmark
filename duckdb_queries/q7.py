@@ -26,12 +26,12 @@ def q():
                 year(l_shipdate) as l_year,
                 l_extendedprice * (1 - l_discount) as volume
             from
-                '{supplier_ds}',
-                '{line_item_ds}',
-                '{orders_ds}',
-                '{customer_ds}',
-                '{nation_ds}' n1,
-                '{nation_ds}' n2
+                {supplier_ds},
+                {line_item_ds},
+                {orders_ds},
+                {customer_ds},
+                {nation_ds} n1,
+                {nation_ds} n2
             where
                 s_suppkey = l_suppkey
                 and o_orderkey = l_orderkey

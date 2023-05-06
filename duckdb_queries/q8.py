@@ -30,14 +30,14 @@ def q():
                 l_extendedprice * (1 - l_discount) as volume,
                 n2.n_name as nation
             from
-                '{part_ds}',
-                '{supplier_ds}',
-                '{line_item_ds}',
-                '{orders_ds}',
-                '{customer_ds}',
-                '{nation_ds}' n1,
-                '{nation_ds}' n2,
-                '{region_ds}'
+                {part_ds},
+                {supplier_ds},
+                {line_item_ds},
+                {orders_ds},
+                {customer_ds},
+                {nation_ds} n1,
+                {nation_ds} n2,
+                {region_ds}
             where
                 p_partkey = l_partkey
                 and s_suppkey = l_suppkey

@@ -17,9 +17,9 @@ def q():
         o_orderdate,
         o_shippriority
     from
-        '{customer_ds}',
-        '{orders_ds}',
-        '{line_item_ds}'
+        {customer_ds},
+        {orders_ds},
+        {line_item_ds}
     where
         c_mktsegment = 'BUILDING'
         and c_custkey = o_custkey

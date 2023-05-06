@@ -21,7 +21,7 @@ def q():
         avg(l_discount) as avg_disc,
         count(*) as count_order
     from
-        '{lineitem}'
+        {lineitem}
     where
         l_shipdate <= '1998-09-02'
     group by

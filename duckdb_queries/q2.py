@@ -23,11 +23,11 @@ def q():
         s_phone,
         trim(s_comment) as s_comment
     from
-        '{part_ds}',
-        '{supplier_ds}',
-        '{part_supp_ds}',
-        '{nation_ds}',
-        '{region_ds}' 
+        {part_ds},
+        {supplier_ds},
+        {part_supp_ds},
+        {nation_ds},
+        {region_ds} 
     where
         p_partkey = ps_partkey
         and s_suppkey = ps_suppkey
@@ -40,10 +40,10 @@ def q():
             select
                 min(ps_supplycost)
             from
-                '{part_supp_ds}',
-                '{supplier_ds}',
-                '{nation_ds}',
-                '{region_ds}'
+                {part_supp_ds},
+                {supplier_ds},
+                {nation_ds},
+                {region_ds}
             where
                 p_partkey = ps_partkey
                 and s_suppkey = ps_suppkey

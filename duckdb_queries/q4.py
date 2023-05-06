@@ -14,7 +14,7 @@ def q():
         o_orderpriority,
         count(*) as order_count
     from
-        '{orders_ds}'
+        {orders_ds}
     where
         o_orderdate >= timestamp '1993-07-01'
         and o_orderdate < timestamp '1993-07-01' + interval '3' month
@@ -22,7 +22,7 @@ def q():
             select
                 *
             from
-                '{line_item_ds}'
+                {line_item_ds}
             where
                 l_orderkey = o_orderkey
                 and l_commitdate < l_receiptdate
