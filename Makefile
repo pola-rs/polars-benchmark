@@ -49,6 +49,9 @@ run_vaex: .venv
 run_spark: .venv
 	.venv/bin/python -m spark_queries.executor
 
+run_duckdb: .venv
+	.venv/bin/python -m duckdb_queries.executor
+
 plot_results: .venv
 	.venv/bin/python -m scripts.plot_results
 

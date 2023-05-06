@@ -61,7 +61,7 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
         )
         .join(bar_order, on="solution")
         .groupby("query_no")
-        .agg([pl.col("labels").list(), pl.col("index").min()])
+        .agg([pl.col("labels"), pl.col("index").min()])
         .with_columns(pl.col("labels").arr.join(",\n"))
     )
 
@@ -161,7 +161,7 @@ if __name__ == "__main__":
     e = pl.lit(True)
 
     if INCLUDE_IO:
-        LIMIT = 120
+        LIMIT = 2
         e = e & pl.col("include_io") & ~(pl.col("solution") == "vaex_feather")
     else:
         LIMIT = 40

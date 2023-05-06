@@ -1,4 +1,5 @@
 import os
+import re
 import sys
 from subprocess import run
 
@@ -55,7 +56,13 @@ def on_second_call(func):
 
 def execute_all(solution: str):
     package_name = f"{solution}_queries"
-    num_queries = 7
+
+    expr = re.compile(r"^q(\d+).py")
+    num_queries = 0
+    for file in os.listdir(package_name):
+        g = expr.search(file)
+        if g is not None:
+            num_queries = max(int(g.group(1)), num_queries)
 
     with CodeTimer(name=f"Overall execution of ALL {solution} queries", unit="s"):
         for i in range(1, num_queries + 1):
