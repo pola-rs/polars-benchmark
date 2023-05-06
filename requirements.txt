@@ -2,7 +2,6 @@ polars
 black==23.3.0
 isort==5.12.0
 linetimer
-pandas
 pyarrow
 dask
 modin[ray]
@@ -10,3 +9,4 @@ plotly
 vaex
 pyspark
 duckdb
+pandas>=2.0
