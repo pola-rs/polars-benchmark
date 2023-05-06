@@ -17,6 +17,9 @@ def q():
     n1 = nation_ds.filter(pl.col("n_name") == "FRANCE")
     n2 = nation_ds.filter(pl.col("n_name") == "GERMANY")
 
+    var_1 = datetime(1995, 1, 1)
+    var_2 = datetime(1996, 12, 31)
+
     df1 = (
         customer_ds.join(n1, left_on="c_nationkey", right_on="n_nationkey")
         .join(orders_ds, left_on="c_custkey", right_on="o_custkey")
@@ -39,8 +42,7 @@ def q():
 
     q_final = (
         pl.concat([df1, df2])
-        .filter(pl.col("l_shipdate") >= datetime(1995, 1, 1))
-        .filter(pl.col("l_shipdate") <= datetime(1996, 12, 31))
+        .filter(pl.col("l_shipdate").is_between(var_1, var_2))
         .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume")
         )

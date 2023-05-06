@@ -19,7 +19,6 @@ def q():
     customer_ds()
 
     def query():
-
         nonlocal line_item_ds
         nonlocal orders_ds
         nonlocal customer_ds

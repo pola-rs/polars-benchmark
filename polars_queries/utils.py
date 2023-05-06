@@ -34,7 +34,10 @@ def _scan_ds(path: str):
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFrame:
     answer_ldf = pl.scan_csv(
-        join(base_dir, f"q{query}.out"), separator="|", has_header=True, try_parse_dates=True
+        join(base_dir, f"q{query}.out"),
+        separator="|",
+        has_header=True,
+        try_parse_dates=True,
     )
     cols = answer_ldf.columns
     answer_ldf = answer_ldf.select(

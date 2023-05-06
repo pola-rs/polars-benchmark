@@ -8,10 +8,10 @@ Q_NUM = 1
 
 
 def q():
-    VAR1 = datetime(1998, 9, 2)
+    var_1 = datetime(1998, 9, 2)
     q = utils.get_line_item_ds()
     q_final = (
-        q.filter(pl.col("l_shipdate") <= VAR1)
+        q.filter(pl.col("l_shipdate") <= var_1)
         .groupby(["l_returnflag", "l_linestatus"])
         .agg(
             [

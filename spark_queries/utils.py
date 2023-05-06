@@ -120,7 +120,10 @@ def run_query(q_num: int, result: SparkDF):
 
         if LOG_TIMINGS:
             append_row(
-                solution="spark", version=get_or_create_spark().version, q=f"q{q_num}", secs=secs
+                solution="spark",
+                version=get_or_create_spark().version,
+                q=f"q{q_num}",
+                secs=secs,
             )
         else:
             test_results(q_num, pdf)
