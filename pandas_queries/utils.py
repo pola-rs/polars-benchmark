@@ -20,7 +20,7 @@ from common_utils import (
 def _read_ds(path: str) -> PandasDF:
     path = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
-        return pd.read_parquet(path)
+        return pd.read_parquet(path, use_nullable_dtypes=True, engine="pyarrow")
     elif FILE_TYPE == "feather":
         return pd.read_feather(path)
     else:
