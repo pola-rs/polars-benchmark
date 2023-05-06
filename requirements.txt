@@ -9,4 +9,4 @@ modin[ray]
 plotly
 vaex
 pyspark
-
+duckdb
