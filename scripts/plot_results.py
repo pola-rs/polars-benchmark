@@ -159,24 +159,46 @@ if __name__ == "__main__":
     print("write plot:", WRITE_PLOT)
 
     e = pl.lit(True)
+    max_query = 8
 
     if INCLUDE_IO:
-        LIMIT = 2
+        LIMIT = 15
         e = e & pl.col("include_io") & ~(pl.col("solution") == "vaex_feather")
     else:
-        LIMIT = 2
+        LIMIT = 15
         e = e & ~pl.col("include_io")
 
     df = (
         pl.scan_csv(TIMINGS_FILE)
         .filter(e)
+        # filter the max query to plot
+        .filter((pl.col("query_no").str.extract("q(\d+)", 1).cast(int) <= max_query))
+        # create a version no
         .with_columns(
             [
                 pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0),
                 pl.format("{}-{}", "solution", "version").alias("solution-version"),
             ]
         )
+        # ensure we get the latest version
+        .sort(["solution", "version"])
+        .groupby(["solution", "query_no"], maintain_order=True)
+        .last()
         .collect()
     )
+    order = pl.DataFrame(
+        {
+            "solution": [
+                "polars",
+                "duckdb",
+                "pandas",
+                "dask",
+                "spark",
+                "vaex_parquet",
+                "modin",
+            ]
+        }
+    )
+    df = order.join(df, on="solution", how="left")
 
     plot(df, limit=LIMIT, group="solution-version")
