@@ -1,4 +1,5 @@
 import duckdb
+
 from duckdb_queries import utils
 
 Q_NUM = 16

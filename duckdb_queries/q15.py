@@ -1,4 +1,6 @@
 import duckdb
+from duckdb import DuckDBPyConnection
+
 from duckdb_queries import utils
 
 Q_NUM = 15
@@ -9,7 +11,7 @@ def q():
     supplier_ds = utils.get_supplier_ds()
 
     ddl = f"""
-    create view revenue (supplier_no, total_revenue) as
+    create or replace temporary view revenue (supplier_no, total_revenue) as
         select
             l_suppkey,
             sum(l_extendedprice * (1 - l_discount))
@@ -44,11 +46,11 @@ def q():
         s_suppkey
 	"""
 
-    duckdb.sql(ddl)
+    _ = duckdb.execute(ddl)
     q_final = duckdb.sql(query_str)
 
     utils.run_query(Q_NUM, q_final)
-    duckdb.sql("DROP VIEW IF EXISTS revenue")
+    duckdb.execute("DROP VIEW IF EXISTS revenue")
 
 
 if __name__ == "__main__":
