@@ -48,8 +48,6 @@ def q():
     spark.sql(ddl)
     q_final = spark.sql(query_str)
 
-    q_final.show()
-
     utils.run_query(Q_NUM, q_final)
     spark.sql("drop view revenue")
 

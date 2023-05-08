@@ -52,8 +52,6 @@ def q():
 
     q_final = utils.get_or_create_spark().sql(query_str)
 
-    q_final.show()
-
     utils.run_query(Q_NUM, q_final)
 
 

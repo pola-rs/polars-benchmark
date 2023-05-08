@@ -11,15 +11,21 @@ from common_utils import (
     DATASET_BASE_DIR,
     LOG_TIMINGS,
     SHOW_RESULTS,
+    SPARK_LOG_LEVEL,
     append_row,
     on_second_call,
 )
 
+print("SPARK_LOG_LEVEL:", SPARK_LOG_LEVEL)
+
 
 def get_or_create_spark() -> SparkSession:
-    return (
+    spark = (
         SparkSession.builder.appName("spark_queries").master("local[*]").getOrCreate()
     )
+    spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
+
+    return spark
 
 
 def __read_parquet_ds(path: str, table_name: str) -> SparkDF:
