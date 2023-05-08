@@ -29,7 +29,7 @@ def _scan_ds(path: str):
         raise ValueError(f"file type: {FILE_TYPE} not expected")
     if INCLUDE_IO:
         return scan
-    return scan.collect().lazy()
+    return scan.collect().rechunk().lazy()
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFrame:
