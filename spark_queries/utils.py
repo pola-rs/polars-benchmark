@@ -35,7 +35,6 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
         join(base_dir, f"q{query}.out"),
         sep="|",
         parse_dates=True,
-        infer_datetime_format=True,
     )
     return answer_df.rename(columns=lambda x: x.strip())
 
