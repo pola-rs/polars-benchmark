@@ -12,3 +12,7 @@ dask-worker-space/
 timings*.csv
 plots/
 **/spark-warehouse
+perf.*
+target/
+**/flamegraph.svg
+Cargo.lock

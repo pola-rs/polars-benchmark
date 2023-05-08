@@ -1,0 +1,33 @@
+[package]
+name = "polars_queries_rust"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+chrono = "0.4"
+jemallocator = { version = "0.5", features = ["disable_initial_exec_tls"] }
+
+[dependencies.polars]
+version = "*"
+path = "../../polars/polars"
+default-features = false
+features = [
+  "performant",
+  "fmt",
+  "simd",
+  "lazy",
+  "ipc",
+  "top_k",
+  "streaming",
+  "dtype-categorical",
+  "dtype-struct",
+  "parquet",
+  "temporal",
+  "dtype-date",
+  "dtype-datetime",
+]
+
+[profile.release]
+debug = 1
