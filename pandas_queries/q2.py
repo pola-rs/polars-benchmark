@@ -1,3 +1,5 @@
+import pyarrow.compute as pc
+
 from pandas_queries import utils
 
 Q_NUM = 2
@@ -13,13 +15,29 @@ def q():
     supplier_ds = utils.get_supplier_ds
     part_ds = utils.get_part_ds
     part_supp_ds = utils.get_part_supp_ds
+    columns_nations = ["n_nationkey", "n_name", "n_regionkey"]
+    columns_regions = ["r_regionkey", "r_name"]
+    columns_supplier = [
+        "s_suppkey",
+        "s_name",
+        "s_address",
+        "s_nationkey",
+        "s_phone",
+        "s_acctbal",
+        "s_comment",
+    ]
+    columns_part_supp = ["ps_partkey", "ps_suppkey", "ps_supplycost"]
+    columns_part_ds = ["p_partkey", "p_mfgr"]
+    kwargs_part_ds = {
+        "filters": (pc.field("p_size") == var1) & pc.ends_with(pc.field("p_type"), var2)
+    }
 
     # first call one time to cache in case we don't include the IO times
-    region_ds()
-    nation_ds()
-    supplier_ds()
-    part_ds()
-    part_supp_ds()
+    region_ds(columns=columns_regions)
+    nation_ds(columns=columns_nations)
+    supplier_ds(columns=columns_supplier)
+    part_ds(columns=columns_part_ds, kwargs=kwargs_part_ds)
+    part_supp_ds(columns=columns_part_supp)
 
     def query():
         nonlocal region_ds
@@ -27,39 +45,28 @@ def q():
         nonlocal supplier_ds
         nonlocal part_ds
         nonlocal part_supp_ds
-        region_ds = region_ds()
-        nation_ds = nation_ds()
-        supplier_ds = supplier_ds()
-        part_ds = part_ds()
-        part_supp_ds = part_supp_ds()
 
-        nation_filtered = nation_ds.loc[:, ["n_nationkey", "n_name", "n_regionkey"]]
-        region_filtered = region_ds[(region_ds["r_name"] == var3)]
-        region_filtered = region_filtered.loc[:, ["r_regionkey"]]
-        r_n_merged = nation_filtered.merge(
+        region_ds = region_ds(columns=columns_regions)
+        nation_ds = nation_ds(columns=columns_nations)
+        supplier_ds = supplier_ds(columns=columns_supplier)
+        part_ds = part_ds(columns=columns_part_ds, kwargs=kwargs_part_ds)
+
+        part_supp_ds = part_supp_ds(columns=columns_part_supp)
+
+        region_filtered = region_ds.loc[(region_ds["r_name"] == var3), ["r_regionkey"]]
+        r_n_merged = nation_ds.merge(
             region_filtered, left_on="n_regionkey", right_on="r_regionkey", how="inner"
         )
-        r_n_merged = r_n_merged.loc[:, ["n_nationkey", "n_name"]]
-        supplier_filtered = supplier_ds.loc[
-            :,
-            [
-                "s_suppkey",
-                "s_name",
-                "s_address",
-                "s_nationkey",
-                "s_phone",
-                "s_acctbal",
-                "s_comment",
-            ],
-        ]
+
+        r_n_merged = r_n_merged[["n_nationkey", "n_name"]]
         s_r_n_merged = r_n_merged.merge(
-            supplier_filtered,
+            supplier_ds,
             left_on="n_nationkey",
             right_on="s_nationkey",
             how="inner",
         )
-        s_r_n_merged = s_r_n_merged.loc[
-            :,
+
+        s_r_n_merged = s_r_n_merged[
             [
                 "n_name",
                 "s_suppkey",
@@ -68,16 +75,16 @@ def q():
                 "s_phone",
                 "s_acctbal",
                 "s_comment",
-            ],
+            ]
         ]
-        partsupp_filtered = part_supp_ds.loc[
-            :, ["ps_partkey", "ps_suppkey", "ps_supplycost"]
+        part_supp_ds = part_supp_ds[
+            part_supp_ds.ps_suppkey.isin(s_r_n_merged.s_suppkey)
         ]
         ps_s_r_n_merged = s_r_n_merged.merge(
-            partsupp_filtered, left_on="s_suppkey", right_on="ps_suppkey", how="inner"
+            part_supp_ds, left_on="s_suppkey", right_on="ps_suppkey", how="inner"
         )
-        ps_s_r_n_merged = ps_s_r_n_merged.loc[
-            :,
+
+        ps_s_r_n_merged = ps_s_r_n_merged[
             [
                 "n_name",
                 "s_name",
@@ -87,19 +94,15 @@ def q():
                 "s_comment",
                 "ps_partkey",
                 "ps_supplycost",
-            ],
+            ]
         ]
-        part_filtered = part_ds.loc[:, ["p_partkey", "p_mfgr", "p_size", "p_type"]]
-        part_filtered = part_filtered[
-            (part_filtered["p_size"] == var1)
-            & (part_filtered["p_type"].str.endswith(var2))
-        ]
-        part_filtered = part_filtered.loc[:, ["p_partkey", "p_mfgr"]]
+
+        part_filtered = part_ds
         merged_df = part_filtered.merge(
             ps_s_r_n_merged, left_on="p_partkey", right_on="ps_partkey", how="inner"
         )
-        merged_df = merged_df.loc[
-            :,
+
+        merged_df = merged_df[
             [
                 "n_name",
                 "s_name",
@@ -110,11 +113,13 @@ def q():
                 "ps_supplycost",
                 "p_partkey",
                 "p_mfgr",
-            ],
+            ]
         ]
+
         min_values = merged_df.groupby("p_partkey", as_index=False)[
             "ps_supplycost"
         ].min()
+
         min_values.columns = ["P_PARTKEY_CPY", "MIN_SUPPLYCOST"]
         merged_df = merged_df.merge(
             min_values,
@@ -122,8 +127,8 @@ def q():
             right_on=["P_PARTKEY_CPY", "MIN_SUPPLYCOST"],
             how="inner",
         )
-        result_df = merged_df.loc[
-            :,
+
+        result_df = merged_df[
             [
                 "s_acctbal",
                 "s_name",
@@ -133,8 +138,9 @@ def q():
                 "s_address",
                 "s_phone",
                 "s_comment",
-            ],
+            ]
         ]
+
         result_df = result_df.sort_values(
             by=[
                 "s_acctbal",

@@ -1,6 +1,7 @@
 from datetime import datetime
 
 import pandas as pd
+import pyarrow.compute as pc
 
 from pandas_queries import utils
 
@@ -14,12 +15,28 @@ def q():
     orders_ds = utils.get_orders_ds
     supplier_ds = utils.get_supplier_ds
 
+    columns_line = [
+        "l_shipdate",
+        "l_extendedprice",
+        "l_discount",
+        "l_orderkey",
+        "l_suppkey",
+    ]
+    columns_supp = ["s_suppkey", "s_nationkey"]
+    columns_orders = ["o_orderkey", "o_custkey"]
+    columns_customer = ["c_custkey", "c_nationkey"]
+    columns_nation = ["n_nationkey", "n_name"]
+    kwargs_line = {
+        "filters": (pc.field("l_shipdate") >= datetime(1995, 1, 1))
+        & (pc.field("l_shipdate") < datetime(1997, 1, 1))
+    }
+
     # first call one time to cache in case we don't include the IO times
-    nation_ds()
-    customer_ds()
-    line_item_ds()
-    orders_ds()
-    supplier_ds()
+    nation_ds(columns=columns_nation)
+    customer_ds(columns=columns_customer)
+    line_item_ds(columns=columns_line, kwargs=kwargs_line)
+    orders_ds(columns=columns_orders)
+    supplier_ds(columns=columns_supp)
 
     def query():
         nonlocal nation_ds
@@ -28,46 +45,38 @@ def q():
         nonlocal orders_ds
         nonlocal supplier_ds
 
-        nation_ds = nation_ds()
-        customer_ds = customer_ds()
-        line_item_ds = line_item_ds()
-        orders_ds = orders_ds()
-        supplier_ds = supplier_ds()
+        nation_ds = nation_ds(columns=columns_nation)
+        customer_ds = customer_ds(columns=columns_customer)
+        line_item_ds = line_item_ds(columns=columns_line, kwargs=kwargs_line)
+        orders_ds = orders_ds(columns=columns_orders)
+        supplier_ds = supplier_ds(columns=columns_supp)
 
-        lineitem_filtered = line_item_ds[
-            (line_item_ds["l_shipdate"] >= datetime(1995, 1, 1))
-            & (line_item_ds["l_shipdate"] < datetime(1997, 1, 1))
-        ]
+        lineitem_filtered = line_item_ds
         lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].dt.year
         lineitem_filtered["revenue"] = lineitem_filtered["l_extendedprice"] * (
             1.0 - lineitem_filtered["l_discount"]
         )
-        lineitem_filtered = lineitem_filtered.loc[
-            :, ["l_orderkey", "l_suppkey", "l_year", "revenue"]
+        lineitem_filtered = lineitem_filtered[
+            ["l_orderkey", "l_suppkey", "l_year", "revenue"]
         ]
-        supplier_filtered = supplier_ds.loc[:, ["s_suppkey", "s_nationkey"]]
-        orders_filtered = orders_ds.loc[:, ["o_orderkey", "o_custkey"]]
-        customer_filtered = customer_ds.loc[:, ["c_custkey", "c_nationkey"]]
-        n1 = nation_ds[(nation_ds["n_name"] == "FRANCE")].loc[
-            :, ["n_nationkey", "n_name"]
-        ]
-        n2 = nation_ds[(nation_ds["n_name"] == "GERMANY")].loc[
-            :, ["n_nationkey", "n_name"]
+        n1 = nation_ds.loc[(nation_ds["n_name"] == "FRANCE"), ["n_nationkey", "n_name"]]
+        n2 = nation_ds.loc[
+            (nation_ds["n_name"] == "GERMANY"), ["n_nationkey", "n_name"]
         ]
 
         # ----- do nation 1 -----
-        N1_C = customer_filtered.merge(
+        N1_C = customer_ds.merge(
             n1, left_on="c_nationkey", right_on="n_nationkey", how="inner"
         )
         N1_C = N1_C.drop(columns=["c_nationkey", "n_nationkey"]).rename(
             columns={"n_name": "cust_nation"}
         )
         N1_C_O = N1_C.merge(
-            orders_filtered, left_on="c_custkey", right_on="o_custkey", how="inner"
+            orders_ds, left_on="c_custkey", right_on="o_custkey", how="inner"
         )
         N1_C_O = N1_C_O.drop(columns=["c_custkey", "o_custkey"])
 
-        N2_S = supplier_filtered.merge(
+        N2_S = supplier_ds.merge(
             n2, left_on="s_nationkey", right_on="n_nationkey", how="inner"
         )
         N2_S = N2_S.drop(columns=["s_nationkey", "n_nationkey"]).rename(
@@ -84,18 +93,18 @@ def q():
         total1 = total1.drop(columns=["o_orderkey", "l_orderkey"])
 
         # ----- do nation 2 ----- (same as nation 1 section but with nation 2)
-        N2_C = customer_filtered.merge(
+        N2_C = customer_ds.merge(
             n2, left_on="c_nationkey", right_on="n_nationkey", how="inner"
         )
         N2_C = N2_C.drop(columns=["c_nationkey", "n_nationkey"]).rename(
             columns={"n_name": "cust_nation"}
         )
         N2_C_O = N2_C.merge(
-            orders_filtered, left_on="c_custkey", right_on="o_custkey", how="inner"
+            orders_ds, left_on="c_custkey", right_on="o_custkey", how="inner"
         )
         N2_C_O = N2_C_O.drop(columns=["c_custkey", "o_custkey"])
 
-        N1_S = supplier_filtered.merge(
+        N1_S = supplier_ds.merge(
             n1, left_on="s_nationkey", right_on="n_nationkey", how="inner"
         )
         N1_S = N1_S.drop(columns=["s_nationkey", "n_nationkey"]).rename(
