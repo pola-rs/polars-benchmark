@@ -51,7 +51,7 @@ def test_results(q_num: int, result_df: PandasDF):
                 s1 = s1.astype("string").apply(lambda x: x.strip())
                 s2 = s2.astype("string").apply(lambda x: x.strip())
 
-            # pd.testing.assert_series_equal(left=s1, right=s2, check_index=False)
+            pd.testing.assert_series_equal(left=s1, right=s2, check_index=False)
 
 
 @on_second_call
