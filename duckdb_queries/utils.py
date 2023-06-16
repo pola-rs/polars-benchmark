@@ -5,6 +5,7 @@ from typing import Any
 
 import duckdb
 import polars as pl
+from duckdb import DuckDBPyRelation
 from linetimer import CodeTimer, linetimer
 from polars import testing as pl_test
 
@@ -91,14 +92,13 @@ def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> str:
     return _scan_ds(join(base_dir, "partsupp"))
 
 
-def run_query(q_num: int, context: Any):
+def run_query(q_num: int, context: DuckDBPyRelation):
     @linetimer(name=f"Overall execution of duckdb Query {q_num}", unit="s")
     def query():
         with CodeTimer(name=f"Get result of duckdb Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
             # force duckdb to materialize
             result = context.pl()
-            print(result)
 
             secs = timeit.default_timer() - t0
 
