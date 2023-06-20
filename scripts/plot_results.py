@@ -62,7 +62,7 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
         .join(bar_order, on="solution")
         .groupby("query_no")
         .agg([pl.col("labels"), pl.col("index").min()])
-        .with_columns(pl.col("labels").arr.join(",\n"))
+        .with_columns(pl.col("labels").list.join(",\n"))
     )
 
     # then we create a dictionary similar to something like this:
