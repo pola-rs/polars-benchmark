@@ -10,3 +10,4 @@ vaex
 pyspark
 duckdb
 pandas>=2.0
+plotnine
