@@ -135,15 +135,10 @@ def create_plot(
     timings: pl.DataFrame,
     styles: pl.DataFrame,
     queries: list[str],
-    include_io: bool,
-    max_duration: float,
     caption: str,
-    mode: str,
-    width: float,
-    height: float,
-    dpi: float,
+    args: argparse.Namespace,
 ) -> None:
-    if include_io:
+    if args.include_io:
         subtitle = "Results including reading parquet (lower is better)"
     else:
         subtitle = "Results starting from in-memory data (lower is better)"
@@ -175,7 +170,7 @@ def create_plot(
             ),
         )
         + p9.geom_point(alpha=1, color="black")
-        + p9.scale_x_continuous(limits=(0, max_duration))
+        + p9.scale_x_continuous(limits=(0, args.max_duration))
         + p9.scale_y_discrete(limits=queries[::-1])
         + p9.scale_fill_manual(values=styles.get_column("color"))
         + p9.scale_shape_manual(values=styles.get_column("shape"))
@@ -188,22 +183,27 @@ def create_plot(
         )
         + p9.theme_tufte(ticks=False)
         + p9.theme(
-            text=p9.element_text(color=theme[mode]["text_color"]),
+            text=p9.element_text(color=theme[args.mode]["text_color"]),
             plot_title=p9.element_text(size=18, weight=800),
-            plot_background=p9.element_rect(
-                color=theme[mode]["background_color"],
-                fill=theme[mode]["background_color"],
-            ),
-            panel_grid_major_y=p9.element_line(color=theme[mode]["line_color"]),
+            panel_grid_major_y=p9.element_line(color=theme[args.mode]["line_color"]),
             legend_title=p9.element_blank(),
             plot_subtitle=p9.element_text(margin={"b": 20}),
             plot_caption=p9.element_text(
                 ha="left", linespacing=2, style="italic", margin={"t": 20}
             ),
-            figure_size=(width, height),
-            dpi=dpi,
+            figure_size=(args.width, args.height),
+            dpi=args.dpi,
         )
     )
+
+    if not args.transparent:
+        plot = plot + p9.theme(
+            plot_background=p9.element_rect(
+                color=theme[args.mode]["background_color"],
+                fill=theme[args.mode]["background_color"],
+            )
+        )
+
     return plot
 
 
@@ -264,6 +264,12 @@ def main() -> None:
         help="Theme mode",
     )
     parser.add_argument(
+        "-t",
+        "--transparent",
+        action="store_true",
+        help="Make figure background transparent",
+    )
+    parser.add_argument(
         "--width",
         type=float,
         default=8.0,
@@ -305,18 +311,7 @@ def main() -> None:
         timings, styles, queries, args.no_notes, args.max_duration, args.width
     )
 
-    plot = create_plot(
-        timings,
-        styles,
-        queries,
-        include_io=args.include_io,
-        max_duration=args.max_duration,
-        caption=caption,
-        mode=args.mode,
-        width=args.width,
-        height=args.height,
-        dpi=args.dpi,
-    )
+    plot = create_plot(timings, styles, queries, caption, args)
 
     plot.save(args.output)
 
