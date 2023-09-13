@@ -87,44 +87,48 @@ def formulate_caption(
     timings: pl.DataFrame,
     styles: pl.DataFrame,
     queries: list[str],
+    no_notes: bool,
     max_duration: float,
     width: float,
 ):
-    exceeded_timings = timings.filter(pl.col("duration") > max_duration).select(
-        pl.col("name"),
-        pl.col("query"),
-        (
-            pl.lit("took ")
-            + pl.col("duration").round(1).cast(pl.Utf8)
-            + "s on "
-            + pl.col("query")
-        ).alias("text"),
-    )
+    caption = ""
 
-    all_combinations_df = styles.select("name").join(
-        pl.DataFrame({"query": queries}), how="cross"
-    )
+    if not no_notes:
+        exceeded_timings = timings.filter(pl.col("duration") > max_duration).select(
+            pl.col("name"),
+            pl.col("query"),
+            (
+                pl.lit("took ")
+                + pl.col("duration").round(1).cast(pl.Utf8)
+                + "s on "
+                + pl.col("query")
+            ).alias("text"),
+        )
 
-    missing_timings = all_combinations_df.join(
-        timings, how="anti", on=["name", "query"]
-    ).with_columns((pl.lit("failed on ") + pl.col("query")).alias("text"))
+        all_combinations_df = styles.select("name").join(
+            pl.DataFrame({"query": queries}), how="cross"
+        )
 
-    notes_df = pl.concat([exceeded_timings, missing_timings]).sort("name", "query")
+        missing_timings = all_combinations_df.join(
+            timings, how="anti", on=["name", "query"]
+        ).with_columns((pl.lit("failed on ") + pl.col("query")).alias("text"))
 
-    notes = []
-    for name, group in notes_df.group_by("name"):
-        texts = group.get_column("text")
-        join_char = ", " if len(texts) >= 3 else " "
+        notes_df = pl.concat([exceeded_timings, missing_timings]).sort("name", "query")
 
-        if len(texts) >= 2:
-            texts[-1] = "and " + texts[-1]
+        notes = []
+        for name, group in notes_df.group_by("name"):
+            texts = group.get_column("text")
+            join_char = ", " if len(texts) >= 3 else " "
 
-        notes.append(f"{name} {join_char.join(texts)}.")
+            if len(texts) >= 2:
+                texts[-1] = "and " + texts[-1]
 
-    caption = f"Note: {' '.join(notes)} " if notes else ""
+            notes.append(f"{name} {join_char.join(texts)}.")
+
+        if notes:
+            caption += f"Note: {' '.join(notes)} "
     caption += "More information: https://www.pola.rs/benchmarks.html"
-    caption = "\n".join(textwrap.wrap(caption, int(width * 15 - 20)))
-    return caption
+    return "\n".join(textwrap.wrap(caption, int(width * 15 - 20)))
 
 
 def create_plot(
@@ -246,6 +250,12 @@ def main() -> None:
         help="Include I/O time",
     )
     parser.add_argument(
+        "-n",
+        "--no-notes",
+        action="store_true",
+        help="Don't include failed or exceeded timings in caption",
+    )
+    parser.add_argument(
         "-m",
         "--mode",
         type=str,
@@ -291,7 +301,9 @@ def main() -> None:
     timings = prepare_timings(
         read_csv(args.csv), styles, exclude_solutions, queries, args.include_io
     )
-    caption = formulate_caption(timings, styles, queries, args.max_duration, args.width)
+    caption = formulate_caption(
+        timings, styles, queries, args.no_notes, args.max_duration, args.width
+    )
 
     plot = create_plot(
         timings,
