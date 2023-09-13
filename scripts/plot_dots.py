@@ -74,10 +74,11 @@ def prepare_timings(
             & ~pl.col("solution").is_in(exclude_solutions)
         )
         .select(
-            (pl.col("name") + " (" + pl.col("version") + ")").alias("solution"),
+            pl.col("solution"),
+            pl.col("name"),
+            (pl.col("name") + " (" + pl.col("version") + ")").alias("name_version"),
             pl.col("query_no").alias("query"),
             pl.col("duration[s]").alias("duration"),
-            pl.col("name"),
         )
     )
 
@@ -156,15 +157,17 @@ def create_plot(
         },
     }
 
+    styles = styles.join(timings, on="solution", how="semi")
+
     plot = (
         p9.ggplot(
             timings,
             p9.aes(
                 x="duration",
                 y="query",
-                fill="solution",
-                shape="solution",
-                size="solution",
+                fill="name_version",
+                shape="name_version",
+                size="name_version",
             ),
         )
         + p9.geom_point(alpha=1, color="black")
