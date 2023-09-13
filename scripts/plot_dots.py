@@ -33,7 +33,7 @@ def get_styles(exclude_solutions: list[str]):
         │ spark    ┆ Spark    ┆ #e25a1c ┆ *     ┆ 7.0  │
         │ vaex     ┆ Vaex     ┆ #585858 ┆ v     ┆ 6.0  │
         └──────────┴──────────┴─────────┴───────┴──────┘
-"""
+        """
     )
 
     return all_styles.filter(~pl.col("solution").is_in(exclude_solutions))
@@ -183,7 +183,10 @@ def create_plot(
         + p9.theme(
             text=p9.element_text(color=theme[mode]["text_color"]),
             plot_title=p9.element_text(size=18, weight=800),
-            plot_background=p9.element_rect(fill=theme[mode]["background_color"]),
+            plot_background=p9.element_rect(
+                color=theme[mode]["background_color"],
+                fill=theme[mode]["background_color"],
+            ),
             panel_grid_major_y=p9.element_line(color=theme[mode]["line_color"]),
             legend_title=p9.element_blank(),
             plot_subtitle=p9.element_text(margin={"b": 20}),
