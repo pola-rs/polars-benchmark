@@ -113,7 +113,9 @@ def formulate_caption(
             timings, how="anti", on=["name", "query"]
         ).with_columns((pl.lit("failed on ") + pl.col("query")).alias("text"))
 
-        notes_df = pl.concat([exceeded_timings, missing_timings]).sort("name", "query")
+        notes_df = pl.concat([exceeded_timings, missing_timings]).sort(
+            pl.col("name"), pl.col("query").str.slice(1).cast(pl.Int8)
+        )
 
         notes = []
         for name, group in notes_df.group_by("name"):
