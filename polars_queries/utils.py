@@ -16,7 +16,8 @@ from common_utils import (
     append_row,
 )
 
-SHOW_PLAN = os.environ.get("SHOW_PLAN", False)
+SHOW_PLAN = bool(os.environ.get("SHOW_PLAN", False))
+STREAMING = bool(os.environ.get("STREAMING", False))
 
 
 def _scan_ds(path: str):
@@ -89,11 +90,11 @@ def run_query(q_num: int, lp: pl.LazyFrame):
     @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")
     def query():
         if SHOW_PLAN:
-            print(lp.describe_optimized_plan())
+            print(lp.explain())
 
         with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
-            result = lp.collect()
+            result = lp.collect(streaming=STREAMING)
 
             secs = timeit.default_timer() - t0
 

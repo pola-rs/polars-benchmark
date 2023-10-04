@@ -47,7 +47,7 @@ def q():
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume")
         )
         .with_columns(pl.col("l_shipdate").dt.year().alias("l_year"))
-        .groupby(["supp_nation", "cust_nation", "l_year"])
+        .group_by(["supp_nation", "cust_nation", "l_year"])
         .agg([pl.sum("volume").alias("revenue")])
         .sort(by=["supp_nation", "cust_nation", "l_year"])
     )

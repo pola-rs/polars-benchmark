@@ -22,7 +22,7 @@ def q():
         .join(nation_ds, left_on="c_nationkey", right_on="n_nationkey")
         .filter(pl.col("o_orderdate").is_between(var_1, var_2, closed="left"))
         .filter(pl.col("l_returnflag") == "R")
-        .groupby(
+        .group_by(
             [
                 "c_custkey",
                 "c_name",

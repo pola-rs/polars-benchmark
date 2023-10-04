@@ -1,14 +1,13 @@
 #!/usr/bin/env python3
 
-import sys
 import argparse
+import sys
 import textwrap
 import warnings
 
 try:
-    import polars as pl
     import plotnine as p9
-
+    import polars as pl
     from plotnine.exceptions import PlotnineWarning
 
     warnings.filterwarnings("ignore", category=PlotnineWarning)

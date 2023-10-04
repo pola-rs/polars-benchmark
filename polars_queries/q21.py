@@ -14,17 +14,21 @@ def q():
     var_1 = "SAUDI ARABIA"
 
     res_1 = (
-        line_item_ds.groupby("l_orderkey")
-        .agg(pl.col("l_suppkey").n_unique().alias("nunique_col"))
-        .filter(pl.col("nunique_col") > 1)
-        .join(
-            line_item_ds.filter(pl.col("l_receiptdate") > pl.col("l_commitdate")),
-            on="l_orderkey",
+        (
+            line_item_ds.group_by("l_orderkey")
+            .agg(pl.col("l_suppkey").n_unique().alias("nunique_col"))
+            .filter(pl.col("nunique_col") > 1)
+            .join(
+                line_item_ds.filter(pl.col("l_receiptdate") > pl.col("l_commitdate")),
+                on="l_orderkey",
+            )
         )
+        .collect()
+        .lazy()
     )
 
     q_final = (
-        res_1.groupby("l_orderkey")
+        res_1.group_by("l_orderkey")
         .agg(pl.col("l_suppkey").n_unique().alias("nunique_col"))
         .join(res_1, on="l_orderkey")
         .join(supplier_ds, left_on="l_suppkey", right_on="s_suppkey")
@@ -33,9 +37,8 @@ def q():
         .filter(pl.col("nunique_col") == 1)
         .filter(pl.col("n_name") == var_1)
         .filter(pl.col("o_orderstatus") == "F")
-        .groupby("s_name")
-        .count()
-        .select("s_name", pl.col("count").alias("numwait"))
+        .group_by("s_name")
+        .agg(pl.count().alias("numwait"))
         .sort(by=["numwait", "s_name"], descending=[True, False])
         .limit(100)
     )

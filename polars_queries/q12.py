@@ -36,7 +36,7 @@ def q():
                 .alias("low_line_count"),
             ]
         )
-        .groupby("l_shipmode")
+        .group_by("l_shipmode")
         .agg([pl.col("high_line_count").sum(), pl.col("low_line_count").sum()])
         .sort("l_shipmode")
     )

@@ -23,7 +23,7 @@ def q():
         line_item_ds.filter(
             pl.col("l_shipdate").is_between(var_1, var_2, closed="left")
         )
-        .groupby("l_partkey", "l_suppkey")
+        .group_by("l_partkey", "l_suppkey")
         .agg((pl.col("l_quantity").sum() * 0.5).alias("sum_quantity"))
     )
     res_2 = nation_ds.filter(pl.col("n_name") == var_3)

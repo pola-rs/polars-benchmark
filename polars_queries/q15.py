@@ -18,7 +18,7 @@ def q():
         line_item_ds.filter(
             pl.col("l_shipdate").is_between(var_1, var_2, closed="left")
         )
-        .groupby("l_suppkey")
+        .group_by("l_suppkey")
         .agg(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
             .sum()
