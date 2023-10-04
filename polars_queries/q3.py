@@ -24,7 +24,7 @@ def q():
         .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue")
         )
-        .groupby(["o_orderkey", "o_orderdate", "o_shippriority"])
+        .group_by(["o_orderkey", "o_orderdate", "o_shippriority"])
         .agg([pl.sum("revenue")])
         .select(
             [

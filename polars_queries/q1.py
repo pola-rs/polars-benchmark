@@ -12,7 +12,7 @@ def q():
     q = utils.get_line_item_ds()
     q_final = (
         q.filter(pl.col("l_shipdate") <= var_1)
-        .groupby(["l_returnflag", "l_linestatus"])
+        .group_by(["l_returnflag", "l_linestatus"])
         .agg(
             [
                 pl.sum("l_quantity").alias("sum_qty"),

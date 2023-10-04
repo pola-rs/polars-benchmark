@@ -13,14 +13,14 @@ def q():
     var_1 = 300
 
     q_final = (
-        line_item_ds.groupby("l_orderkey")
+        line_item_ds.group_by("l_orderkey")
         .agg(pl.col("l_quantity").sum().alias("sum_quantity"))
         .filter(pl.col("sum_quantity") > var_1)
         .select([pl.col("l_orderkey").alias("key"), pl.col("sum_quantity")])
         .join(orders_ds, left_on="key", right_on="o_orderkey")
         .join(line_item_ds, left_on="key", right_on="l_orderkey")
         .join(customer_ds, left_on="o_custkey", right_on="c_custkey")
-        .groupby("c_name", "o_custkey", "key", "o_orderdate", "o_totalprice")
+        .group_by("c_name", "o_custkey", "key", "o_orderdate", "o_totalprice")
         .agg(pl.col("l_quantity").sum().alias("col6"))
         .select(
             [

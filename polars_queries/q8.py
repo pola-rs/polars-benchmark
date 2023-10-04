@@ -49,7 +49,7 @@ def q():
             .otherwise(0)
             .alias("_tmp")
         )
-        .groupby("o_year")
+        .group_by("o_year")
         .agg((pl.sum("_tmp") / pl.sum("volume")).round(2).alias("mkt_share"))
         .sort("o_year")
     )

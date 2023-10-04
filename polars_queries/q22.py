@@ -31,7 +31,7 @@ def q():
         .with_columns(pl.lit(1).alias("lit"))
         .join(res_2, on="lit")
         .filter(pl.col("c_acctbal") > pl.col("avg_acctbal"))
-        .groupby("cntrycode")
+        .group_by("cntrycode")
         .agg(
             [
                 pl.col("c_acctbal").count().alias("numcust"),

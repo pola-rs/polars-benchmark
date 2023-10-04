@@ -36,7 +36,7 @@ def q():
                 ).alias("amount"),
             ]
         )
-        .groupby(["nation", "o_year"])
+        .group_by(["nation", "o_year"])
         .agg(pl.sum("amount").round(2).alias("sum_profit"))
         .sort(by=["nation", "o_year"], descending=[False, True])
     )

@@ -24,7 +24,7 @@ def q():
     ).with_columns(pl.lit(1).alias("lit"))
 
     q_final = (
-        res_1.groupby("ps_partkey")
+        res_1.group_by("ps_partkey")
         .agg(
             (pl.col("ps_supplycost") * pl.col("ps_availqty"))
             .sum()
