@@ -13,14 +13,10 @@ def q():
     part_ds = utils.get_part_ds()
 
     res_1 = (
-        (
-            part_ds.filter(pl.col("p_brand") == var_1)
-            .filter(pl.col("p_container") == var_2)
-            .join(line_item_ds, how="left", left_on="p_partkey", right_on="l_partkey")
-        )
-        .collect()
-        .lazy()
-    )
+        part_ds.filter(pl.col("p_brand") == var_1)
+        .filter(pl.col("p_container") == var_2)
+        .join(line_item_ds, how="left", left_on="p_partkey", right_on="l_partkey")
+    ).cache()
 
     q_final = (
         res_1.group_by("p_partkey")

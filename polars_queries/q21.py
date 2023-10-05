@@ -23,9 +23,7 @@ def q():
                 on="l_orderkey",
             )
         )
-        .collect()
-        .lazy()
-    )
+    ).cache()
 
     q_final = (
         res_1.group_by("l_orderkey")
