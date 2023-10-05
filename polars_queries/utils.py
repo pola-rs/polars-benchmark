@@ -102,8 +102,8 @@ def run_query(q_num: int, lp: pl.LazyFrame):
             append_row(
                 solution="polars", version=pl.__version__, q=f"q{q_num}", secs=secs
             )
-        # else:
-        # test_results(q_num, result)
+        else:
+            test_results(q_num, result)
 
         if SHOW_RESULTS:
             print(result)
