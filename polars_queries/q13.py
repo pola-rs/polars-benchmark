@@ -11,7 +11,7 @@ def q():
 
     customer_ds = utils.get_customer_ds()
     orders_ds = utils.get_orders_ds().filter(
-        pl.col("o_comment").str.contains(f"{var_1}.*{var_2}").is_not()
+        pl.col("o_comment").str.contains(f"{var_1}.*{var_2}").not_()
     )
     q_final = (
         customer_ds.join(

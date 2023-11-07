@@ -10,7 +10,7 @@ def q():
     part_ds = utils.get_part_ds()
     supplier_ds = (
         utils.get_supplier_ds()
-        .filter(pl.col("s_comment").str.contains(f".*Customer.*Complaints.*"))
+        .filter(pl.col("s_comment").str.contains(".*Customer.*Complaints.*"))
         .select(pl.col("s_suppkey"), pl.col("s_suppkey").alias("ps_suppkey"))
     )
 
@@ -19,7 +19,7 @@ def q():
     q_final = (
         part_ds.join(part_supp_ds, left_on="p_partkey", right_on="ps_partkey")
         .filter(pl.col("p_brand") != var_1)
-        .filter(pl.col("p_type").str.contains("MEDIUM POLISHED*").is_not())
+        .filter(pl.col("p_type").str.contains("MEDIUM POLISHED*").not_())
         .filter(pl.col("p_size").is_in([49, 14, 23, 45, 19, 3, 36, 9]))
         .join(supplier_ds, left_on="ps_suppkey", right_on="s_suppkey", how="left")
         .filter(pl.col("ps_suppkey_right").is_null())
