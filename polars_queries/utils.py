@@ -43,7 +43,7 @@ def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFra
     cols = answer_ldf.columns
     answer_ldf = answer_ldf.select(
         [pl.col(c).alias(c.strip()) for c in cols]
-    ).with_columns([pl.col(pl.datatypes.Utf8).str.strip().keep_name()])
+    ).with_columns([pl.col(pl.datatypes.Utf8).str.strip_chars().name.keep()])
 
     return answer_ldf
 

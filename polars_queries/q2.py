@@ -1,5 +1,3 @@
-import os
-
 import polars as pl
 
 from polars_queries import utils
@@ -53,7 +51,7 @@ def q():
             descending=[True, False, False, False],
         )
         .limit(100)
-        .with_columns(pl.col(pl.datatypes.Utf8).str.strip().keep_name())
+        .with_columns(pl.col(pl.datatypes.Utf8).str.strip_chars().name.keep())
     )
 
     utils.run_query(Q_NUM, q_final)
