@@ -38,7 +38,7 @@ Notes:
 ```shell
 # change directory to the root of the repository
 cd ../
-make run
+./run.sh
 ```
 
 This will do the following,
