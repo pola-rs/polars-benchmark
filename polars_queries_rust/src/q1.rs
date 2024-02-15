@@ -11,7 +11,7 @@ pub fn query() -> PolarsResult<LazyFrame> {
 
     let q = q
         .filter(col("l_shipdate").lt_eq(var_1))
-        .groupby([cols(["l_returnflag", "l_linestatus"])])
+        .group_by([cols(["l_returnflag", "l_linestatus"])])
         .agg([
             sum("l_quantity").alias("sum_qty"),
             sum("l_extendedprice").alias("sum_base_price"),
@@ -26,7 +26,12 @@ pub fn query() -> PolarsResult<LazyFrame> {
             mean("l_discount").alias("avg_disc"),
             count().alias("count_order"),
         ])
-        .sort_by_exprs([cols(["l_returnflag", "l_linestatus"])], &[false], false);
+        .sort_by_exprs(
+            [cols(["l_returnflag", "l_linestatus"])],
+            &[false],
+            false,
+            false,
+        );
 
     Ok(q)
 }

@@ -31,6 +31,13 @@ tables_scale_10: .venv
 	mv tpch-dbgen/*.tbl tables_scale_10/
 	.venv/bin/python prepare_files.py 10
 
+tables_scale_100: .venv
+	$(MAKE) -C tpch-dbgen all
+	cd tpch-dbgen && ./dbgen -vf -s 100 && cd ..
+	mkdir -p "tables_scale_100"
+	mv tpch-dbgen/*.tbl tables_scale_100/
+	.venv/bin/python prepare_files.py 100
+
 run_polars: .venv
 	.venv/bin/python -m polars_queries.executor
 
