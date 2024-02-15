@@ -4,6 +4,7 @@ use polars::error::PolarsError;
 use polars::prelude::PolarsResult;
 
 mod q1;
+mod q21;
 mod utils;
 
 #[global_allocator]
@@ -17,12 +18,13 @@ fn main() -> PolarsResult<()> {
 
     let q = match q_no {
         1 => q1::query(),
+        21 => q21::query(),
         q => Err(PolarsError::ComputeError(
             format!("query {q} does not exist").into(),
         )),
     }?;
 
-    let out = q.with_common_subplan_elimination(true).collect()?;
+    let out = q.with_comm_subplan_elim(true).collect()?;
     dbg!(out);
     Ok(())
 }
