@@ -41,11 +41,7 @@ ignore = [
   # ruff
   "RUF005", # unpack-instead-of-concatenating-to-collection-literal
   # pycodestyle
-  # TODO: Remove errors below to further improve docstring linting
-  # Ordered from most common to least common errors.
-  "D105", # Missing docstring in magic method
-  "D100", # Missing docstring in public module
-  "D104", # Missing docstring in public package
+  "D1", # Missing docstring
   # flake8-todos
   "TD002", # Missing author in TODO
   "TD003", # Missing issue link on the line following this TODO
