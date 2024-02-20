@@ -151,9 +151,7 @@ def q():
                 True,
                 True,
             ],
-        )[
-            :100
-        ]
+        )[:100]
 
         return result_df
 
