@@ -20,6 +20,7 @@ print("file type:", FILE_TYPE)
 CWD = os.path.dirname(os.path.realpath(__file__))
 DATASET_BASE_DIR = os.path.join(CWD, f"tables_scale_{SCALE_FACTOR}")
 ANSWERS_BASE_DIR = os.path.join(CWD, "tpch-dbgen/answers")
+ANSWERS_PARQUET_BASE_DIR = os.path.join(CWD, "data/answers")
 TIMINGS_FILE = os.path.join(CWD, os.environ.get("TIMINGS_FILE", "timings.csv"))
 DEFAULT_PLOTS_DIR = os.path.join(CWD, "plots")
 

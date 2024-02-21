@@ -10,7 +10,7 @@ from linetimer import CodeTimer, linetimer
 from polars import testing as pl_test
 
 from common_utils import (
-    ANSWERS_BASE_DIR,
+    ANSWERS_PARQUET_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,
     INCLUDE_IO,
@@ -33,25 +33,18 @@ def _scan_ds(path: str):
             )
             return name
     elif FILE_TYPE == "feather":
-        raise ValueError("duckdb does not support feather for now")
+        msg = "duckdb does not support feather for now"
+        raise ValueError(msg)
     else:
-        raise ValueError(f"file type: {FILE_TYPE} not expected")
+        msg = f"file type: {FILE_TYPE} not expected"
+        raise ValueError(msg)
     return path
 
 
-def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pl.LazyFrame:
-    answer_ldf = pl.scan_csv(
-        join(base_dir, f"q{query}.out"),
-        separator="|",
-        has_header=True,
-        try_parse_dates=True,
-    )
-    cols = answer_ldf.columns
-    answer_ldf = answer_ldf.select(
-        [pl.col(c).alias(c.strip()) for c in cols]
-    ).with_columns([pl.col(pl.datatypes.Utf8).str.strip_chars().name.keep()])
-
-    return answer_ldf
+def get_query_answer(
+    query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR
+) -> pl.LazyFrame:
+    return pl.scan_parquet(join(base_dir, f"q{query}.parquet"))
 
 
 def test_results(q_num: int, result_df: pl.DataFrame):
