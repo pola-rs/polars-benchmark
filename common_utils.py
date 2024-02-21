@@ -20,9 +20,9 @@ print("file type:", FILE_TYPE)
 
 
 CWD = Path(__file__).parent
-DATASET_BASE_DIR = CWD / f"tables_scale_{SCALE_FACTOR}"
+DATASET_BASE_DIR = CWD / "data" / "tables" / f"scale-{SCALE_FACTOR}"
 ANSWERS_BASE_DIR = CWD / "tpch-dbgen/answers"
-ANSWERS_PARQUET_BASE_DIR = CWD / "data/answers"
+ANSWERS_PARQUET_BASE_DIR = CWD / "data" / "answers"
 TIMINGS_FILE = CWD / os.environ.get("TIMINGS_FILE", "timings.csv")
 DEFAULT_PLOTS_DIR = CWD / "plots"
 

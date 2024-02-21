@@ -22,21 +22,13 @@ fmt:  ## Run autoformatting and linting
 .PHONY: pre-commit
 pre-commit: fmt  ## Run all code quality checks
 
-.PHONY: tables-scale-1
-tables-scale-1: .venv  ## Generate data tables
+.PHONY: tables
+tables: .venv  ## Generate data tables
 	$(MAKE) -C tpch-dbgen all
-	cd tpch-dbgen && ./dbgen -vf -s 1 && cd ..
-	mkdir -p "tables_scale_1"
-	mv tpch-dbgen/*.tbl tables_scale_1/
-	$(VENV_BIN)/python prepare_files.py 1
-
-.PHONY: tables-scale-10
-tables-scale-10: .venv  ## Generate bigger data tables
-	$(MAKE) -C tpch-dbgen all
-	cd tpch-dbgen && ./dbgen -vf -s 10 && cd ..
-	mkdir -p "tables_scale_10"
-	mv tpch-dbgen/*.tbl tables_scale_10/
-	$(VENV_BIN)/python prepare_files.py 10
+	cd tpch-dbgen && ./dbgen -vf -s $(SCALE) && cd ..
+	mkdir -p "data/tables/scale-$(SCALE)"
+	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE)/
+	$(VENV_BIN)/python scripts/prepare_data.py $(SCALE)
 
 .PHONY: run-polars
 run-polars: .venv  ## Run polars benchmarks
@@ -81,7 +73,7 @@ clean-tpch-dbgen:  ## Clean up TPC-H folder
 
 .PHONY: clean-tables
 clean-tables:  ## Clean up data tables
-	@rm -rf tables_scale_*
+	@rm -rf data/tables/
 
 
 .PHONY: help
