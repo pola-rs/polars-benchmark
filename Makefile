@@ -58,16 +58,12 @@ run-dask: .venv  ## Run dask benchmarks
 run-duckdb: .venv  ## Run duckdb benchmarks
 	$(VENV_BIN)/python -m duckdb_queries.executor
 
-.PHONY: run-vaex
-run-vaex: .venv  ## Run vaex benchmarks
-	$(VENV_BIN)/python -m vaex_queries.executor
-
 .PHONY: run-modin
 run-modin: .venv  ## Run modin benchmarks
 	$(VENV_BIN)/python -m modin_queries.executor
 
 .PHONY: run-all
-run-all: run-polars run-pandas run-pyspark run-dask run-duckdb run-vaex run-modin   ## Run all benchmarks
+run-all: run-polars run-pandas run-pyspark run-dask run-duckdb run-modin   ## Run all benchmarks
 
 .PHONY: plot
 plot: .venv  ## Plot results
