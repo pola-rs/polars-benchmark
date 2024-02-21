@@ -21,7 +21,7 @@ def q():
     q_final = (
         res_1.group_by("p_partkey")
         .agg((0.2 * pl.col("l_quantity").mean()).alias("avg_quantity"))
-        .select([pl.col("p_partkey").alias("key"), pl.col("avg_quantity")])
+        .select(pl.col("p_partkey").alias("key"), pl.col("avg_quantity"))
         .join(res_1, left_on="key", right_on="p_partkey")
         .filter(pl.col("l_quantity") < pl.col("avg_quantity"))
         .select((pl.col("l_extendedprice").sum() / 7.0).round(2).alias("avg_yearly"))

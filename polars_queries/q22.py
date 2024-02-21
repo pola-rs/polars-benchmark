@@ -12,7 +12,7 @@ def q():
     res_1 = (
         customer_ds.with_columns(pl.col("c_phone").str.slice(0, 2).alias("cntrycode"))
         .filter(pl.col("cntrycode").str.contains("13|31|23|29|30|18|17"))
-        .select(["c_acctbal", "c_custkey", "cntrycode"])
+        .select("c_acctbal", "c_custkey", "cntrycode")
     )
 
     res_2 = (
@@ -33,10 +33,8 @@ def q():
         .filter(pl.col("c_acctbal") > pl.col("avg_acctbal"))
         .group_by("cntrycode")
         .agg(
-            [
-                pl.col("c_acctbal").count().alias("numcust"),
-                pl.col("c_acctbal").sum().round(2).alias("totacctbal"),
-            ]
+            pl.col("c_acctbal").count().alias("numcust"),
+            pl.col("c_acctbal").sum().round(2).alias("totacctbal"),
         )
         .sort("cntrycode")
     )

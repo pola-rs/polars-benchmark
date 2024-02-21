@@ -21,7 +21,7 @@ def q():
             (
                 100.00
                 * pl.when(pl.col("p_type").str.contains("PROMO*"))
-                .then((pl.col("l_extendedprice") * (1 - pl.col("l_discount"))))
+                .then(pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
                 .otherwise(0)
                 .sum()
                 / (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).sum()

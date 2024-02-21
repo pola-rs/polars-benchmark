@@ -16,8 +16,8 @@ def q():
     nation_ds = utils.get_nation_ds()
     region_ds = utils.get_region_ds()
 
-    n1 = nation_ds.select(["n_nationkey", "n_regionkey"])
-    n2 = nation_ds.clone().select(["n_nationkey", "n_name"])
+    n1 = nation_ds.select("n_nationkey", "n_regionkey")
+    n2 = nation_ds.clone().select("n_nationkey", "n_name")
 
     q_final = (
         part_ds.join(line_item_ds, left_on="p_partkey", right_on="l_partkey")
@@ -35,13 +35,9 @@ def q():
         )
         .filter(pl.col("p_type") == "ECONOMY ANODIZED STEEL")
         .select(
-            [
-                pl.col("o_orderdate").dt.year().alias("o_year"),
-                (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias(
-                    "volume"
-                ),
-                pl.col("n_name").alias("nation"),
-            ]
+            pl.col("o_orderdate").dt.year().alias("o_year"),
+            (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume"),
+            pl.col("n_name").alias("nation"),
         )
         .with_columns(
             pl.when(pl.col("nation") == "BRAZIL")

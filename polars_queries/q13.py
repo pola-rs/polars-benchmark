@@ -20,9 +20,9 @@ def q():
         .group_by("c_custkey")
         .agg(pl.col("o_orderkey").count().alias("c_count"))
         .group_by("c_count")
-        .count()
-        .select([pl.col("c_count"), pl.col("count").alias("custdist")])
-        .sort(["custdist", "c_count"], descending=[True, True])
+        .len()
+        .select(pl.col("c_count"), pl.col("len").alias("custdist"))
+        .sort(by=["custdist", "c_count"], descending=[True, True])
     )
 
     utils.run_query(Q_NUM, q_final)

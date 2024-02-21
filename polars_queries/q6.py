@@ -23,7 +23,7 @@ def q():
         .with_columns(
             (pl.col("l_extendedprice") * pl.col("l_discount")).alias("revenue")
         )
-        .select(pl.sum("revenue").alias("revenue"))
+        .select(pl.sum("revenue"))
     )
 
     utils.run_query(Q_NUM, q_final)

@@ -16,23 +16,21 @@ def q():
         line_item_ds.group_by("l_orderkey")
         .agg(pl.col("l_quantity").sum().alias("sum_quantity"))
         .filter(pl.col("sum_quantity") > var_1)
-        .select([pl.col("l_orderkey").alias("key"), pl.col("sum_quantity")])
+        .select(pl.col("l_orderkey").alias("key"), pl.col("sum_quantity"))
         .join(orders_ds, left_on="key", right_on="o_orderkey")
         .join(line_item_ds, left_on="key", right_on="l_orderkey")
         .join(customer_ds, left_on="o_custkey", right_on="c_custkey")
         .group_by("c_name", "o_custkey", "key", "o_orderdate", "o_totalprice")
         .agg(pl.col("l_quantity").sum().alias("col6"))
         .select(
-            [
-                pl.col("c_name"),
-                pl.col("o_custkey").alias("c_custkey"),
-                pl.col("key").alias("o_orderkey"),
-                pl.col("o_orderdate").alias("o_orderdat"),
-                pl.col("o_totalprice"),
-                pl.col("col6"),
-            ]
+            pl.col("c_name"),
+            pl.col("o_custkey").alias("c_custkey"),
+            pl.col("key").alias("o_orderkey"),
+            pl.col("o_orderdate").alias("o_orderdat"),
+            pl.col("o_totalprice"),
+            pl.col("col6"),
         )
-        .sort(["o_totalprice", "o_orderdat"], descending=[True, False])
+        .sort(by=["o_totalprice", "o_orderdat"], descending=[True, False])
         .limit(100)
     )
 

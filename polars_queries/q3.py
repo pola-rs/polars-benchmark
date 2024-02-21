@@ -24,15 +24,13 @@ def q():
         .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue")
         )
-        .group_by(["o_orderkey", "o_orderdate", "o_shippriority"])
-        .agg([pl.sum("revenue")])
+        .group_by("o_orderkey", "o_orderdate", "o_shippriority")
+        .agg(pl.sum("revenue"))
         .select(
-            [
-                pl.col("o_orderkey").alias("l_orderkey"),
-                "revenue",
-                "o_orderdate",
-                "o_shippriority",
-            ]
+            pl.col("o_orderkey").alias("l_orderkey"),
+            "revenue",
+            "o_orderdate",
+            "o_shippriority",
         )
         .sort(by=["revenue", "o_orderdate"], descending=[True, False])
         .limit(10)
