@@ -1,4 +1,3 @@
-
 import pandas as pd
 
 from pandas_queries import utils
