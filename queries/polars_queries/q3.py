@@ -2,7 +2,7 @@ from datetime import datetime
 
 import polars as pl
 
-from polars_queries import utils
+from queries.polars_queries import utils
 
 Q_NUM = 3
 

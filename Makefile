@@ -32,7 +32,7 @@ tables: .venv  ## Generate data tables
 
 .PHONY: run-polars
 run-polars: .venv  ## Run polars benchmarks
-	$(VENV_BIN)/python -m polars_queries.executor
+	$(VENV_BIN)/python -m queries.polars_queries.executor
 
 .PHONY: run-pandas
 run-pandas: .venv  ## Run pandas benchmarks

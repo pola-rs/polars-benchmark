@@ -13,6 +13,7 @@ SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
 WRITE_PLOT = bool(os.environ.get("WRITE_PLOT", False))
 FILE_TYPE = os.environ.get("FILE_TYPE", "parquet")
 SPARK_LOG_LEVEL = os.environ.get("SPARK_LOG_LEVEL", "ERROR")
+
 print("include io:", INCLUDE_IO)
 print("show results:", SHOW_RESULTS)
 print("log timings:", LOG_TIMINGS)
@@ -20,11 +21,12 @@ print("file type:", FILE_TYPE)
 
 
 CWD = Path(__file__).parent
-DATASET_BASE_DIR = CWD / "data" / "tables" / f"scale-{SCALE_FACTOR}"
-ANSWERS_BASE_DIR = CWD / "tpch-dbgen/answers"
-ANSWERS_PARQUET_BASE_DIR = CWD / "data" / "answers"
-TIMINGS_FILE = CWD / os.environ.get("TIMINGS_FILE", "timings.csv")
-DEFAULT_PLOTS_DIR = CWD / "plots"
+ROOT = CWD.parent
+DATASET_BASE_DIR = ROOT / "data" / "tables" / f"scale-{SCALE_FACTOR}"
+ANSWERS_BASE_DIR = ROOT / "tpch-dbgen/answers"
+ANSWERS_PARQUET_BASE_DIR = ROOT / "data" / "answers"
+TIMINGS_FILE = ROOT / os.environ.get("TIMINGS_FILE", "timings.csv")
+DEFAULT_PLOTS_DIR = ROOT / "plots"
 
 
 def append_row(solution: str, q: str, secs: float, version: str, success=True):
@@ -61,13 +63,13 @@ def on_second_call(func):
 def execute_all(solution: str):
     package_name = f"{solution}_queries"
 
-    expr = re.compile(r"^q(\d+).py")
+    expr = re.compile(r"q(\d+).py$")
     num_queries = 0
-    for file in os.listdir(package_name):
-        g = expr.search(file)
+    for file in (CWD / package_name).iterdir():
+        g = expr.search(str(file))
         if g is not None:
             num_queries = max(int(g.group(1)), num_queries)
 
     with CodeTimer(name=f"Overall execution of ALL {solution} queries", unit="s"):
         for i in range(1, num_queries + 1):
-            run([sys.executable, "-m", f"{package_name}.q{i}"])
+            run([sys.executable, "-m", f"queries.{package_name}.q{i}"])
