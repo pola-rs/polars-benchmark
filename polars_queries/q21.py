@@ -14,14 +14,12 @@ def q():
     var_1 = "SAUDI ARABIA"
 
     res_1 = (
-        (
-            line_item_ds.group_by("l_orderkey")
-            .agg(pl.col("l_suppkey").n_unique().alias("nunique_col"))
-            .filter(pl.col("nunique_col") > 1)
-            .join(
-                line_item_ds.filter(pl.col("l_receiptdate") > pl.col("l_commitdate")),
-                on="l_orderkey",
-            )
+        line_item_ds.group_by("l_orderkey")
+        .agg(pl.col("l_suppkey").n_unique().alias("nunique_col"))
+        .filter(pl.col("nunique_col") > 1)
+        .join(
+            line_item_ds.filter(pl.col("l_receiptdate") > pl.col("l_commitdate")),
+            on="l_orderkey",
         )
     ).cache()
 

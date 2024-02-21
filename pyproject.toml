@@ -1,0 +1,68 @@
+[tool.ruff]
+line-length = 88
+fix = true
+
+[tool.ruff.lint]
+select = [
+  "E", # pycodestyle
+  "W", # pycodestyle
+  "F", # Pyflakes
+  "B", # flake8-bugbear
+  "C4", # flake8-comprehensions
+  "D", # flake8-docstrings
+  "D213", # Augment NumPy docstring convention: Multi-line docstring summary should start at the second line
+  "D417", # Augment NumPy docstring convention: Missing argument descriptions
+  "I", # isort
+  "SIM", # flake8-simplify
+  "TCH", # flake8-type-checking
+  "TID", # flake8-tidy-imports
+  "UP", # pyupgrade
+  "PT", # flake8-pytest-style
+  "RUF", # Ruff-specific rules
+  "PTH", # flake8-use-pathlib
+  "FA", # flake8-future-annotations
+  "PIE", # flake8-pie
+  "TD", # flake8-todos
+  "TRY", # tryceratops
+  "EM", # flake8-errmsg
+  "FBT001", # flake8-boolean-trap
+]
+
+ignore = [
+  # Line length regulated by formatter
+  "E501",
+  # pydocstyle: http://www.pydocstyle.org/en/stable/error_codes.html
+  "D401", # Relax NumPy docstring convention: First line should be in imperative mood
+  # flake8-pytest-style:
+  "PT011", # pytest.raises({exception}) is too broad, set the match parameter or use a more specific exception
+  # flake8-simplify
+  "SIM102", # Use a single `if` statement instead of nested `if` statements
+  "SIM108", # Use ternary operator
+  # ruff
+  "RUF005", # unpack-instead-of-concatenating-to-collection-literal
+  # pycodestyle
+  "D1", # Missing docstring
+  # flake8-todos
+  "TD002", # Missing author in TODO
+  "TD003", # Missing issue link on the line following this TODO
+  # tryceratops
+  "TRY003", # Avoid specifying long messages outside the exception class
+  # Lints below are turned off because of conflicts with the ruff formatter
+  "D206",
+  "W191",
+]
+
+[tool.ruff.lint.pycodestyle]
+max-doc-length = 88
+
+[tool.ruff.lint.pydocstyle]
+convention = "numpy"
+
+[tool.ruff.lint.flake8-tidy-imports]
+ban-relative-imports = "all"
+
+[tool.ruff.lint.flake8-type-checking]
+strict = true
+
+[tool.ruff.format]
+docstring-code-format = true

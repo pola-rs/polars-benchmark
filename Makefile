@@ -1,62 +1,95 @@
+.DEFAULT_GOAL := help
+
+PYTHONPATH=
 SHELL=/bin/bash
-PYTHON=.venv/bin/python
+VENV=.venv
+VENV_BIN=$(VENV)/bin
 
-.venv:
-	@python -m venv .venv
-	@.venv/bin/pip install -U pip
-	@.venv/bin/pip install --no-cache-dir -r requirements.txt
+.venv:  ## Set up Python virtual environment and install requirements
+	python3 -m venv $(VENV)
+	$(MAKE) requirements
 
-clean-tpch-dbgen:
-	$(MAKE) -C tpch-dbgen clean
+.PHONY: requirements
+requirements: .venv  ## Update Python project requirements
+	$(VENV_BIN)/python -m pip install --upgrade pip
+	$(VENV_BIN)/pip install --upgrade -r requirements.txt
 
-clean-venv:
-	rm -r .venv
+.PHONY: fmt
+fmt:  ## Run autoformatting and linting
+	$(VENV_BIN)/ruff check
+	$(VENV_BIN)/ruff format
 
-clean-tables:
-	rm -r tables_scale_*
+.PHONY: pre-commit
+pre-commit: fmt  ## Run all code quality checks
 
-clean: clean-tpch-dbgen clean-venv
-
-tables_scale_1: .venv
+.PHONY: tables-scale-1
+tables-scale-1: .venv  ## Generate data tables
 	$(MAKE) -C tpch-dbgen all
 	cd tpch-dbgen && ./dbgen -vf -s 1 && cd ..
 	mkdir -p "tables_scale_1"
 	mv tpch-dbgen/*.tbl tables_scale_1/
-	.venv/bin/python prepare_files.py 1
+	$(VENV_BIN)/python prepare_files.py 1
 
-tables_scale_10: .venv
+.PHONY: tables-scale-10
+tables-scale-10: .venv  ## Generate bigger data tables
 	$(MAKE) -C tpch-dbgen all
 	cd tpch-dbgen && ./dbgen -vf -s 10 && cd ..
 	mkdir -p "tables_scale_10"
 	mv tpch-dbgen/*.tbl tables_scale_10/
-	.venv/bin/python prepare_files.py 10
+	$(VENV_BIN)/python prepare_files.py 10
 
-run_polars: .venv
-	.venv/bin/python -m polars_queries.executor
+.PHONY: run-polars
+run-polars: .venv  ## Run polars benchmarks
+	$(VENV_BIN)/python -m polars_queries.executor
 
-run_pandas: .venv
-	.venv/bin/python -m pandas_queries.executor
+.PHONY: run-pandas
+run-pandas: .venv  ## Run pandas benchmarks
+	$(VENV_BIN)/python -m pandas_queries.executor
 
-run_dask: .venv
-	.venv/bin/python -m dask_queries.executor
+.PHONY: run-pyspark
+run-pyspark: .venv  ## Run pyspark benchmarks
+	$(VENV_BIN)/python -m spark_queries.executor
 
-run_modin: .venv
-	.venv/bin/python -m modin_queries.executor
+.PHONY: run-dask
+run-dask: .venv  ## Run dask benchmarks
+	$(VENV_BIN)/python -m dask_queries.executor
 
-run_vaex: .venv
-	.venv/bin/python -m vaex_queries.executor
+.PHONY: run-duckdb
+run-duckdb: .venv  ## Run duckdb benchmarks
+	$(VENV_BIN)/python -m duckdb_queries.executor
 
-run_spark: .venv
-	.venv/bin/python -m spark_queries.executor
+.PHONY: run-vaex
+run-vaex: .venv  ## Run vaex benchmarks
+	$(VENV_BIN)/python -m vaex_queries.executor
 
-run_duckdb: .venv
-	.venv/bin/python -m duckdb_queries.executor
+.PHONY: run-modin
+run-modin: .venv  ## Run modin benchmarks
+	$(VENV_BIN)/python -m modin_queries.executor
 
-plot_results: .venv
-	.venv/bin/python -m scripts.plot_results
+.PHONY: run-all
+run-all: run-polars run-pandas run-pyspark run-dask run-duckdb run-vaex run-modin   ## Run all benchmarks
 
-run_all: run_polars run_pandas run_vaex run_dask run_modin run_spark
+.PHONY: plot
+plot: .venv  ## Plot results
+	$(VENV_BIN)/python -m scripts.plot_results
 
-pre-commit:
-	.venv/bin/python -m isort .
-	.venv/bin/python -m black .
+
+.PHONY: clean
+clean:  clean-tpch-dbgen clean-tables  ## Clean up everything
+	@rm -rf .ruff_cache/
+	@rm -rf .venv/
+
+.PHONY: clean-tpch-dbgen
+clean-tpch-dbgen:  ## Clean up TPC-H folder
+	@$(MAKE) -C tpch-dbgen clean
+
+.PHONY: clean-tables
+clean-tables:  ## Clean up data tables
+	@rm -rf tables_scale_*
+
+
+.PHONY: help
+help:  ## Display this help screen
+	@echo -e "\033[1mAvailable commands:\033[0m"
+	@grep -E '^[a-z.A-Z_0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}' | sort
+
