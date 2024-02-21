@@ -27,9 +27,9 @@ def get_styles(exclude_solutions: list[str]):
         │ dask     ┆ Dask     ┆ #ef1161 ┆ D     ┆ 4.5  │
         │ duckdb   ┆ DuckDB   ┆ #fff000 ┆ o     ┆ 5.0  │
         │ modin    ┆ Modin    ┆ #00abee ┆ >     ┆ 5.0  │
-        │ pandas   ┆ Pandas   ┆ #e70488 ┆ s     ┆ 5.0  │
+        │ pandas   ┆ pandas   ┆ #e70488 ┆ s     ┆ 5.0  │
         │ polars   ┆ Polars   ┆ #adbac7 ┆ p     ┆ 6.0  │
-        │ spark    ┆ Spark    ┆ #e25a1c ┆ *     ┆ 7.0  │
+        │ pyspark  ┆ PySpark  ┆ #e25a1c ┆ *     ┆ 7.0  │
         └──────────┴──────────┴─────────┴───────┴──────┘
         """
     )

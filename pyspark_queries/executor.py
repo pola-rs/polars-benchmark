@@ -1,7 +1,7 @@
 from linetimer import CodeTimer
 
 # TODO: works for now, but need dynamic imports for this.
-from spark_queries import (  # noqa: F401
+from pyspark_queries import (  # noqa: F401
     q1,
     q2,
     q3,
