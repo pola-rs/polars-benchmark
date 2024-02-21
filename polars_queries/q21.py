@@ -34,7 +34,7 @@ def q():
         .filter(pl.col("n_name") == var_1)
         .filter(pl.col("o_orderstatus") == "F")
         .group_by("s_name")
-        .agg(pl.count().alias("numwait"))
+        .agg(pl.len().alias("numwait"))
         .sort(by=["numwait", "s_name"], descending=[True, False])
         .limit(100)
     )

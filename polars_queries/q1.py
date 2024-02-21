@@ -30,7 +30,7 @@ def q():
                 pl.mean("l_quantity").alias("avg_qty"),
                 pl.mean("l_extendedprice").alias("avg_price"),
                 pl.mean("l_discount").alias("avg_disc"),
-                pl.count().alias("count_order"),
+                pl.len().alias("count_order"),
             ],
         )
         .sort(["l_returnflag", "l_linestatus"])
