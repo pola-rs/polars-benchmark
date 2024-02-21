@@ -6,7 +6,7 @@ from pandas.core.frame import DataFrame as PandasDF
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
-from common_utils import (
+from queries.common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     LOG_TIMINGS,

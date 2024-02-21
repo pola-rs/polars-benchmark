@@ -7,7 +7,7 @@ import modin.pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
-from common_utils import (
+from queries.common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     LOG_TIMINGS,

@@ -8,7 +8,7 @@ import dask.dataframe as dd
 import pandas as pd
 from linetimer import CodeTimer, linetimer
 
-from common_utils import (
+from queries.common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,

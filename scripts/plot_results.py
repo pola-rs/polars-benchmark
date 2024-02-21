@@ -11,7 +11,7 @@ from pathlib import Path
 import plotly.express as px
 import polars as pl
 
-from common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WRITE_PLOT
+from queries.common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WRITE_PLOT
 
 # colors for each bar
 COLORS = {
