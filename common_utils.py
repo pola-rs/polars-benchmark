@@ -1,6 +1,7 @@
 import os
 import re
 import sys
+from pathlib import Path
 from subprocess import run
 
 from linetimer import CodeTimer
@@ -17,16 +18,17 @@ print("show results:", SHOW_RESULTS)
 print("log timings:", LOG_TIMINGS)
 print("file type:", FILE_TYPE)
 
-CWD = os.path.dirname(os.path.realpath(__file__))
-DATASET_BASE_DIR = os.path.join(CWD, f"tables_scale_{SCALE_FACTOR}")
-ANSWERS_BASE_DIR = os.path.join(CWD, "tpch-dbgen/answers")
-ANSWERS_PARQUET_BASE_DIR = os.path.join(CWD, "data/answers")
-TIMINGS_FILE = os.path.join(CWD, os.environ.get("TIMINGS_FILE", "timings.csv"))
-DEFAULT_PLOTS_DIR = os.path.join(CWD, "plots")
+
+CWD = Path(__file__).parent
+DATASET_BASE_DIR = CWD / f"tables_scale_{SCALE_FACTOR}"
+ANSWERS_BASE_DIR = CWD / "tpch-dbgen/answers"
+ANSWERS_PARQUET_BASE_DIR = CWD / "data/answers"
+TIMINGS_FILE = CWD / os.environ.get("TIMINGS_FILE", "timings.csv")
+DEFAULT_PLOTS_DIR = CWD / "plots"
 
 
 def append_row(solution: str, q: str, secs: float, version: str, success=True):
-    with open(TIMINGS_FILE, "a") as f:
+    with TIMINGS_FILE.open("a") as f:
         if f.tell() == 0:
             f.write("solution,version,query_no,duration[s],include_io,success\n")
         f.write(f"{solution},{version},{q},{secs},{INCLUDE_IO},{success}\n")

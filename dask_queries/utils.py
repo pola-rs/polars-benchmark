@@ -1,7 +1,7 @@
 import os
 import timeit
 from collections.abc import Callable
-from os.path import join
+from pathlib import Path
 from typing import Union
 
 import dask.dataframe as dd
@@ -30,9 +30,9 @@ def read_ds(path: str) -> Union:
     return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
 
 
-def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> dd.DataFrame:
+def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> dd.DataFrame:
     answer_df = pd.read_csv(
-        join(base_dir, f"q{query}.out"),
+        base_dir / f"q{query}.out",
         sep="|",
         parse_dates=True,
         infer_datetime_format=True,
@@ -57,42 +57,42 @@ def test_results(q_num: int, result_df: pd.DataFrame):
 
 @on_second_call
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "lineitem.parquet"))
+    return read_ds(Path(base_dir) / "lineitem.parquet")
 
 
 @on_second_call
 def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "orders.parquet"))
+    return read_ds(Path(base_dir) / "orders.parquet")
 
 
 @on_second_call
 def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "customer.parquet"))
+    return read_ds(Path(base_dir) / "customer.parquet")
 
 
 @on_second_call
 def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "region.parquet"))
+    return read_ds(Path(base_dir) / "region.parquet")
 
 
 @on_second_call
 def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "nation.parquet"))
+    return read_ds(Path(base_dir) / "nation.parquet")
 
 
 @on_second_call
 def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "supplier.parquet"))
+    return read_ds(Path(base_dir) / "supplier.parquet")
 
 
 @on_second_call
 def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "part.parquet"))
+    return read_ds(Path(base_dir) / "part.parquet")
 
 
 @on_second_call
 def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> dd.DataFrame:
-    return read_ds(join(base_dir, "partsupp.parquet"))
+    return read_ds(Path(base_dir) / "partsupp.parquet")
 
 
 def run_query(q_num: str, query: Callable):

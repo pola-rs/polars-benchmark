@@ -27,7 +27,10 @@ def q():
         flineitem = line_item_ds[lsel]
         forders = orders_ds[osel]
         forders = forders[["o_orderkey", "o_orderpriority"]]
-        # jn = forders[forders["o_orderkey"].compute().isin(flineitem["l_orderkey"])] # doesn't support isin
+
+        # doesn't support isin
+        # jn = forders[forders["o_orderkey"].compute().isin(flineitem["l_orderkey"])]
+
         jn = forders.merge(
             flineitem, left_on="o_orderkey", right_on="l_orderkey"
         ).drop_duplicates(subset=["o_orderkey"])[["o_orderpriority", "o_orderkey"]]

@@ -1,5 +1,5 @@
 import timeit
-from os.path import join
+from pathlib import Path
 
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
@@ -34,11 +34,11 @@ def __read_parquet_ds(path: str, table_name: str) -> SparkDF:
     return df
 
 
-def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
+def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
     import pandas as pd
 
     answer_df = pd.read_csv(
-        join(base_dir, f"q{query}.out"),
+        base_dir / f"q{query}.out",
         sep="|",
         parse_dates=True,
     )
@@ -68,42 +68,42 @@ def test_results(q_num: int, result_df: PandasDF):
 
 @on_second_call
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "lineitem.parquet"), "lineitem")
+    return __read_parquet_ds(Path(base_dir) / "lineitem.parquet", "lineitem")
 
 
 @on_second_call
 def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "orders.parquet"), "orders")
+    return __read_parquet_ds(Path(base_dir) / "orders.parquet", "orders")
 
 
 @on_second_call
 def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "customer.parquet"), "customer")
+    return __read_parquet_ds(Path(base_dir) / "customer.parquet", "customer")
 
 
 @on_second_call
 def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "region.parquet"), "region")
+    return __read_parquet_ds(Path(base_dir) / "region.parquet", "region")
 
 
 @on_second_call
 def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "nation.parquet"), "nation")
+    return __read_parquet_ds(Path(base_dir) / "nation.parquet", "nation")
 
 
 @on_second_call
 def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "supplier.parquet"), "supplier")
+    return __read_parquet_ds(Path(base_dir) / "supplier.parquet", "supplier")
 
 
 @on_second_call
 def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "part.parquet"), "part")
+    return __read_parquet_ds(Path(base_dir) / "part.parquet", "part")
 
 
 @on_second_call
 def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> SparkDF:
-    return __read_parquet_ds(join(base_dir, "partsupp.parquet"), "partsupp")
+    return __read_parquet_ds(Path(base_dir) / "partsupp.parquet", "partsupp")
 
 
 def drop_temp_view():

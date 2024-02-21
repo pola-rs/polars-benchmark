@@ -1,5 +1,4 @@
-"""
-Script for visualizing benchmark results using Plotly.
+"""Script for visualizing benchmark results using Plotly.
 
 To use this script, run:
 
@@ -112,16 +111,20 @@ def plot(
     group: str = "solution",
     limit: int = 120,
 ):
-    """
-    Generate a Plotly Figure of a grouped bar chart diplaying benchmark results from a DataFrame.
+    """Generate a Plotly Figure of a grouped bar chart displaying benchmark results.
 
     Parameters
     ----------
-    df (pl.DataFrame): DataFrame containing `x`, `y`, and `group`.
-    x (str, optional): Column for X Axis. Defaults to "query_no".
-    y (str, optional): Column for Y Axis. Defaults to "duration[s]".
-    group (str, optional): Column for group. Defaults to "solution".
-    limit: height limit in seconds
+    df
+        DataFrame containing `x`, `y`, and `group`.
+    x
+        Column for X Axis. Defaults to "query_no".
+    y
+        Column for Y Axis. Defaults to "duration[s]".
+    group
+        Column for group. Defaults to "solution".
+    limit
+        height limit in seconds
 
     Returns
     -------

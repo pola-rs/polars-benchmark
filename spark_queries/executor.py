@@ -34,5 +34,5 @@ if __name__ == "__main__":
         for sm in sub_modules:
             try:
                 eval(f"{sm}.q()")
-            except:
+            except Exception:
                 print(f"Exception occurred while executing spark_queries.{sm}")
