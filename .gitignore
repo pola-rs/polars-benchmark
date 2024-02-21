@@ -1,19 +1,26 @@
 .idea/
 .swp
-tables_scale_1*/
 *.tbl
 *.o
 dbgen
-.venv/
-__pycache__/
 qgen
 dask_user_space/
 dask-worker-space/
 timings*.csv
-plots/
 **/spark-warehouse
 perf.*
-target/
 **/flamegraph.svg
-Cargo.lock
+
+# Python
+__pycache__/
+.venv/
 .ruff_cache/
+
+# Rust
+.cargo/
+target/
+Cargo.lock
+
+# Project
+/data/tables/
+plots/
