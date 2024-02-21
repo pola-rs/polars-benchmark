@@ -1,6 +1,6 @@
 import timeit
-from os.path import join
-from typing import Callable
+from collections.abc import Callable
+from pathlib import Path
 
 import pandas as pd
 from linetimer import CodeTimer, linetimer
@@ -17,19 +17,20 @@ from common_utils import (
 )
 
 
-def _read_ds(path: str) -> PandasDF:
+def _read_ds(path: Path) -> PandasDF:
     path = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
         return pd.read_parquet(path, dtype_backend="pyarrow", engine="pyarrow")
     elif FILE_TYPE == "feather":
         return pd.read_feather(path)
     else:
-        raise ValueError(f"file type: {FILE_TYPE} not expected")
+        msg = f"file type: {FILE_TYPE} not expected"
+        raise ValueError(msg)
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
     answer_df = pd.read_csv(
-        join(base_dir, f"q{query}.out"),
+        Path(base_dir) / f"q{query}.out",
         sep="|",
         parse_dates=True,
         infer_datetime_format=True,
@@ -54,42 +55,42 @@ def test_results(q_num: int, result_df: PandasDF):
 
 @on_second_call
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "lineitem"))
+    return _read_ds(Path(base_dir) / "lineitem")
 
 
 @on_second_call
 def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "orders"))
+    return _read_ds(Path(base_dir) / "orders")
 
 
 @on_second_call
 def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "customer"))
+    return _read_ds(Path(base_dir) / "customer")
 
 
 @on_second_call
 def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "region"))
+    return _read_ds(Path(base_dir) / "region")
 
 
 @on_second_call
 def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "nation"))
+    return _read_ds(Path(base_dir) / "nation")
 
 
 @on_second_call
 def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "supplier"))
+    return _read_ds(Path(base_dir) / "supplier")
 
 
 @on_second_call
 def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "part"))
+    return _read_ds(Path(base_dir) / "part")
 
 
 @on_second_call
 def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(join(base_dir, "partsupp"))
+    return _read_ds(Path(base_dir) / "partsupp")
 
 
 def run_query(q_num: int, query: Callable):
