@@ -16,7 +16,7 @@ jobs:
       - name: Get ruff version from requirements file
         id: version
         run: |
-          VERSION=$(grep -m 1 -oP 'ruff==\K(.*)' requirements-lint.txt)
+          VERSION=$(grep -m 1 -oP 'ruff==\K(.*)' requirements.txt)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       # - uses: chartboost/ruff-action@v1
