@@ -4,7 +4,7 @@ Q_NUM = 22
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         cntrycode,
         count(*) as numcust,

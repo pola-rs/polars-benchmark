@@ -4,7 +4,7 @@ Q_NUM = 21
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         s_name,
         count(*) as numwait

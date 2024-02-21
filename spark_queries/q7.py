@@ -4,7 +4,7 @@ Q_NUM = 7
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         supp_nation,
         cust_nation,

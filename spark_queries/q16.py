@@ -4,7 +4,7 @@ Q_NUM = 16
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         p_brand,
         p_type,

@@ -4,7 +4,7 @@ Q_NUM = 17
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         round(sum(l_extendedprice) / 7.0, 2) as avg_yearly
     from

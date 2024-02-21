@@ -4,7 +4,7 @@ Q_NUM = 14
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         round(100.00 * sum(case
             when p_type like 'PROMO%'

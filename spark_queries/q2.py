@@ -4,7 +4,7 @@ Q_NUM = 2
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         s_acctbal,
         s_name,

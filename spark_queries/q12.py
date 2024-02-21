@@ -4,7 +4,7 @@ Q_NUM = 12
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         l_shipmode,
         sum(case

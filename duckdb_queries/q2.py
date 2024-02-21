@@ -27,7 +27,7 @@ def q():
         {supplier_ds},
         {part_supp_ds},
         {nation_ds},
-        {region_ds} 
+        {region_ds}
     where
         p_partkey = ps_partkey
         and s_suppkey = ps_suppkey

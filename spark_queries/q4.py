@@ -4,7 +4,7 @@ Q_NUM = 4
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         o_orderpriority,
         count(*) as order_count

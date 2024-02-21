@@ -4,7 +4,7 @@ Q_NUM = 8
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         o_year,
         round(

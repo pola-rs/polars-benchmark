@@ -92,13 +92,12 @@ for name in [
     "lineitem",
 ]:
     print("process table:", name)
-    df = pl.scan_csv(
+    lf = pl.scan_csv(
         f"tables_scale_{scale_fac}/{name}.tbl",
         has_header=False,
         separator="|",
         try_parse_dates=True,
-        with_column_names=lambda _: eval(f"h_{name}"),
+        new_columns=eval(f"h_{name}"),
     )
-
-    df = df.with_columns([pl.col(pl.Date).cast(pl.Datetime)])
-    df.sink_parquet(f"tables_scale_{scale_fac}/{name}.parquet")
+    lf = lf.with_columns(pl.col(pl.Date).cast(pl.Datetime))
+    lf.sink_parquet(f"tables_scale_{scale_fac}/{name}.parquet")

@@ -1,5 +1,4 @@
 import datetime
-from datetime import datetime
 
 import modin.pandas as pd
 

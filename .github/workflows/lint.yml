@@ -19,10 +19,10 @@ jobs:
           VERSION=$(grep -m 1 -oP 'ruff==\K(.*)' requirements.txt)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
-      # - uses: chartboost/ruff-action@v1
-      #   with:
-      #     version: ${{ steps.version.outputs.version }}
-      #     args: check --no-fix
+      - uses: chartboost/ruff-action@v1
+        with:
+          version: ${{ steps.version.outputs.version }}
+          args: check --no-fix
 
       - uses: chartboost/ruff-action@v1
         with:

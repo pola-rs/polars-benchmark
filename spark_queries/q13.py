@@ -4,7 +4,7 @@ Q_NUM = 13
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         c_count, count(*) as custdist
     from (

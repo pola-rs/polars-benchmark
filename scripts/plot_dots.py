@@ -45,7 +45,7 @@ def parse_queries(s: str) -> list[str]:
             int_set.update(range(start, end + 1))
         else:
             int_set.add(int(part))
-    return [f"q{x}" for x in sorted(list(int_set))]
+    return [f"q{x}" for x in sorted(int_set)]
 
 
 def read_csv(filename: str) -> pl.DataFrame:
@@ -305,7 +305,11 @@ def main() -> None:
     styles = get_styles(exclude_solutions)
     queries = parse_queries(args.queries)
     timings = prepare_timings(
-        read_csv(args.csv), styles, exclude_solutions, queries, args.include_io
+        read_csv(args.csv),
+        styles,
+        exclude_solutions,
+        queries,
+        args.include_io,
     )
     caption = formulate_caption(
         timings, styles, queries, args.no_notes, args.max_duration, args.width

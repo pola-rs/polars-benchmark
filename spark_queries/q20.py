@@ -4,7 +4,7 @@ Q_NUM = 20
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         s_name,
         s_address
