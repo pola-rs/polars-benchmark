@@ -30,7 +30,6 @@ def get_styles(exclude_solutions: list[str]):
         │ pandas   ┆ Pandas   ┆ #e70488 ┆ s     ┆ 5.0  │
         │ polars   ┆ Polars   ┆ #adbac7 ┆ p     ┆ 6.0  │
         │ spark    ┆ Spark    ┆ #e25a1c ┆ *     ┆ 7.0  │
-        │ vaex     ┆ Vaex     ┆ #585858 ┆ v     ┆ 6.0  │
         └──────────┴──────────┴─────────┴───────┴──────┘
         """
     )

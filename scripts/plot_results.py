@@ -163,7 +163,7 @@ if __name__ == "__main__":
 
     if INCLUDE_IO:
         LIMIT = 15
-        e = e & pl.col("include_io") & ~(pl.col("solution") == "vaex_feather")
+        e = e & pl.col("include_io")
     else:
         LIMIT = 15
         e = e & ~pl.col("include_io")
@@ -194,7 +194,6 @@ if __name__ == "__main__":
                 "pandas",
                 "dask",
                 "spark",
-                "vaex_parquet",
                 "modin",
             ]
         }

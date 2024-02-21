@@ -8,7 +8,6 @@ polars
 pyarrow
 dask
 modin[ray]
-vaex
 pyspark
 duckdb
 pandas>=2.0
