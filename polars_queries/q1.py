@@ -31,7 +31,7 @@ def q():
             pl.mean("l_discount").alias("avg_disc"),
             pl.len().alias("count_order"),
         )
-        .sort(["l_returnflag", "l_linestatus"])
+        .sort("l_returnflag", "l_linestatus")
     )
 
     utils.run_query(Q_NUM, q_final)

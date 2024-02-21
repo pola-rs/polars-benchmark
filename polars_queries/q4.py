@@ -21,7 +21,7 @@ def q():
         .unique(subset=["o_orderpriority", "l_orderkey"])
         .group_by("o_orderpriority")
         .agg(pl.len().alias("order_count"))
-        .sort(by="o_orderpriority")
+        .sort("o_orderpriority")
         .with_columns(pl.col("order_count").cast(pl.Int64))
     )
 

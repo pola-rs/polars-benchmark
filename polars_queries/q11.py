@@ -34,7 +34,7 @@ def q():
         .with_columns(pl.lit(1).alias("lit"))
         .join(res_2, on="lit")
         .filter(pl.col("value") > pl.col("tmp"))
-        .select(["ps_partkey", "value"])
+        .select("ps_partkey", "value")
         .sort("value", descending=True)
     )
 

@@ -1,5 +1,3 @@
-from datetime import datetime
-
 import polars as pl
 
 from polars_queries import utils
@@ -27,16 +25,14 @@ def q():
         .join(nation_ds, left_on="s_nationkey", right_on="n_nationkey")
         .filter(pl.col("p_name").str.contains("green"))
         .select(
-            [
-                pl.col("n_name").alias("nation"),
-                pl.col("o_orderdate").dt.year().alias("o_year"),
-                (
-                    pl.col("l_extendedprice") * (1 - pl.col("l_discount"))
-                    - pl.col("ps_supplycost") * pl.col("l_quantity")
-                ).alias("amount"),
-            ]
+            pl.col("n_name").alias("nation"),
+            pl.col("o_orderdate").dt.year().alias("o_year"),
+            (
+                pl.col("l_extendedprice") * (1 - pl.col("l_discount"))
+                - pl.col("ps_supplycost") * pl.col("l_quantity")
+            ).alias("amount"),
         )
-        .group_by(["nation", "o_year"])
+        .group_by("nation", "o_year")
         .agg(pl.sum("amount").round(2).alias("sum_profit"))
         .sort(by=["nation", "o_year"], descending=[False, True])
     )

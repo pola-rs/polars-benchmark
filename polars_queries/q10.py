@@ -23,38 +23,32 @@ def q():
         .filter(pl.col("o_orderdate").is_between(var_1, var_2, closed="left"))
         .filter(pl.col("l_returnflag") == "R")
         .group_by(
-            [
-                "c_custkey",
-                "c_name",
-                "c_acctbal",
-                "c_phone",
-                "n_name",
-                "c_address",
-                "c_comment",
-            ]
+            "c_custkey",
+            "c_name",
+            "c_acctbal",
+            "c_phone",
+            "n_name",
+            "c_address",
+            "c_comment",
         )
         .agg(
-            [
-                (pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
-                .sum()
-                .round(2)
-                .alias("revenue")
-            ]
+            (pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
+            .sum()
+            .round(2)
+            .alias("revenue")
         )
         .with_columns(
             pl.col("c_address").str.strip_chars(), pl.col("c_comment").str.strip_chars()
         )
         .select(
-            [
-                "c_custkey",
-                "c_name",
-                "revenue",
-                "c_acctbal",
-                "n_name",
-                "c_address",
-                "c_phone",
-                "c_comment",
-            ]
+            "c_custkey",
+            "c_name",
+            "revenue",
+            "c_acctbal",
+            "n_name",
+            "c_address",
+            "c_phone",
+            "c_comment",
         )
         .sort(by="revenue", descending=True)
         .limit(20)

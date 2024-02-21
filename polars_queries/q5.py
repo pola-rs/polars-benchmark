@@ -35,7 +35,7 @@ def q():
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue")
         )
         .group_by("n_name")
-        .agg([pl.sum("revenue")])
+        .agg(pl.sum("revenue"))
         .sort(by="revenue", descending=True)
     )
 

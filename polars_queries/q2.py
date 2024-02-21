@@ -40,11 +40,7 @@ def q():
     q_final = (
         result_q1.group_by("p_partkey")
         .agg(pl.min("ps_supplycost").alias("ps_supplycost"))
-        .join(
-            result_q1,
-            left_on=["p_partkey", "ps_supplycost"],
-            right_on=["p_partkey", "ps_supplycost"],
-        )
+        .join(result_q1, on=["p_partkey", "ps_supplycost"])
         .select(final_cols)
         .sort(
             by=["s_acctbal", "n_name", "s_name", "p_partkey"],
