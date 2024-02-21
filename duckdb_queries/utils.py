@@ -26,7 +26,7 @@ def _scan_ds(path: Path):
             duckdb.read_parquet(path)
             return f"'{path}'"
         else:
-            name = path.replace("/", "_").replace(".", "_")
+            name = path.replace("/", "_").replace(".", "_").replace("-", "_")
             duckdb.sql(
                 f"create temp table if not exists {name} as select * from read_parquet('{path}');"
             )
