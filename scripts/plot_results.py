@@ -10,6 +10,7 @@ from pathlib import Path
 
 import plotly.express as px
 import polars as pl
+
 from queries.common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WRITE_PLOT
 
 # colors for each bar
@@ -37,7 +38,10 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
     # order of solutions in the file
     # e.g. ['polar', 'pandas', 'dask']
     bar_order = (
-        df["solution"].unique(maintain_order=True).to_frame().with_row_count("index")
+        df.get_column("solution")
+        .unique(maintain_order=True)
+        .to_frame()
+        .with_row_index()
     )
 
     # every bar in the plot has a different offset for the text
@@ -58,8 +62,8 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
             .otherwise(pl.format("{} had an internal error", "solution"))
         )
         .join(bar_order, on="solution")
-        .groupby("query_no")
-        .agg([pl.col("labels"), pl.col("index").min()])
+        .group_by("query_no")
+        .agg(pl.col("labels"), pl.col("index").min())
         .with_columns(pl.col("labels").list.join(",\n"))
     )
 
