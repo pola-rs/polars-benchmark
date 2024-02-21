@@ -32,27 +32,27 @@ tables: .venv  ## Generate data tables
 
 .PHONY: run-polars
 run-polars: .venv  ## Run polars benchmarks
-	$(VENV_BIN)/python -m polars_queries.executor
+	$(VENV_BIN)/python -m queries.polars.executor
 
 .PHONY: run-pandas
 run-pandas: .venv  ## Run pandas benchmarks
-	$(VENV_BIN)/python -m pandas_queries.executor
+	$(VENV_BIN)/python -m queries.pandas.executor
 
 .PHONY: run-pyspark
 run-pyspark: .venv  ## Run pyspark benchmarks
-	$(VENV_BIN)/python -m pyspark_queries.executor
+	$(VENV_BIN)/python -m queries.pyspark.executor
 
 .PHONY: run-dask
 run-dask: .venv  ## Run dask benchmarks
-	$(VENV_BIN)/python -m dask_queries.executor
+	$(VENV_BIN)/python -m queries.dask.executor
 
 .PHONY: run-duckdb
 run-duckdb: .venv  ## Run duckdb benchmarks
-	$(VENV_BIN)/python -m duckdb_queries.executor
+	$(VENV_BIN)/python -m queries.duckdb.executor
 
 .PHONY: run-modin
 run-modin: .venv  ## Run modin benchmarks
-	$(VENV_BIN)/python -m modin_queries.executor
+	$(VENV_BIN)/python -m queries.modin.executor
 
 .PHONY: run-all
 run-all: run-polars run-pandas run-pyspark run-dask run-duckdb run-modin   ## Run all benchmarks
