@@ -1,4 +1,4 @@
-from spark_queries import utils
+from pyspark_queries import utils
 
 Q_NUM = 3
 

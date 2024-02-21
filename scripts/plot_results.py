@@ -196,7 +196,7 @@ if __name__ == "__main__":
         .collect()
     )
     order = pl.DataFrame(
-        {"solution": ["polars", "duckdb", "pandas", "dask", "spark", "modin"]}
+        {"solution": ["polars", "duckdb", "pandas", "dask", "pyspark", "modin"]}
     )
     df = order.join(df, on="solution", how="left")
 

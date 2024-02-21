@@ -48,7 +48,7 @@ def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
 def test_results(q_num: int, result_df: PandasDF):
     import pandas as pd
 
-    with CodeTimer(name=f"Testing result of Spark Query {q_num}", unit="s"):
+    with CodeTimer(name=f"Testing result of PySpark Query {q_num}", unit="s"):
         answer = get_query_answer(q_num)
 
         for c, t in answer.dtypes.items():
@@ -116,16 +116,16 @@ def drop_temp_view():
 
 
 def run_query(q_num: int, result: SparkDF):
-    @linetimer(name=f"Overall execution of Spark Query {q_num}", unit="s")
+    @linetimer(name=f"Overall execution of PySpark Query {q_num}", unit="s")
     def run():
-        with CodeTimer(name=f"Get result of Spark Query {q_num}", unit="s"):
+        with CodeTimer(name=f"Get result of PySpark Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
             pdf = result.toPandas()
             secs = timeit.default_timer() - t0
 
         if LOG_TIMINGS:
             append_row(
-                solution="spark",
+                solution="pyspark",
                 version=get_or_create_spark().version,
                 q=f"q{q_num}",
                 secs=secs,

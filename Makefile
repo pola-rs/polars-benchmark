@@ -40,7 +40,7 @@ run-pandas: .venv  ## Run pandas benchmarks
 
 .PHONY: run-pyspark
 run-pyspark: .venv  ## Run pyspark benchmarks
-	$(VENV_BIN)/python -m spark_queries.executor
+	$(VENV_BIN)/python -m pyspark_queries.executor
 
 .PHONY: run-dask
 run-dask: .venv  ## Run dask benchmarks
