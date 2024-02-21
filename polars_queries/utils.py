@@ -1,6 +1,6 @@
 import os
 import timeit
-from os.path import join
+from pathlib import Path
 
 import polars as pl
 from linetimer import CodeTimer, linetimer
@@ -20,7 +20,7 @@ SHOW_PLAN = bool(os.environ.get("SHOW_PLAN", False))
 STREAMING = bool(os.environ.get("STREAMING", False))
 
 
-def _scan_ds(path: str):
+def _scan_ds(path: Path):
     path = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
         scan = pl.scan_parquet(path)
@@ -37,7 +37,7 @@ def _scan_ds(path: str):
 def get_query_answer(
     query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR
 ) -> pl.LazyFrame:
-    return pl.scan_parquet(join(base_dir, f"q{query}.parquet"))
+    return pl.scan_parquet(Path(base_dir) / f"q{query}.out")
 
 
 def test_results(q_num: int, result_df: pl.DataFrame):
@@ -47,35 +47,35 @@ def test_results(q_num: int, result_df: pl.DataFrame):
 
 
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "lineitem"))
+    return _scan_ds(Path(base_dir) / "lineitem")
 
 
 def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "orders"))
+    return _scan_ds(Path(base_dir) / "orders")
 
 
 def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "customer"))
+    return _scan_ds(Path(base_dir) / "customer")
 
 
 def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "region"))
+    return _scan_ds(Path(base_dir) / "region")
 
 
 def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "nation"))
+    return _scan_ds(Path(base_dir) / "nation")
 
 
 def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "supplier"))
+    return _scan_ds(Path(base_dir) / "supplier")
 
 
 def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "part"))
+    return _scan_ds(Path(base_dir) / "part")
 
 
 def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(join(base_dir, "partsupp"))
+    return _scan_ds(Path(base_dir) / "partsupp")
 
 
 def run_query(q_num: int, lp: pl.LazyFrame):
