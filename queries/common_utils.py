@@ -61,7 +61,7 @@ def on_second_call(func):
 
 
 def execute_all(solution: str):
-    package_name = f"{solution}_queries"
+    package_name = f"{solution}"
 
     expr = re.compile(r"q(\d+).py$")
     num_queries = 0
