@@ -11,8 +11,8 @@ VENV_BIN=$(VENV)/bin
 
 .PHONY: requirements
 requirements: .venv  ## Update Python project requirements
-	$(VENV_BIN)/python -m pip install --upgrade pip
-	$(VENV_BIN)/pip install --upgrade -r requirements.txt
+	$(VENV_BIN)/python -m pip install uv
+	$(VENV_BIN)/uv pip install --upgrade -r requirements.txt
 
 .PHONY: fmt
 fmt:  ## Run autoformatting and linting
