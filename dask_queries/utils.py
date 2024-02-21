@@ -1,7 +1,8 @@
 import os
 import timeit
+from collections.abc import Callable
 from os.path import join
-from typing import Callable, Union
+from typing import Union
 
 import dask.dataframe as dd
 import pandas as pd
@@ -23,7 +24,8 @@ def read_ds(path: str) -> Union:
     if INCLUDE_IO:
         return dd.read_parquet(path)
     if FILE_TYPE == "feather":
-        raise ValueError("file type feather not supported for dask queries")
+        msg = "file type feather not supported for dask queries"
+        raise ValueError(msg)
 
     return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
 

@@ -1,13 +1,13 @@
-"""This script uses Plotly to visualize benchmark results.
+"""
+Script for visualizing benchmark results using Plotly.
 
-To use this script run
+To use this script, run:
 
 ```shell
 .venv/bin/python ./scripts/plot_results.py
 ```
 """
-
-import os
+from pathlib import Path
 
 import plotly.express as px
 import polars as pl
@@ -44,7 +44,7 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
 
     # every bar in the plot has a different offset for the text
     start_offset = 10
-    offsets = [start_offset + 12 * i for i in range(0, bar_order.height)]
+    offsets = [start_offset + 12 * i for i in range(bar_order.height)]
 
     # we look for the solutions that surpassed the limit
     # and create a text label for them
@@ -90,18 +90,19 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
             y=LIMIT,
             xshift=x_shift,
             yshift=30,
-            font=dict(color="white"),
+            font={"color": "white"},
             showarrow=False,
             text=anno_text,
         )
 
 
 def write_plot_image(fig):
-    if not os.path.exists(DEFAULT_PLOTS_DIR):
-        os.mkdir(DEFAULT_PLOTS_DIR)
+    path = Path(DEFAULT_PLOTS_DIR)
+    if not path.exists():
+        path.mkdir()
 
-    file_name = f"plot_with_io.html" if INCLUDE_IO else "plot_without_io.html"
-    fig.write_html(os.path.join(DEFAULT_PLOTS_DIR, file_name))
+    file_name = "plot_with_io.html" if INCLUDE_IO else "plot_without_io.html"
+    fig.write_html(path / file_name)
 
 
 def plot(
@@ -111,20 +112,21 @@ def plot(
     group: str = "solution",
     limit: int = 120,
 ):
-    """Generate a Plotly Figure of a grouped bar chart diplaying
-    benchmark results from a DataFrame.
-
-    Args:
-        df (pl.DataFrame): DataFrame containing `x`, `y`, and `group`.
-        x (str, optional): Column for X Axis. Defaults to "query_no".
-        y (str, optional): Column for Y Axis. Defaults to "duration[s]".
-        group (str, optional): Column for group. Defaults to "solution".
-        limit: height limit in seconds
-
-    Returns:
-        px.Figure: Plotly Figure (histogram)
     """
+    Generate a Plotly Figure of a grouped bar chart diplaying benchmark results from a DataFrame.
 
+    Parameters
+    ----------
+    df (pl.DataFrame): DataFrame containing `x`, `y`, and `group`.
+    x (str, optional): Column for X Axis. Defaults to "query_no".
+    y (str, optional): Column for Y Axis. Defaults to "duration[s]".
+    group (str, optional): Column for group. Defaults to "solution".
+    limit: height limit in seconds
+
+    Returns
+    -------
+    px.Figure: Plotly Figure (histogram)
+    """
     # build plotly figure object
     fig = px.histogram(
         x=df[x],
@@ -142,8 +144,14 @@ def plot(
         paper_bgcolor="rgba(41,52,65,1)",
         yaxis_range=[0, limit],
         plot_bgcolor="rgba(41,52,65,1)",
-        margin=dict(t=100),
-        legend=dict(orientation="h", xanchor="left", yanchor="top", x=0.37, y=-0.1),
+        margin={"t": 100},
+        legend={
+            "orientation": "h",
+            "xanchor": "left",
+            "yanchor": "top",
+            "x": 0.37,
+            "y": -0.1,
+        },
     )
 
     add_annotations(fig, limit, df)
@@ -172,31 +180,20 @@ if __name__ == "__main__":
         pl.scan_csv(TIMINGS_FILE)
         .filter(e)
         # filter the max query to plot
-        .filter((pl.col("query_no").str.extract("q(\d+)", 1).cast(int) <= max_query))
+        .filter(pl.col("query_no").str.extract(r"q(\d+)", 1).cast(int) <= max_query)
         # create a version no
         .with_columns(
-            [
-                pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0),
-                pl.format("{}-{}", "solution", "version").alias("solution-version"),
-            ]
+            pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0),
+            pl.format("{}-{}", "solution", "version").alias("solution-version"),
         )
         # ensure we get the latest version
-        .sort(["solution", "version"])
-        .groupby(["solution", "query_no"], maintain_order=True)
+        .sort("solution", "version")
+        .group_by("solution", "query_no", maintain_order=True)
         .last()
         .collect()
     )
     order = pl.DataFrame(
-        {
-            "solution": [
-                "polars",
-                "duckdb",
-                "pandas",
-                "dask",
-                "spark",
-                "modin",
-            ]
-        }
+        {"solution": ["polars", "duckdb", "pandas", "dask", "spark", "modin"]}
     )
     df = order.join(df, on="solution", how="left")
 

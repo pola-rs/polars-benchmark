@@ -1,10 +1,9 @@
 import timeit
+from collections.abc import Callable
 from os.path import join
-from typing import Callable
 
 import modin
 import modin.pandas as pd
-import pandas
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 

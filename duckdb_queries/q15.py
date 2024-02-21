@@ -1,5 +1,4 @@
 import duckdb
-from duckdb import DuckDBPyConnection
 
 from duckdb_queries import utils
 

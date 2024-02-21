@@ -4,7 +4,7 @@ Q_NUM = 19
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         round(sum(l_extendedprice* (1 - l_discount)), 2) as revenue
     from

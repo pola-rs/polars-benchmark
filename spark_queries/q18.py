@@ -4,7 +4,7 @@ Q_NUM = 18
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         c_name,
         c_custkey,

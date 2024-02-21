@@ -4,7 +4,7 @@ Q_NUM = 11
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         ps_partkey,
         round(sum(ps_supplycost * ps_availqty), 2) as value

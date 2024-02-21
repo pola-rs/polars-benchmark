@@ -6,7 +6,7 @@ Q_NUM = 15
 def q():
     spark = utils.get_or_create_spark()
 
-    ddl = f"""
+    ddl = """
     create temp view revenue (supplier_no, total_revenue) as
         select
             l_suppkey,
@@ -20,7 +20,7 @@ def q():
             l_suppkey
     """
 
-    query_str = f"""
+    query_str = """
     select
         s_suppkey,
         s_name,

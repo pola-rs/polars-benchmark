@@ -4,7 +4,7 @@ Q_NUM = 1
 
 
 def q():
-    query_str = f"""
+    query_str = """
     select
         l_returnflag,
         l_linestatus,
