@@ -16,3 +16,4 @@ perf.*
 target/
 **/flamegraph.svg
 Cargo.lock
+.ruff_cache/
