@@ -16,7 +16,7 @@ jobs:
       - name: Get ruff version from requirements file
         id: version
         run: |
-          VERSION=$(grep -m 1 -oP 'ruff==\K(.*)' requirements.txt)
+          VERSION=$(grep -m 1 -oP 'ruff==\K(.*)' requirements-dev.txt)
           echo "version=$VERSION" >> $GITHUB_OUTPUT
 
       - uses: chartboost/ruff-action@v1
@@ -41,7 +41,9 @@ jobs:
           cache: pip
 
       - name: Install dependencies
-        run: pip install -r requirements.txt
+        run: |
+          pip install -r requirements.txt
+          pip install -r requirements-dev.txt
 
       # Allow untyped calls for older Python versions
       - name: Run mypy
