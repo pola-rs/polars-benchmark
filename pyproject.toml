@@ -65,11 +65,11 @@ docstring-code-format = true
 [tool.mypy]
 files = ["queries", "scripts"]
 # strict = true
-# enable_error_code = [
-#   "redundant-expr",
-#   "truthy-bool",
-#   "ignore-without-code",
-# ]
+enable_error_code = [
+  "redundant-expr",
+  "truthy-bool",
+  "ignore-without-code",
+]
 
 
 [[tool.mypy.overrides]]
