@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from queries.dask import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 1
 
@@ -12,7 +18,7 @@ def q() -> None:
     # first call one time to cache in case we don't include the IO times
     lineitem()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal lineitem
         lineitem = lineitem()
 

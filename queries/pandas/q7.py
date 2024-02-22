@@ -21,7 +21,7 @@ def q() -> None:
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal nation_ds
         nonlocal customer_ds
         nonlocal line_item_ds

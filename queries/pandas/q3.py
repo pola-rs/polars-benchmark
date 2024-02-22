@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pandas as pd
+
 from queries.pandas import utils
 
 Q_NUM = 3
@@ -18,7 +20,7 @@ def q() -> None:
     line_item_ds()
     orders_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal customer_ds
         nonlocal line_item_ds
         nonlocal orders_ds

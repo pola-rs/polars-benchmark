@@ -1,8 +1,10 @@
 import os
 import re
 import sys
+from collections.abc import Callable
 from pathlib import Path
 from subprocess import run
+from typing import Any
 
 from linetimer import CodeTimer
 
@@ -28,15 +30,17 @@ TIMINGS_FILE = ROOT / os.environ.get("TIMINGS_FILE", "timings.csv")
 DEFAULT_PLOTS_DIR = ROOT / "plots"
 
 
-def append_row(solution: str, q: str, secs: float, version: str, success=True):
+def append_row(
+    solution: str, q: str, secs: float, version: str, success: bool = True
+) -> None:
     with TIMINGS_FILE.open("a") as f:
         if f.tell() == 0:
             f.write("solution,version,query_no,duration[s],include_io,success\n")
         f.write(f"{solution},{version},{q},{secs},{INCLUDE_IO},{success}\n")
 
 
-def on_second_call(func):
-    def helper(*args, **kwargs):
+def on_second_call(func: Callable):
+    def helper(*args: Any, **kwargs: Any):
         helper.calls += 1
 
         # first call is outside the function

@@ -17,35 +17,29 @@ except ImportError:
 
 
 def get_styles(exclude_solutions: list[str]):
-    all_styles = pl.from_repr(
-        """
-        ┌──────────┬──────────┬─────────┬───────┬──────┐
-        │ solution ┆ name     ┆ color   ┆ shape ┆ size │
-        │ ---      ┆ ---      ┆ ---     ┆ ---   ┆ ---  │
-        │ str      ┆ str      ┆ str     ┆ str   ┆ f32  │
-        ╞══════════╪══════════╪═════════╪═══════╪══════╡
-        │ dask     ┆ Dask     ┆ #ef1161 ┆ D     ┆ 4.5  │
-        │ duckdb   ┆ DuckDB   ┆ #fff000 ┆ o     ┆ 5.0  │
-        │ modin    ┆ Modin    ┆ #00abee ┆ >     ┆ 5.0  │
-        │ pandas   ┆ pandas   ┆ #e70488 ┆ s     ┆ 5.0  │
-        │ polars   ┆ Polars   ┆ #adbac7 ┆ p     ┆ 6.0  │
-        │ pyspark  ┆ PySpark  ┆ #e25a1c ┆ *     ┆ 7.0  │
-        └──────────┴──────────┴─────────┴───────┴──────┘
-        """
+    all_styles = pl.DataFrame(
+        data=[
+            ["dask", "Dask", "#ef1161", "D", 4.5],
+            ["duckdb", "DuckDB", "#fff000", "o", 5.0],
+            ["modin", "Modin", "#00abee", ">", 5.0],
+            ["pandas", "pandas", "#e70488", "s", 5.0],
+            ["polars", "Polars", "#adbac7", "p", 6.0],
+            ["pyspark", "PySpark", "#e25a1c", "*", 7.0],
+        ],
+        schema=["solution", "name", "color", "shape", "size"],
     )
-
     return all_styles.filter(~pl.col("solution").is_in(exclude_solutions))
 
 
 def parse_queries(s: str) -> list[str]:
-    int_set = set()
+    query_numbers: set[int] = set()
     for part in s.split(","):
         if "-" in part:
             start, end = map(int, part.split("-"))
-            int_set.update(range(start, end + 1))
+            query_numbers.update(range(start, end + 1))
         else:
-            int_set.add(int(part))
-    return [f"q{x}" for x in sorted(int_set)]
+            query_numbers.add(int(part))
+    return [f"q{x}" for x in sorted(query_numbers)]
 
 
 def read_csv(filename: str) -> pl.DataFrame:
@@ -137,7 +131,7 @@ def create_plot(
     queries: list[str],
     caption: str,
     args: argparse.Namespace,
-) -> None:
+) -> p9.ggplot:
     if args.include_io:
         subtitle = "Results including reading parquet (lower is better)"
     else:

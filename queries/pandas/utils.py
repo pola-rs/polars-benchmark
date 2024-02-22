@@ -22,17 +22,17 @@ pd.options.mode.copy_on_write = True
 
 
 def _read_ds(path: Path) -> PandasDF:
-    path = f"{path}.{FILE_TYPE}"
+    path_str = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
-        return pd.read_parquet(path, dtype_backend="pyarrow")
+        return pd.read_parquet(path_str, dtype_backend="pyarrow")
     elif FILE_TYPE == "feather":
-        return pd.read_feather(path, dtype_backend="pyarrow")
+        return pd.read_feather(path_str, dtype_backend="pyarrow")
     else:
         msg = f"file type: {FILE_TYPE} not expected"
         raise ValueError(msg)
 
 
-def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
+def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
     path = base_dir / f"q{query}.parquet"
     return pd.read_parquet(path, dtype_backend="pyarrow")
 
@@ -56,48 +56,48 @@ def test_results(q_num: int, result_df: PandasDF):
 
 
 @on_second_call
-def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "lineitem")
+def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "lineitem")
 
 
 @on_second_call
-def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "orders")
+def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "orders")
 
 
 @on_second_call
-def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "customer")
+def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "customer")
 
 
 @on_second_call
-def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "region")
+def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "region")
 
 
 @on_second_call
-def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "nation")
+def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "nation")
 
 
 @on_second_call
-def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "supplier")
+def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "supplier")
 
 
 @on_second_call
-def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "part")
+def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "part")
 
 
 @on_second_call
-def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return _read_ds(Path(base_dir) / "partsupp")
+def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_ds(base_dir / "partsupp")
 
 
 def run_query(q_num: int, query: Callable):
     @linetimer(name=f"Overall execution of pandas Query {q_num}", unit="s")
-    def run():
+    def run() -> None:
         with CodeTimer(name=f"Get result of pandas Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
             result = query()

@@ -1,3 +1,5 @@
+import pandas as pd
+
 from queries.pandas import utils
 
 Q_NUM = 2
@@ -21,7 +23,7 @@ def q() -> None:
     part_ds()
     part_supp_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal region_ds
         nonlocal nation_ds
         nonlocal supplier_ds

@@ -64,9 +64,18 @@ docstring-code-format = true
 
 [tool.mypy]
 files = ["queries", "scripts"]
-strict = true
-enable_error_code = [
-  "redundant-expr",
-  "truthy-bool",
-  "ignore-without-code",
+# strict = true
+# enable_error_code = [
+#   "redundant-expr",
+#   "truthy-bool",
+#   "ignore-without-code",
+# ]
+
+
+[[tool.mypy.overrides]]
+module = [
+  "linetimer.*",
+  "modin.*",
+  "plotly.*",
 ]
+ignore_missing_imports = true

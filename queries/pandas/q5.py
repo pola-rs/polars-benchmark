@@ -1,5 +1,7 @@
 from datetime import datetime
 
+import pandas as pd
+
 from queries.pandas import utils
 
 Q_NUM = 5
@@ -24,7 +26,7 @@ def q() -> None:
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal region_ds
         nonlocal nation_ds
         nonlocal customer_ds

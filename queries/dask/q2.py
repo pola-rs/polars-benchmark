@@ -1,4 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from queries.dask import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 2
 
@@ -21,7 +28,7 @@ def q() -> None:
     part_ds()
     part_supp_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal region_ds
         nonlocal nation_ds
         nonlocal supplier_ds

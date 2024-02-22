@@ -1,6 +1,12 @@
-import datetime
+from __future__ import annotations
+
+from datetime import datetime
+from typing import TYPE_CHECKING
 
 from queries.dask import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 5
 
@@ -24,7 +30,7 @@ def q() -> None:
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal region_ds
         nonlocal nation_ds
         nonlocal customer_ds

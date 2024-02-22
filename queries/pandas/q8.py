@@ -19,7 +19,7 @@ def q() -> None:
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal nation_ds
         nonlocal customer_ds
         nonlocal line_item_ds
@@ -68,7 +68,7 @@ def q() -> None:
         n2_filtered = nation_ds.loc[:, ["n_nationkey", "n_name"]].rename(
             columns={"n_name": "nation"}
         )
-        total: pd.DataFrame = total.merge(
+        total = total.merge(
             n1_filtered, left_on="c_nationkey", right_on="n_nationkey", how="inner"
         )
         total = total.loc[:, ["volume", "s_nationkey", "o_year", "n_regionkey"]]
