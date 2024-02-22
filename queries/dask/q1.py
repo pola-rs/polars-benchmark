@@ -1,18 +1,24 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from queries.dask import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 1
 
 
-def q():
+def q() -> None:
     VAR1 = datetime(1998, 9, 2)
 
     lineitem = utils.get_line_item_ds
     # first call one time to cache in case we don't include the IO times
     lineitem()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal lineitem
         lineitem = lineitem()
 
@@ -64,7 +70,7 @@ def q():
             total.compute().reset_index().sort_values(["l_returnflag", "l_linestatus"])
         )
 
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

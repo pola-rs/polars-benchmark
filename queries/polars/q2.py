@@ -5,7 +5,7 @@ from queries.polars import utils
 Q_NUM = 2
 
 
-def q():
+def q() -> None:
     var_1 = 15
     var_2 = "BRASS"
     var_3 = "EUROPE"

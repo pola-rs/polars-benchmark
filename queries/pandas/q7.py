@@ -7,7 +7,7 @@ from queries.pandas import utils
 Q_NUM = 7
 
 
-def q():
+def q() -> None:
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
@@ -21,7 +21,7 @@ def q():
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal nation_ds
         nonlocal customer_ds
         nonlocal line_item_ds
@@ -128,7 +128,7 @@ def q():
                 True,
             ],
         )
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

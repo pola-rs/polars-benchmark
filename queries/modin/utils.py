@@ -1,9 +1,10 @@
 import timeit
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import modin
-import modin.pandas as pd
+import pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.core.frame import DataFrame as PandasDF
 
@@ -17,18 +18,16 @@ from queries.common_utils import (
 )
 
 
-def __read_parquet_ds(path: str) -> PandasDF:
-    return pd.read_parquet(path, dtype_backend="pyarrow", engine="pyarrow")
+def _read_parquet_ds(path: Path) -> PandasDF:
+    return pd.read_parquet(path, dtype_backend="pyarrow")
 
 
-def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
-    import pandas as pd
-
+def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
     path = base_dir / f"q{query}.parquet"
     return pd.read_parquet(path)
 
 
-def test_results(q_num: int, result_df: PandasDF):
+def test_results(q_num: int, result_df: PandasDF) -> None:
     with CodeTimer(name=f"Testing result of modin Query {q_num}", unit="s"):
         import pandas as pd
 
@@ -46,48 +45,48 @@ def test_results(q_num: int, result_df: PandasDF):
 
 
 @on_second_call
-def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "lineitem.parquet")
+def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "lineitem.parquet")
 
 
 @on_second_call
-def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "orders.parquet")
+def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "orders.parquet")
 
 
 @on_second_call
-def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "customer.parquet")
+def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "customer.parquet")
 
 
 @on_second_call
-def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "region.parquet")
+def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "region.parquet")
 
 
 @on_second_call
-def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "nation.parquet")
+def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "nation.parquet")
 
 
 @on_second_call
-def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "supplier.parquet")
+def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "supplier.parquet")
 
 
 @on_second_call
-def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "part.parquet")
+def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "part.parquet")
 
 
 @on_second_call
-def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> PandasDF:
-    return __read_parquet_ds(Path(base_dir) / "partsupp.parquet")
+def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+    return _read_parquet_ds(base_dir / "partsupp.parquet")
 
 
-def run_query(q_num: int, query: Callable):
-    @linetimer(name=f"Overall execution of modin Query {q_num}", unit="s")
-    def run():
+def run_query(q_num: int, query: Callable[..., Any]) -> None:
+    @linetimer(name=f"Overall execution of modin Query {q_num}", unit="s")  # type: ignore[misc]
+    def run() -> None:
         with CodeTimer(name=f"Get result of modin Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
             result = query()

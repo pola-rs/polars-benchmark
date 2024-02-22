@@ -1,11 +1,17 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from queries.modin import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 4
 
 
-def q():
+def q() -> None:
     date1 = datetime(1993, 10, 1)
     date2 = datetime(1993, 7, 1)
 
@@ -16,7 +22,7 @@ def q():
     line_item_ds()
     orders_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal line_item_ds
         nonlocal orders_ds
         line_item_ds = line_item_ds()
@@ -33,7 +39,7 @@ def q():
             .sort_values(["o_orderpriority"])
             .rename(columns={"o_orderkey": "order_count"})
         )
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

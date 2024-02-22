@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 import modin.pandas as pd
@@ -7,7 +9,7 @@ from queries.modin import utils
 Q_NUM = 6
 
 
-def q():
+def q() -> None:
     date1 = datetime(1994, 1, 1)
     date2 = datetime(1995, 1, 1)
     var3 = 24
@@ -17,7 +19,7 @@ def q():
     # first call one time to cache in case we don't include the IO times
     line_item_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal line_item_ds
         line_item_ds = line_item_ds()
 

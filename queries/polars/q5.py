@@ -7,7 +7,7 @@ from queries.polars import utils
 Q_NUM = 5
 
 
-def q():
+def q() -> None:
     var_1 = "ASIA"
     var_2 = datetime(1994, 1, 1)
     var_3 = datetime(1995, 1, 1)

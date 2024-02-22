@@ -3,7 +3,7 @@ from queries.pyspark import utils
 Q_NUM = 14
 
 
-def q():
+def q() -> None:
     query_str = """
     select
         round(100.00 * sum(case

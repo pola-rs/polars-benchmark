@@ -20,12 +20,12 @@ SHOW_PLAN = bool(os.environ.get("SHOW_PLAN", False))
 STREAMING = bool(os.environ.get("STREAMING", False))
 
 
-def _scan_ds(path: Path):
-    path = f"{path}.{FILE_TYPE}"
+def _scan_ds(path: Path) -> pl.LazyFrame:
+    path_str = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
-        scan = pl.scan_parquet(path)
+        scan = pl.scan_parquet(path_str)
     elif FILE_TYPE == "feather":
-        scan = pl.scan_ipc(path)
+        scan = pl.scan_ipc(path_str)
     else:
         msg = f"file type: {FILE_TYPE} not expected"
         raise ValueError(msg)
@@ -38,47 +38,47 @@ def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pl.LazyFr
     return pl.scan_parquet(base_dir / f"q{query}.parquet")
 
 
-def test_results(q_num: int, result_df: pl.DataFrame):
+def test_results(q_num: int, result_df: pl.DataFrame) -> None:
     with CodeTimer(name=f"Testing result of polars Query {q_num}", unit="s"):
         answer = get_query_answer(q_num).collect()
         assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
-def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "lineitem")
+def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "lineitem")
 
 
-def get_orders_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "orders")
+def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "orders")
 
 
-def get_customer_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "customer")
+def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "customer")
 
 
-def get_region_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "region")
+def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "region")
 
 
-def get_nation_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "nation")
+def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "nation")
 
 
-def get_supplier_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "supplier")
+def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "supplier")
 
 
-def get_part_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "part")
+def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "part")
 
 
-def get_part_supp_ds(base_dir: str = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(Path(base_dir) / "partsupp")
+def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
+    return _scan_ds(base_dir / "partsupp")
 
 
-def run_query(q_num: int, lp: pl.LazyFrame):
-    @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")
-    def query():
+def run_query(q_num: int, lp: pl.LazyFrame) -> None:
+    @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")  # type: ignore[misc]
+    def query() -> None:
         if SHOW_PLAN:
             print(lp.explain())
 

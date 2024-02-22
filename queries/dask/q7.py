@@ -1,16 +1,22 @@
+from __future__ import annotations
+
 import warnings
 from datetime import datetime
+from typing import TYPE_CHECKING
+
+from queries.dask import utils
 
 with warnings.catch_warnings():
     warnings.filterwarnings("ignore", category=DeprecationWarning)
     import dask.dataframe as dd
 
-from queries.dask import utils
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 7
 
 
-def q():
+def q() -> None:
     var1 = datetime(1995, 1, 1)
     var2 = datetime(1997, 1, 1)
 
@@ -27,7 +33,7 @@ def q():
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal nation_ds
         nonlocal customer_ds
         nonlocal line_item_ds
@@ -117,7 +123,7 @@ def q():
         total2 = total2.drop(columns=["o_orderkey", "l_orderkey"])
 
         # concat results
-        total = dd.concat([total1, total2])
+        total = dd.concat([total1, total2])  # type: ignore[attr-defined]
         result_df = (
             total.groupby(["supp_nation", "cust_nation", "l_year"])
             .revenue.agg("sum")
@@ -127,13 +133,9 @@ def q():
 
         result_df = result_df.compute().sort_values(
             by=["supp_nation", "cust_nation", "l_year"],
-            ascending=[
-                True,
-                True,
-                True,
-            ],
+            ascending=[True, True, True],
         )
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

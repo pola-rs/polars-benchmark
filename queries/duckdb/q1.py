@@ -5,7 +5,7 @@ from queries.duckdb import utils
 Q_NUM = 1
 
 
-def q():
+def q() -> None:
     lineitem = utils.get_line_item_ds()
 
     query_str = f"""

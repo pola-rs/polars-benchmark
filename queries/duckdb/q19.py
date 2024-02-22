@@ -5,7 +5,7 @@ from queries.duckdb import utils
 Q_NUM = 19
 
 
-def q():
+def q() -> None:
     part_ds = utils.get_part_ds()
     line_item_ds = utils.get_line_item_ds()
 

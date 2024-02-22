@@ -1,9 +1,11 @@
+import pandas as pd
+
 from queries.pandas import utils
 
 Q_NUM = 2
 
 
-def q():
+def q() -> None:
     var1 = 15
     var2 = "BRASS"
     var3 = "EUROPE"
@@ -21,7 +23,7 @@ def q():
     part_ds()
     part_supp_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal region_ds
         nonlocal nation_ds
         nonlocal supplier_ds
@@ -150,7 +152,7 @@ def q():
             ],
         )[:100]
 
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

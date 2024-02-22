@@ -5,7 +5,7 @@ from queries.duckdb import utils
 Q_NUM = 22
 
 
-def q():
+def q() -> None:
     orders_ds = utils.get_orders_ds()
     customer_ds = utils.get_customer_ds()
 

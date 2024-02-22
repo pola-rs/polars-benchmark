@@ -3,7 +3,7 @@ from queries.pyspark import utils
 Q_NUM = 6
 
 
-def q():
+def q() -> None:
     query_str = """
     select
         sum(l_extendedprice * l_discount) as revenue

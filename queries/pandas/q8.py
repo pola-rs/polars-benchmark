@@ -5,7 +5,7 @@ from queries.pandas import utils
 Q_NUM = 8
 
 
-def q():
+def q() -> None:
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
@@ -19,7 +19,7 @@ def q():
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal nation_ds
         nonlocal customer_ds
         nonlocal line_item_ds
@@ -68,7 +68,7 @@ def q():
         n2_filtered = nation_ds.loc[:, ["n_nationkey", "n_name"]].rename(
             columns={"n_name": "nation"}
         )
-        total: pd.DataFrame = total.merge(
+        total = total.merge(
             n1_filtered, left_on="c_nationkey", right_on="n_nationkey", how="inner"
         )
         total = total.loc[:, ["volume", "s_nationkey", "o_year", "n_regionkey"]]
@@ -83,17 +83,17 @@ def q():
         )
         total = total.loc[:, ["volume", "o_year", "nation"]]
 
-        def udf(df):
-            demonimator = df["volume"].sum()
+        def udf(df: pd.DataFrame) -> float:
+            demonimator: float = df["volume"].sum()
             df = df[df["nation"] == "BRAZIL"]
-            numerator = df["volume"].sum()
+            numerator: float = df["volume"].sum()
             return round(numerator / demonimator, 2)
 
         total = total.groupby("o_year", as_index=False).apply(udf, include_groups=False)
         total.columns = ["o_year", "mkt_share"]
         total = total.sort_values(by=["o_year"], ascending=[True])
 
-        return total
+        return total  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

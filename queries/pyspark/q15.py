@@ -3,7 +3,7 @@ from queries.pyspark import utils
 Q_NUM = 15
 
 
-def q():
+def q() -> None:
     spark = utils.get_or_create_spark()
 
     ddl = """

@@ -5,7 +5,7 @@ from queries.duckdb import utils
 Q_NUM = 2
 
 
-def q():
+def q() -> None:
     region_ds = utils.get_region_ds()
     nation_ds = utils.get_nation_ds()
     supplier_ds = utils.get_supplier_ds()
