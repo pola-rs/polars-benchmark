@@ -3,7 +3,7 @@ from queries.pyspark import utils
 Q_NUM = 10
 
 
-def q():
+def q() -> None:
     query_str = """
     select
         c_custkey,

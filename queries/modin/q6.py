@@ -7,7 +7,7 @@ from queries.modin import utils
 Q_NUM = 6
 
 
-def q():
+def q() -> None:
     date1 = datetime(1994, 1, 1)
     date2 = datetime(1995, 1, 1)
     var3 = 24

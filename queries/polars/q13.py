@@ -5,7 +5,7 @@ from queries.polars import utils
 Q_NUM = 13
 
 
-def q():
+def q() -> None:
     var_1 = "special"
     var_2 = "requests"
 

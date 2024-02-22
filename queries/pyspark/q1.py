@@ -3,7 +3,7 @@ from queries.pyspark import utils
 Q_NUM = 1
 
 
-def q():
+def q() -> None:
     query_str = """
     select
         l_returnflag,

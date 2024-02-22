@@ -5,7 +5,7 @@ from queries.dask import utils
 Q_NUM = 4
 
 
-def q():
+def q() -> None:
     date1 = datetime(1993, 10, 1)
     date2 = datetime(1993, 7, 1)
 

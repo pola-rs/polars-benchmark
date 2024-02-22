@@ -7,7 +7,7 @@ from queries.polars import utils
 Q_NUM = 10
 
 
-def q():
+def q() -> None:
     customer_ds = utils.get_customer_ds()
     orders_ds = utils.get_orders_ds()
     line_item_ds = utils.get_line_item_ds()

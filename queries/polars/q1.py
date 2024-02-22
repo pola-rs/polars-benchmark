@@ -7,7 +7,7 @@ from queries.polars import utils
 Q_NUM = 1
 
 
-def q():
+def q() -> None:
     var_1 = datetime(1998, 9, 2)
     q = utils.get_line_item_ds()
     q_final = (

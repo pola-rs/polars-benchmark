@@ -3,7 +3,7 @@ from queries.pyspark import utils
 Q_NUM = 13
 
 
-def q():
+def q() -> None:
     query_str = """
     select
         c_count, count(*) as custdist

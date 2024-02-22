@@ -3,7 +3,7 @@ from queries.pandas import utils
 Q_NUM = 2
 
 
-def q():
+def q() -> None:
     var1 = 15
     var2 = "BRASS"
     var3 = "EUROPE"

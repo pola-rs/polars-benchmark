@@ -7,7 +7,7 @@ from queries.pandas import utils
 Q_NUM = 7
 
 
-def q():
+def q() -> None:
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds

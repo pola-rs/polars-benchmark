@@ -3,7 +3,7 @@ from queries.pyspark import utils
 Q_NUM = 20
 
 
-def q():
+def q() -> None:
     query_str = """
     select
         s_name,

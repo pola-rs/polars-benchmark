@@ -5,7 +5,7 @@ from queries.modin import utils
 Q_NUM = 1
 
 
-def q():
+def q() -> None:
     VAR1 = datetime(1998, 9, 2)
 
     lineitem = utils.get_line_item_ds

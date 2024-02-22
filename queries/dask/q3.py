@@ -5,7 +5,7 @@ from queries.dask import utils
 Q_NUM = 3
 
 
-def q():
+def q() -> None:
     var1 = datetime(1995, 3, 15)
     var2 = "BUILDING"
 

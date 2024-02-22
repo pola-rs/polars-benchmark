@@ -5,7 +5,7 @@ from queries.polars import utils
 Q_NUM = 11
 
 
-def q():
+def q() -> None:
     supplier_ds = utils.get_supplier_ds()
     part_supp_ds = utils.get_part_supp_ds()
     nation_ds = utils.get_nation_ds()

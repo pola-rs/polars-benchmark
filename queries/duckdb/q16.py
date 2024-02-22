@@ -5,7 +5,7 @@ from queries.duckdb import utils
 Q_NUM = 16
 
 
-def q():
+def q() -> None:
     part_ds = utils.get_part_ds()
     supplier_ds = utils.get_supplier_ds()
     part_supp_ds = utils.get_part_supp_ds()

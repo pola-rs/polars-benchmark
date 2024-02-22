@@ -5,7 +5,7 @@ from queries.modin import utils
 Q_NUM = 3
 
 
-def q():
+def q() -> None:
     var1 = var2 = datetime(1995, 3, 15)
     var3 = "BUILDING"
 
