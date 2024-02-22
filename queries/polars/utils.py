@@ -35,9 +35,9 @@ def _scan_ds(path: Path):
 
 
 def get_query_answer(
-    query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR
+    query: int, base_dir: Path = ANSWERS_PARQUET_BASE_DIR
 ) -> pl.LazyFrame:
-    return pl.scan_parquet(Path(base_dir) / f"q{query}.parquet")
+    return pl.scan_parquet(base_dir / f"q{query}.parquet")
 
 
 def test_results(q_num: int, result_df: pl.DataFrame):

@@ -1,6 +1,9 @@
-import datetime
+import warnings
+from datetime import datetime
 
-import dask.dataframe as dd
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    import dask.dataframe as dd
 
 from queries.dask import utils
 
@@ -8,8 +11,9 @@ Q_NUM = 7
 
 
 def q():
-    var1 = datetime.strptime("1995-01-01", "%Y-%m-%d")
-    var2 = datetime.strptime("1997-01-01", "%Y-%m-%d")
+    var1 = datetime(1995, 1, 1)
+    var2 = datetime(1997, 1, 1)
+
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
