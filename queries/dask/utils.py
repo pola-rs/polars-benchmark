@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import timeit
 from typing import TYPE_CHECKING, Any
 
@@ -29,12 +28,15 @@ if TYPE_CHECKING:
 
 def read_ds(path: Path) -> DataFrame:
     if INCLUDE_IO:
-        return dd.read_parquet(path)  # type: ignore[attr-defined,no-any-return]
+        return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
     if FILE_TYPE == "feather":
         msg = "file type feather not supported for dask queries"
         raise ValueError(msg)
 
-    return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())  # type: ignore[attr-defined,no-any-return]
+    # TODO: Load into memory before returning the Dask DataFrame.
+    # Code below is tripped up by date types and pyarrow backend is not yet supported
+    # return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
+    return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
 
 
 def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pd.DataFrame:

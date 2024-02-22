@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import pandas as pd
 
@@ -8,7 +8,7 @@ Q_NUM = 1
 
 
 def q() -> None:
-    VAR1 = datetime(1998, 9, 2)
+    VAR1 = date(1998, 9, 2)
 
     lineitem = utils.get_line_item_ds
     # first call one time to cache in case we don't include the IO times

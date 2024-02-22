@@ -3,13 +3,9 @@ import re
 import sys
 from pathlib import Path
 from subprocess import run
-from typing import TYPE_CHECKING, Any, ParamSpec, TypeVar
+from typing import Any
 
 from linetimer import CodeTimer
-
-if TYPE_CHECKING:
-    P = ParamSpec("P")
-    T = TypeVar("T")
 
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
 SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))

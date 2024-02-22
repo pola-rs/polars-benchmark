@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -14,8 +14,8 @@ def q() -> None:
     part_ds = utils.get_part_ds()
     part_supp_ds = utils.get_part_supp_ds()
 
-    var_1 = datetime(1994, 1, 1)
-    var_2 = datetime(1995, 1, 1)
+    var_1 = date(1994, 1, 1)
+    var_2 = date(1995, 1, 1)
     var_3 = "CANADA"
     var_4 = "forest"
 

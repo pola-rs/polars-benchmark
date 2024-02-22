@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -8,8 +8,8 @@ Q_NUM = 6
 
 
 def q() -> None:
-    var_1 = datetime(1994, 1, 1)
-    var_2 = datetime(1995, 1, 1)
+    var_1 = date(1994, 1, 1)
+    var_2 = date(1995, 1, 1)
     var_3 = 24
 
     line_item_ds = utils.get_line_item_ds()

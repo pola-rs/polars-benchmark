@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -28,11 +28,7 @@ def q() -> None:
         .join(region_ds, left_on="n_regionkey", right_on="r_regionkey")
         .filter(pl.col("r_name") == "AMERICA")
         .join(n2, left_on="s_nationkey", right_on="n_nationkey")
-        .filter(
-            pl.col("o_orderdate").is_between(
-                datetime(1995, 1, 1), datetime(1996, 12, 31)
-            )
-        )
+        .filter(pl.col("o_orderdate").is_between(date(1995, 1, 1), date(1996, 12, 31)))
         .filter(pl.col("p_type") == "ECONOMY ANODIZED STEEL")
         .select(
             pl.col("o_orderdate").dt.year().alias("o_year"),

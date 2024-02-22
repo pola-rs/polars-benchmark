@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import warnings
-from datetime import datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
 from queries.dask import utils
@@ -17,8 +17,8 @@ Q_NUM = 7
 
 
 def q() -> None:
-    var1 = datetime(1995, 1, 1)
-    var2 = datetime(1997, 1, 1)
+    var1 = date(1995, 1, 1)
+    var2 = date(1997, 1, 1)
 
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds

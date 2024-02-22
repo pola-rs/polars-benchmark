@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -11,8 +11,8 @@ def q() -> None:
     line_item_ds = utils.get_line_item_ds()
     part_ds = utils.get_part_ds()
 
-    var_1 = datetime(1995, 9, 1)
-    var_2 = datetime(1995, 10, 1)
+    var_1 = date(1995, 9, 1)
+    var_2 = date(1995, 10, 1)
 
     q_final = (
         line_item_ds.join(part_ds, left_on="l_partkey", right_on="p_partkey")
