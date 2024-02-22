@@ -18,6 +18,7 @@ requirements: .venv  ## Update Python project requirements
 fmt:  ## Run autoformatting and linting
 	$(VENV_BIN)/ruff check
 	$(VENV_BIN)/ruff format
+	$(VENV_BIN)/mypy
 
 .PHONY: pre-commit
 pre-commit: fmt  ## Run all code quality checks

@@ -13,8 +13,9 @@ perf.*
 
 # Python
 __pycache__/
-.venv/
+.mypy_cache/
 .ruff_cache/
+.venv/
 
 # Rust
 .cargo/
