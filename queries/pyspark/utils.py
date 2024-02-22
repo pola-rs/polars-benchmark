@@ -28,8 +28,8 @@ def get_or_create_spark() -> SparkSession:
     return spark
 
 
-def __read_parquet_ds(path: str, table_name: str) -> SparkDF:
-    df = get_or_create_spark().read.parquet(path)
+def __read_parquet_ds(path: Path, table_name: str) -> SparkDF:
+    df = get_or_create_spark().read.parquet(str(path))
     df.createOrReplaceTempView(table_name)
     return df
 

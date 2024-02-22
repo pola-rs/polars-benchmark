@@ -1,7 +1,7 @@
 from linetimer import CodeTimer
 
 # TODO: works for now, but need dynamic imports for this.
-from pyspark import (  # noqa: F401
+from queries.pyspark import (  # noqa: F401
     q1,
     q2,
     q3,
@@ -30,9 +30,11 @@ if __name__ == "__main__":
     num_queries = 22
 
     with CodeTimer(name="Overall execution of ALL spark queries", unit="s"):
-        sub_modules = [f"q{sm}" for sm in range(1, num_queries + 1)]
-        for sm in sub_modules:
+        for query_number in range(1, num_queries + 1):
+            submodule = f"q{query_number}"
             try:
-                eval(f"{sm}.q()")
-            except Exception:
-                print(f"Exception occurred while executing spark_queries.{sm}")
+                eval(f"{submodule}.q()")
+            except Exception as exc:
+                print(
+                    f"Exception occurred while executing PySpark query {query_number}:\n{exc}"
+                )
