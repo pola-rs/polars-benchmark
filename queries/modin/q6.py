@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import modin.pandas as pd
 
@@ -8,8 +8,8 @@ Q_NUM = 6
 
 
 def q():
-    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d")
-    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d")
+    date1 = datetime(1994, 1, 1)
+    date2 = datetime(1995, 1, 1)
     var3 = 24
 
     line_item_ds = utils.get_line_item_ds

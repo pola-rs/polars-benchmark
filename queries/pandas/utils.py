@@ -4,7 +4,9 @@ from pathlib import Path
 
 import pandas as pd
 from linetimer import CodeTimer, linetimer
+from pandas.api.types import is_string_dtype
 from pandas.core.frame import DataFrame as PandasDF
+from pandas.testing import assert_series_equal
 
 from queries.common_utils import (
     ANSWERS_BASE_DIR,
@@ -16,26 +18,23 @@ from queries.common_utils import (
     on_second_call,
 )
 
+pd.options.mode.copy_on_write = True
+
 
 def _read_ds(path: Path) -> PandasDF:
     path = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
-        return pd.read_parquet(path, dtype_backend="pyarrow", engine="pyarrow")
+        return pd.read_parquet(path, dtype_backend="pyarrow")
     elif FILE_TYPE == "feather":
-        return pd.read_feather(path)
+        return pd.read_feather(path, dtype_backend="pyarrow")
     else:
         msg = f"file type: {FILE_TYPE} not expected"
         raise ValueError(msg)
 
 
 def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
-    answer_df = pd.read_csv(
-        Path(base_dir) / f"q{query}.out",
-        sep="|",
-        parse_dates=True,
-        infer_datetime_format=True,
-    )
-    return answer_df.rename(columns=lambda x: x.strip())
+    path = base_dir / f"q{query}.parquet"
+    return pd.read_parquet(path, dtype_backend="pyarrow")
 
 
 def test_results(q_num: int, result_df: PandasDF):
@@ -46,11 +45,14 @@ def test_results(q_num: int, result_df: PandasDF):
             s1 = result_df[c]
             s2 = answer[c]
 
-            if t.name == "object":
-                s1 = s1.astype("string").apply(lambda x: x.strip())
-                s2 = s2.astype("string").apply(lambda x: x.strip())
+            if is_string_dtype(t):
+                s1 = s1.apply(lambda x: x.strip())
 
-            pd.testing.assert_series_equal(left=s1, right=s2, check_index=False)
+            # TODO: Remove this cast
+            if s2.dtype == "date32[day][pyarrow]":
+                s2 = s2.astype("timestamp[us][pyarrow]")
+
+            assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
 
 
 @on_second_call

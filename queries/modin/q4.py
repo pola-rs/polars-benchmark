@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from queries.modin import utils
 
@@ -6,8 +6,8 @@ Q_NUM = 4
 
 
 def q():
-    date1 = datetime.datetime.strptime("1993-10-01", "%Y-%m-%d")
-    date2 = datetime.datetime.strptime("1993-07-01", "%Y-%m-%d")
+    date1 = datetime(1993, 10, 1)
+    date2 = datetime(1993, 7, 1)
 
     line_item_ds = utils.get_line_item_ds
     orders_ds = utils.get_orders_ds

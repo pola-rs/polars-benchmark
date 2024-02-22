@@ -7,7 +7,7 @@ from linetimer import CodeTimer, linetimer
 from polars.testing import assert_frame_equal
 
 from queries.common_utils import (
-    ANSWERS_PARQUET_BASE_DIR,
+    ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,
     INCLUDE_IO,
@@ -34,10 +34,8 @@ def _scan_ds(path: Path):
     return scan.collect().rechunk().lazy()
 
 
-def get_query_answer(
-    query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR
-) -> pl.LazyFrame:
-    return pl.scan_parquet(Path(base_dir) / f"q{query}.parquet")
+def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pl.LazyFrame:
+    return pl.scan_parquet(base_dir / f"q{query}.parquet")
 
 
 def test_results(q_num: int, result_df: pl.DataFrame):

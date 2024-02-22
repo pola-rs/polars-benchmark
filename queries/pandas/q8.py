@@ -89,7 +89,7 @@ def q():
             numerator = df["volume"].sum()
             return round(numerator / demonimator, 2)
 
-        total = total.groupby("o_year", as_index=False).apply(udf)
+        total = total.groupby("o_year", as_index=False).apply(udf, include_groups=False)
         total.columns = ["o_year", "mkt_share"]
         total = total.sort_values(by=["o_year"], ascending=[True])
 

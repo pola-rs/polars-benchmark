@@ -23,8 +23,7 @@ print("file type:", FILE_TYPE)
 CWD = Path(__file__).parent
 ROOT = CWD.parent
 DATASET_BASE_DIR = ROOT / "data" / "tables" / f"scale-{SCALE_FACTOR}"
-ANSWERS_BASE_DIR = ROOT / "tpch-dbgen/answers"
-ANSWERS_PARQUET_BASE_DIR = ROOT / "data" / "answers"
+ANSWERS_BASE_DIR = ROOT / "data" / "answers"
 TIMINGS_FILE = ROOT / os.environ.get("TIMINGS_FILE", "timings.csv")
 DEFAULT_PLOTS_DIR = ROOT / "plots"
 

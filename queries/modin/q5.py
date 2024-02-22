@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from queries.modin import utils
 
@@ -6,8 +6,8 @@ Q_NUM = 5
 
 
 def q():
-    date1 = datetime.datetime.strptime("1994-01-01", "%Y-%m-%d")
-    date2 = datetime.datetime.strptime("1995-01-01", "%Y-%m-%d")
+    date1 = datetime(1994, 1, 1)
+    date2 = datetime(1995, 1, 1)
 
     region_ds = utils.get_region_ds
     nation_ds = utils.get_nation_ds
