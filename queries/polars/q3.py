@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -8,7 +8,7 @@ Q_NUM = 3
 
 
 def q() -> None:
-    var_1 = var_2 = datetime(1995, 3, 15)
+    var_1 = var_2 = date(1995, 3, 15)
     var_3 = "BUILDING"
 
     customer_ds = utils.get_customer_ds()

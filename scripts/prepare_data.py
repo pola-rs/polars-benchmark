@@ -106,8 +106,5 @@ for name in [
         new_columns=eval(f"h_{name}"),
     )
 
-    # TODO: Remove this cast
-    lf = lf.with_columns(pl.col(pl.Date).cast(pl.Datetime))
-
     lf.sink_parquet(TABLES_DIR / f"{name}.parquet")
     lf.sink_ipc(TABLES_DIR / f"{name}.ipc")

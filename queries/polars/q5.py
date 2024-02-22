@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -9,8 +9,8 @@ Q_NUM = 5
 
 def q() -> None:
     var_1 = "ASIA"
-    var_2 = datetime(1994, 1, 1)
-    var_3 = datetime(1995, 1, 1)
+    var_2 = date(1994, 1, 1)
+    var_3 = date(1995, 1, 1)
 
     region_ds = utils.get_region_ds()
     nation_ds = utils.get_nation_ds()

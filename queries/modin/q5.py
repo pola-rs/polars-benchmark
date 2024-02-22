@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
 from queries.modin import utils
@@ -12,8 +12,8 @@ Q_NUM = 5
 
 
 def q() -> None:
-    date1 = datetime(1994, 1, 1)
-    date2 = datetime(1995, 1, 1)
+    date1 = date(1994, 1, 1)
+    date2 = date(1995, 1, 1)
 
     region_ds = utils.get_region_ds
     nation_ds = utils.get_nation_ds

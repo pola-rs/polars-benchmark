@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -11,8 +11,8 @@ def q() -> None:
     line_item_ds = utils.get_line_item_ds()
     supplier_ds = utils.get_supplier_ds()
 
-    var_1 = datetime(1996, 1, 1)
-    var_2 = datetime(1996, 4, 1)
+    var_1 = date(1996, 1, 1)
+    var_2 = date(1996, 4, 1)
 
     revenue_ds = (
         line_item_ds.filter(

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date
 from typing import TYPE_CHECKING
 
 from queries.modin import utils
@@ -12,7 +12,7 @@ Q_NUM = 3
 
 
 def q() -> None:
-    var1 = var2 = datetime(1995, 3, 15)
+    var1 = var2 = date(1995, 3, 15)
     var3 = "BUILDING"
 
     customer_ds = utils.get_customer_ds

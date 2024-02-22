@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import date
 
 import modin.pandas as pd
 
@@ -10,8 +10,8 @@ Q_NUM = 6
 
 
 def q() -> None:
-    date1 = datetime(1994, 1, 1)
-    date2 = datetime(1995, 1, 1)
+    date1 = date(1994, 1, 1)
+    date2 = date(1995, 1, 1)
     var3 = 24
 
     line_item_ds = utils.get_line_item_ds

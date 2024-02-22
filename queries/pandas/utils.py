@@ -49,10 +49,6 @@ def test_results(q_num: int, result_df: PandasDF) -> None:
             if is_string_dtype(t):
                 s1 = s1.apply(lambda x: x.strip())
 
-            # TODO: Remove this cast
-            if s2.dtype == "date32[day][pyarrow]":
-                s2 = s2.astype("timestamp[us][pyarrow]")
-
             assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
 
 

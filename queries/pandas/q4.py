@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import pandas as pd
 
@@ -8,8 +8,8 @@ Q_NUM = 4
 
 
 def q() -> None:
-    date1 = datetime(1993, 10, 1)
-    date2 = datetime(1993, 7, 1)
+    date1 = date(1993, 10, 1)
+    date2 = date(1993, 7, 1)
 
     line_item_ds = utils.get_line_item_ds
     orders_ds = utils.get_orders_ds

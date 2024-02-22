@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import date
 
 import polars as pl
 
@@ -13,8 +13,8 @@ def q() -> None:
     line_item_ds = utils.get_line_item_ds()
     nation_ds = utils.get_nation_ds()
 
-    var_1 = datetime(1993, 10, 1)
-    var_2 = datetime(1994, 1, 1)
+    var_1 = date(1993, 10, 1)
+    var_2 = date(1994, 1, 1)
 
     q_final = (
         customer_ds.join(orders_ds, left_on="c_custkey", right_on="o_custkey")
