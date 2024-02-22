@@ -1,6 +1,7 @@
 import timeit
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
 
 import modin
 import pandas as pd
@@ -26,7 +27,7 @@ def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
     return pd.read_parquet(path)
 
 
-def test_results(q_num: int, result_df: PandasDF):
+def test_results(q_num: int, result_df: PandasDF) -> None:
     with CodeTimer(name=f"Testing result of modin Query {q_num}", unit="s"):
         import pandas as pd
 
@@ -83,8 +84,8 @@ def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
     return _read_parquet_ds(base_dir / "partsupp.parquet")
 
 
-def run_query(q_num: int, query: Callable):
-    @linetimer(name=f"Overall execution of modin Query {q_num}", unit="s")
+def run_query(q_num: int, query: Callable[..., Any]) -> None:
+    @linetimer(name=f"Overall execution of modin Query {q_num}", unit="s")  # type: ignore[misc]
     def run() -> None:
         with CodeTimer(name=f"Get result of modin Query {q_num}", unit="s"):
             t0 = timeit.default_timer()

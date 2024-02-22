@@ -38,7 +38,7 @@ def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pl.LazyFr
     return pl.scan_parquet(base_dir / f"q{query}.parquet")
 
 
-def test_results(q_num: int, result_df: pl.DataFrame):
+def test_results(q_num: int, result_df: pl.DataFrame) -> None:
     with CodeTimer(name=f"Testing result of polars Query {q_num}", unit="s"):
         answer = get_query_answer(q_num).collect()
         assert_frame_equal(left=result_df, right=answer, check_dtype=False)
@@ -77,7 +77,7 @@ def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
 
 
 def run_query(q_num: int, lp: pl.LazyFrame) -> None:
-    @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")
+    @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")  # type: ignore[misc]
     def query() -> None:
         if SHOW_PLAN:
             print(lp.explain())

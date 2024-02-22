@@ -84,7 +84,7 @@ def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> str:
 
 
 def run_query(q_num: int, context: DuckDBPyRelation) -> None:
-    @linetimer(name=f"Overall execution of duckdb Query {q_num}", unit="s")
+    @linetimer(name=f"Overall execution of duckdb Query {q_num}", unit="s")  # type: ignore[misc]
     def query() -> None:
         with CodeTimer(name=f"Get result of duckdb Query {q_num}", unit="s"):
             t0 = timeit.default_timer()

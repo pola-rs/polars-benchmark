@@ -135,7 +135,7 @@ def q() -> None:
             by=["supp_nation", "cust_nation", "l_year"],
             ascending=[True, True, True],
         )
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

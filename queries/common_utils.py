@@ -66,7 +66,7 @@ def on_second_call(func: Any) -> Any:
     return helper
 
 
-def execute_all(solution: str):
+def execute_all(solution: str) -> None:
     package_name = f"{solution}"
 
     expr = re.compile(r"q(\d+).py$")

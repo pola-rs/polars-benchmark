@@ -64,7 +64,7 @@ def q() -> None:
 
         result_df = total.reset_index().sort_values(["l_returnflag", "l_linestatus"])
 
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

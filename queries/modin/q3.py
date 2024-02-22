@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from queries.modin import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 3
 
@@ -18,7 +24,7 @@ def q() -> None:
     line_item_ds()
     orders_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal customer_ds
         nonlocal line_item_ds
         nonlocal orders_ds
@@ -53,7 +59,7 @@ def q() -> None:
         result_df = total[:10].loc[
             :, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]
         ]
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from datetime import datetime
 
 import modin.pandas as pd
@@ -24,7 +26,7 @@ def q() -> None:
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal nation_ds
         nonlocal customer_ds
         nonlocal line_item_ds
@@ -124,11 +126,7 @@ def q() -> None:
 
         result_df = result_df.sort_values(
             by=["supp_nation", "cust_nation", "l_year"],
-            ascending=[
-                True,
-                True,
-                True,
-            ],
+            ascending=[True, True, True],
         )
         return result_df
 

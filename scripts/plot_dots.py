@@ -16,7 +16,7 @@ except ImportError:
     sys.exit(1)
 
 
-def get_styles(exclude_solutions: list[str]):
+def get_styles(exclude_solutions: list[str]) -> pl.DataFrame:
     all_styles = pl.DataFrame(
         data=[
             ["dask", "Dask", "#ef1161", "D", 4.5],
@@ -56,7 +56,7 @@ def prepare_timings(
     exclude_solutions: list[str],
     queries: list[str],
     include_io: bool,
-):
+) -> pl.DataFrame:
     return (
         timings.join(styles, on="solution", how="left")
         .filter(
@@ -82,7 +82,7 @@ def formulate_caption(
     no_notes: bool,
     max_duration: float,
     width: float,
-):
+) -> str:
     caption = ""
 
     if not no_notes:

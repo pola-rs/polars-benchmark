@@ -55,7 +55,7 @@ def q() -> None:
         result_df = total[:10].loc[
             :, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]
         ]
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

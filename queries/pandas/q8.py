@@ -83,17 +83,17 @@ def q() -> None:
         )
         total = total.loc[:, ["volume", "o_year", "nation"]]
 
-        def udf(df):
-            demonimator = df["volume"].sum()
+        def udf(df: pd.DataFrame) -> float:
+            demonimator: float = df["volume"].sum()
             df = df[df["nation"] == "BRAZIL"]
-            numerator = df["volume"].sum()
+            numerator: float = df["volume"].sum()
             return round(numerator / demonimator, 2)
 
         total = total.groupby("o_year", as_index=False).apply(udf, include_groups=False)
         total.columns = ["o_year", "mkt_share"]
         total = total.sort_values(by=["o_year"], ascending=[True])
 
-        return total
+        return total  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

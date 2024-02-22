@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import timeit
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Any
 
 import dask.dataframe as dd
 import pandas as pd
@@ -24,15 +24,17 @@ if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
+    from dask.dataframe.core import DataFrame
 
-def read_ds(path: Path) -> dd.DataFrame:
+
+def read_ds(path: Path) -> DataFrame:
     if INCLUDE_IO:
-        return dd.read_parquet(path)
+        return dd.read_parquet(path)  # type: ignore[attr-defined,no-any-return]
     if FILE_TYPE == "feather":
         msg = "file type feather not supported for dask queries"
         raise ValueError(msg)
 
-    return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
+    return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())  # type: ignore[attr-defined,no-any-return]
 
 
 def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pd.DataFrame:
@@ -40,7 +42,7 @@ def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pd.DataFr
     return pd.read_parquet(path)
 
 
-def test_results(q_num: int, result_df: pd.DataFrame):
+def test_results(q_num: int, result_df: pd.DataFrame) -> None:
     with CodeTimer(name=f"Testing result of dask Query {q_num}", unit="s"):
         answer = get_query_answer(q_num)
 
@@ -56,47 +58,47 @@ def test_results(q_num: int, result_df: pd.DataFrame):
 
 
 @on_second_call
-def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "lineitem.parquet")
 
 
 @on_second_call
-def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "orders.parquet")
 
 
 @on_second_call
-def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "customer.parquet")
 
 
 @on_second_call
-def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "region.parquet")
 
 
 @on_second_call
-def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "nation.parquet")
 
 
 @on_second_call
-def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "supplier.parquet")
 
 
 @on_second_call
-def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "part.parquet")
 
 
 @on_second_call
-def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> dd.DataFrame:
+def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> DataFrame:
     return read_ds(base_dir / "partsupp.parquet")
 
 
-def run_query(q_num: int, query: Callable) -> None:
-    @linetimer(name=f"Overall execution of dask Query {q_num}", unit="s")
+def run_query(q_num: int, query: Callable[..., Any]) -> None:
+    @linetimer(name=f"Overall execution of dask Query {q_num}", unit="s")  # type: ignore[misc]
     def run() -> None:
         import dask
 

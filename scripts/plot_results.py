@@ -7,6 +7,7 @@ To use this script, run:
 ```
 """
 from pathlib import Path
+from typing import Any
 
 import plotly.express as px
 import polars as pl
@@ -34,7 +35,7 @@ LABEL_UPDATES = {
 }
 
 
-def add_annotations(fig, limit: int, df: pl.DataFrame):
+def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
     # order of solutions in the file
     # e.g. ['polar', 'pandas', 'dask']
     bar_order = (
@@ -98,7 +99,7 @@ def add_annotations(fig, limit: int, df: pl.DataFrame):
         )
 
 
-def write_plot_image(fig):
+def write_plot_image(fig: Any) -> None:
     path = Path(DEFAULT_PLOTS_DIR)
     if not path.exists():
         path.mkdir()
@@ -113,7 +114,7 @@ def plot(
     y: str = "duration[s]",
     group: str = "solution",
     limit: int = 120,
-):
+) -> px.Figure:
     """Generate a Plotly Figure of a grouped bar chart displaying benchmark results.
 
     Parameters

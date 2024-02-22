@@ -1,6 +1,12 @@
+from __future__ import annotations
+
 from datetime import datetime
+from typing import TYPE_CHECKING
 
 from queries.modin import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 5
 
@@ -24,7 +30,7 @@ def q() -> None:
     orders_ds()
     supplier_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal region_ds
         nonlocal nation_ds
         nonlocal customer_ds
@@ -55,7 +61,7 @@ def q() -> None:
         jn5["revenue"] = jn5.l_extendedprice * (1.0 - jn5.l_discount)
         gb = jn5.groupby("n_name", as_index=False)["revenue"].sum()
         result_df = gb.sort_values("revenue", ascending=False)
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

@@ -35,7 +35,7 @@ def q() -> None:
             .sort_values(["o_orderpriority"])
             .rename(columns={"o_orderkey": "order_count"})
         )
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

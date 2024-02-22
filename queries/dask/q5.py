@@ -61,7 +61,7 @@ def q() -> None:
         jn5["revenue"] = jn5.l_extendedprice * (1.0 - jn5.l_discount)
         gb = jn5.groupby("n_name")["revenue"].sum()
         result_df = gb.compute().reset_index().sort_values("revenue", ascending=False)
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

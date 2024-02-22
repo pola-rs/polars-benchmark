@@ -41,7 +41,7 @@ def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
     return pd.read_parquet(path)
 
 
-def test_results(q_num: int, result_df: PandasDF):
+def test_results(q_num: int, result_df: PandasDF) -> None:
     import pandas as pd
 
     with CodeTimer(name=f"Testing result of PySpark Query {q_num}", unit="s"):
@@ -102,7 +102,7 @@ def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
     return _read_parquet_ds(base_dir / "partsupp.parquet", "partsupp")
 
 
-def drop_temp_view():
+def drop_temp_view() -> None:
     spark = get_or_create_spark()
     [
         spark.catalog.dropTempView(t.name)
@@ -111,9 +111,9 @@ def drop_temp_view():
     ]
 
 
-def run_query(q_num: int, result: SparkDF):
-    @linetimer(name=f"Overall execution of PySpark Query {q_num}", unit="s")
-    def run():
+def run_query(q_num: int, result: SparkDF) -> None:
+    @linetimer(name=f"Overall execution of PySpark Query {q_num}", unit="s")  # type: ignore[misc]
+    def run() -> None:
         with CodeTimer(name=f"Get result of PySpark Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
             pdf = result.toPandas()

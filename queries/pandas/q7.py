@@ -128,7 +128,7 @@ def q() -> None:
                 True,
             ],
         )
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

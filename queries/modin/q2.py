@@ -1,4 +1,11 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from queries.modin import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 2
 
@@ -21,7 +28,7 @@ def q() -> None:
     part_ds()
     part_supp_ds()
 
-    def query():
+    def query() -> pd.DataFrame:
         nonlocal region_ds
         nonlocal nation_ds
         nonlocal supplier_ds
@@ -150,7 +157,7 @@ def q() -> None:
             ],
         )[:100]
 
-        return result_df
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 
