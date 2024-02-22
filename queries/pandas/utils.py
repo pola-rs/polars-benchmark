@@ -9,7 +9,7 @@ from pandas.core.frame import DataFrame as PandasDF
 from pandas.testing import assert_series_equal
 
 from queries.common_utils import (
-    ANSWERS_PARQUET_BASE_DIR,
+    ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,
     LOG_TIMINGS,
@@ -32,7 +32,7 @@ def _read_ds(path: Path) -> PandasDF:
         raise ValueError(msg)
 
 
-def get_query_answer(query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR) -> PandasDF:
+def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> PandasDF:
     path = base_dir / f"q{query}.parquet"
     return pd.read_parquet(path, dtype_backend="pyarrow")
 

@@ -10,7 +10,7 @@ from linetimer import CodeTimer, linetimer
 from pandas.testing import assert_series_equal
 
 from queries.common_utils import (
-    ANSWERS_PARQUET_BASE_DIR,
+    ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,
     INCLUDE_IO,
@@ -31,9 +31,7 @@ def read_ds(path: str) -> Union:
     return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
 
 
-def get_query_answer(
-    query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR
-) -> pd.DataFrame:
+def get_query_answer(query: int, base_dir: str = ANSWERS_BASE_DIR) -> pd.DataFrame:
     path = base_dir / f"q{query}.parquet"
     return pd.read_parquet(path)
 
