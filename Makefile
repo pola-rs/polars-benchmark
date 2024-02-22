@@ -5,14 +5,21 @@ SHELL=/bin/bash
 VENV=.venv
 VENV_BIN=$(VENV)/bin
 
-.venv:  ## Set up Python virtual environment and install requirements
+.venv:  ## Set up Python virtual environment and install dependencies
 	python3 -m venv $(VENV)
-	$(MAKE) requirements
+	$(MAKE) install-deps
 
-.PHONY: requirements
-requirements: .venv  ## Update Python project requirements
-	$(VENV_BIN)/python -m pip install uv
-	$(VENV_BIN)/uv pip install --upgrade -r requirements.txt
+.PHONY: install-deps
+install-deps: .venv  ## Install Python project dependencies
+	$(VENV_BIN)/python -m pip install --upgrade uv
+	$(VENV_BIN)/uv pip install -r requirements.txt
+	$(VENV_BIN)/uv pip install -r requirements-dev.txt
+
+.PHONY: bump-deps
+bump-deps: .venv  ## Bump Python project dependencies
+	$(VENV_BIN)/python -m pip install --upgrade uv
+	$(VENV_BIN)/uv pip compile requirements.in > requirements.txt
+	$(VENV_BIN)/uv pip compile requirements-dev.in > requirements-dev.txt
 
 .PHONY: fmt
 fmt:  ## Run autoformatting and linting
