@@ -7,9 +7,10 @@ from typing import Union
 import dask.dataframe as dd
 import pandas as pd
 from linetimer import CodeTimer, linetimer
+from pandas.testing import assert_series_equal
 
 from queries.common_utils import (
-    ANSWERS_BASE_DIR,
+    ANSWERS_PARQUET_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,
     INCLUDE_IO,
@@ -31,14 +32,10 @@ def read_ds(path: str) -> Union:
 
 
 def get_query_answer(
-    query: int, base_dir: Path = ANSWERS_BASE_DIR
-) -> dd.DataFrame:
-    answer_df = pd.read_csv(
-        base_dir / f"q{query}.out",
-        sep="|",
-        parse_dates=True,
-    )
-    return answer_df.rename(columns=lambda x: x.strip())
+    query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR
+) -> pd.DataFrame:
+    path = base_dir / f"q{query}.parquet"
+    return pd.read_parquet(path)
 
 
 def test_results(q_num: int, result_df: pd.DataFrame):
@@ -53,9 +50,7 @@ def test_results(q_num: int, result_df: pd.DataFrame):
                 s1 = s1.astype("string").apply(lambda x: x.strip())
                 s2 = s2.astype("string").apply(lambda x: x.strip())
 
-            pd.testing.assert_series_equal(
-                left=s1, right=s2, check_index=False, check_dtype=False
-            )
+            assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
 
 
 @on_second_call

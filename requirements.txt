@@ -12,4 +12,4 @@ pyspark
 # TODO: Enable optional ray dependency for modin when ray supports Python 3.12
 # https://github.com/ray-project/ray/issues/40211
 # modin[ray]
-modin
+modin[dask]

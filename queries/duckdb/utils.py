@@ -6,7 +6,7 @@ import duckdb
 import polars as pl
 from duckdb import DuckDBPyRelation
 from linetimer import CodeTimer, linetimer
-from polars import testing as pl_test
+from polars.testing import assert_frame_equal
 
 from queries.common_utils import (
     ANSWERS_PARQUET_BASE_DIR,
@@ -41,15 +41,16 @@ def _scan_ds(path: Path):
 
 
 def get_query_answer(
-    query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR
+    query: int, base_dir: Path = ANSWERS_PARQUET_BASE_DIR
 ) -> pl.LazyFrame:
-    return pl.scan_parquet(Path(base_dir) / f"q{query}.parquet")
+    path = base_dir / f"q{query}.parquet"
+    return pl.scan_parquet(path)
 
 
 def test_results(q_num: int, result_df: pl.DataFrame):
     with CodeTimer(name=f"Testing result of duckdb Query {q_num}", unit="s"):
         answer = get_query_answer(q_num).collect()
-        pl_test.assert_frame_equal(left=result_df, right=answer, check_dtype=False)
+        assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
 def get_line_item_ds(base_dir: str = DATASET_BASE_DIR) -> str:

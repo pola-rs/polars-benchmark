@@ -7,7 +7,7 @@ from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
 from queries.common_utils import (
-    ANSWERS_BASE_DIR,
+    ANSWERS_PARQUET_BASE_DIR,
     DATASET_BASE_DIR,
     LOG_TIMINGS,
     SHOW_RESULTS,
@@ -34,15 +34,11 @@ def __read_parquet_ds(path: Path, table_name: str) -> SparkDF:
     return df
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
+def get_query_answer(query: int, base_dir: str = ANSWERS_PARQUET_BASE_DIR) -> PandasDF:
     import pandas as pd
 
-    answer_df = pd.read_csv(
-        base_dir / f"q{query}.out",
-        sep="|",
-        parse_dates=True,
-    )
-    return answer_df.rename(columns=lambda x: x.strip())
+    path = base_dir / f"q{query}.parquet"
+    return pd.read_parquet(path)
 
 
 def test_results(q_num: int, result_df: PandasDF):

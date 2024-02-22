@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 import modin.pandas as pd
 
@@ -8,6 +8,9 @@ Q_NUM = 7
 
 
 def q():
+    var1 = datetime(1995, 1, 1)
+    var2 = datetime(1997, 1, 1)
+
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
@@ -35,8 +38,7 @@ def q():
         supplier_ds = supplier_ds()
 
         lineitem_filtered = line_item_ds[
-            (line_item_ds["l_shipdate"] >= datetime.strptime("1995-01-01", "%Y-%m-%d"))
-            & (line_item_ds["l_shipdate"] < datetime.strptime("1997-01-01", "%Y-%m-%d"))
+            (line_item_ds["l_shipdate"] >= var1) & (line_item_ds["l_shipdate"] < var2)
         ]
         lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].dt.year
         lineitem_filtered["revenue"] = lineitem_filtered["l_extendedprice"] * (

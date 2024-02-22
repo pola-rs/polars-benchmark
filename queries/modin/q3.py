@@ -1,4 +1,4 @@
-import datetime
+from datetime import datetime
 
 from queries.modin import utils
 
@@ -6,7 +6,7 @@ Q_NUM = 3
 
 
 def q():
-    var1 = var2 = datetime.datetime.strptime("1995-03-15", "%Y-%m-%d")
+    var1 = var2 = datetime(1995, 3, 15)
     var3 = "BUILDING"
 
     customer_ds = utils.get_customer_ds
