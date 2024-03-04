@@ -12,8 +12,8 @@ from queries.common_utils import (
     FILE_TYPE,
     INCLUDE_IO,
     LOG_TIMINGS,
-    SHOW_RESULTS,
     append_row,
+    settings,
 )
 
 SHOW_PLAN = bool(os.environ.get("SHOW_PLAN", False))
@@ -95,7 +95,7 @@ def run_query(q_num: int, lp: pl.LazyFrame) -> None:
         else:
             test_results(q_num, result)
 
-        if SHOW_RESULTS:
+        if settings.print_query_output:
             print(result)
 
     query()

@@ -14,8 +14,8 @@ from queries.common_utils import (
     FILE_TYPE,
     INCLUDE_IO,
     LOG_TIMINGS,
-    SHOW_RESULTS,
     append_row,
+    settings,
 )
 
 
@@ -100,7 +100,7 @@ def run_query(q_num: int, context: DuckDBPyRelation) -> None:
         else:
             test_results(q_num, result)
 
-        if SHOW_RESULTS:
+        if settings.print_query_output:
             print(result)
 
     query()

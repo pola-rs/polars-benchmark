@@ -14,9 +14,9 @@ from queries.common_utils import (
     DATASET_BASE_DIR,
     FILE_TYPE,
     LOG_TIMINGS,
-    SHOW_RESULTS,
     append_row,
     on_second_call,
+    settings,
 )
 
 pd.options.mode.copy_on_write = True
@@ -107,7 +107,7 @@ def run_query(q_num: int, query: Callable[..., Any]) -> None:
         else:
             test_results(q_num, result)
 
-        if SHOW_RESULTS:
+        if settings.print_query_output:
             print(result)
 
     run()

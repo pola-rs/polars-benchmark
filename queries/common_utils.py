@@ -7,15 +7,18 @@ from typing import Any
 
 from linetimer import CodeTimer
 
+from queries.settings import Settings
+
+settings = Settings()
+print(settings.model_dump_json())
+
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
-SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
 LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
 SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
 WRITE_PLOT = bool(os.environ.get("WRITE_PLOT", False))
 FILE_TYPE = os.environ.get("FILE_TYPE", "parquet")
 
 print("include io:", INCLUDE_IO)
-print("show results:", SHOW_RESULTS)
 print("log timings:", LOG_TIMINGS)
 print("file type:", FILE_TYPE)
 

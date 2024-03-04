@@ -10,9 +10,9 @@ from queries.common_utils import (
     ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     LOG_TIMINGS,
-    SHOW_RESULTS,
     append_row,
     on_second_call,
+    settings,
 )
 
 
@@ -126,7 +126,7 @@ def run_query(q_num: int, result: SparkDF) -> None:
         else:
             test_results(q_num, pdf)
 
-        if SHOW_RESULTS:
+        if settings.print_query_output:
             print(pdf)
 
     run()
