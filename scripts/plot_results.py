@@ -17,9 +17,9 @@ from queries.common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WR
 # colors for each bar
 COLORS = {
     "polars": "#f7c5a0",
-    "dask": "#87f7cf",
-    "pandas": "#72ccff",
     "duckdb": "#fff000",
+    "pandas": "#72ccff",
+    "pyspark": "#87f7cf",
 }
 
 # default base template for plot's theme
@@ -37,7 +37,7 @@ LABEL_UPDATES = {
 
 def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
     # order of solutions in the file
-    # e.g. ['polar', 'pandas', 'dask']
+    # e.g. ['polar', 'pandas']
     bar_order = (
         df.get_column("solution")
         .unique(maintain_order=True)

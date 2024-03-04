@@ -4,8 +4,6 @@
 *.o
 dbgen
 qgen
-dask_user_space/
-dask-worker-space/
 timings*.csv
 **/spark-warehouse
 perf.*
