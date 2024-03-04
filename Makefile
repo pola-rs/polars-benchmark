@@ -50,20 +50,12 @@ run-pandas: .venv  ## Run pandas benchmarks
 run-pyspark: .venv  ## Run pyspark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark.executor
 
-.PHONY: run-dask
-run-dask: .venv  ## Run dask benchmarks
-	$(VENV_BIN)/python -m queries.dask.executor
-
 .PHONY: run-duckdb
 run-duckdb: .venv  ## Run duckdb benchmarks
 	$(VENV_BIN)/python -m queries.duckdb.executor
 
-.PHONY: run-modin
-run-modin: .venv  ## Run modin benchmarks
-	$(VENV_BIN)/python -m queries.modin.executor
-
 .PHONY: run-all
-run-all: run-polars run-pandas run-pyspark run-dask run-duckdb run-modin   ## Run all benchmarks
+run-all: run-polars run-pandas run-pyspark run-duckdb   ## Run all benchmarks
 
 .PHONY: plot
 plot: .venv  ## Plot results

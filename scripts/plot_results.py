@@ -19,7 +19,7 @@ COLORS = {
     "polars": "#f7c5a0",
     "dask": "#87f7cf",
     "pandas": "#72ccff",
-    # "modin": "#d4a4eb",
+    "duckdb": "#fff000",
 }
 
 # default base template for plot's theme
@@ -199,9 +199,7 @@ if __name__ == "__main__":
         .last()
         .collect()
     )
-    order = pl.DataFrame(
-        {"solution": ["polars", "duckdb", "pandas", "dask", "pyspark", "modin"]}
-    )
+    order = pl.DataFrame({"solution": ["polars", "duckdb", "pandas", "pyspark"]})
     df = order.join(df, on="solution", how="left")
 
     plot(df, limit=LIMIT, group="solution-version")
