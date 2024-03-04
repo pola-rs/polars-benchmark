@@ -6,6 +6,7 @@ To use this script, run:
 .venv/bin/python ./scripts/plot_results.py
 ```
 """
+
 from pathlib import Path
 from typing import Any
 
