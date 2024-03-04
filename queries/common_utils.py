@@ -13,7 +13,6 @@ LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
 SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
 WRITE_PLOT = bool(os.environ.get("WRITE_PLOT", False))
 FILE_TYPE = os.environ.get("FILE_TYPE", "parquet")
-SPARK_LOG_LEVEL = os.environ.get("SPARK_LOG_LEVEL", "ERROR")
 
 print("include io:", INCLUDE_IO)
 print("show results:", SHOW_RESULTS)

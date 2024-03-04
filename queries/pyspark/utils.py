@@ -11,19 +11,16 @@ from queries.common_utils import (
     DATASET_BASE_DIR,
     LOG_TIMINGS,
     SHOW_RESULTS,
-    SPARK_LOG_LEVEL,
     append_row,
     on_second_call,
 )
-
-print("SPARK_LOG_LEVEL:", SPARK_LOG_LEVEL)
 
 
 def get_or_create_spark() -> SparkSession:
     spark = (
         SparkSession.builder.appName("spark_queries").master("local[*]").getOrCreate()
     )
-    spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
+    spark.sparkContext.setLogLevel("ERROR")
 
     return spark
 
