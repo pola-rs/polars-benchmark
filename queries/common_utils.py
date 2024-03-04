@@ -14,7 +14,6 @@ print(settings.model_dump_json())
 
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
 LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
-SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
 WRITE_PLOT = bool(os.environ.get("WRITE_PLOT", False))
 FILE_TYPE = os.environ.get("FILE_TYPE", "parquet")
 
@@ -25,7 +24,7 @@ print("file type:", FILE_TYPE)
 
 CWD = Path(__file__).parent
 ROOT = CWD.parent
-DATASET_BASE_DIR = ROOT / "data" / "tables" / f"scale-{SCALE_FACTOR}"
+DATASET_BASE_DIR = ROOT / "data" / "tables" / f"scale-{settings.scale_factor}"
 ANSWERS_BASE_DIR = ROOT / "data" / "answers"
 TIMINGS_FILE = ROOT / os.environ.get("TIMINGS_FILE", "timings.csv")
 DEFAULT_PLOTS_DIR = ROOT / "plots"
