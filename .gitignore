@@ -25,4 +25,4 @@ Cargo.lock
 
 # Project
 /data/tables/
-plots/
+/output/

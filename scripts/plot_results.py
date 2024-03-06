@@ -7,13 +7,12 @@ To use this script, run:
 ```
 """
 
-from pathlib import Path
 from typing import Any
 
 import plotly.express as px
 import polars as pl
 
-from queries.common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WRITE_PLOT
+from queries.common_utils import INCLUDE_IO, TIMINGS_FILE, settings
 
 # colors for each bar
 COLORS = {
@@ -101,7 +100,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
 
 
 def write_plot_image(fig: Any) -> None:
-    path = Path(DEFAULT_PLOTS_DIR)
+    path = settings.paths.plots
     if not path.exists():
         path.mkdir()
 
@@ -164,7 +163,7 @@ def plot(
 
     add_annotations(fig, limit, df)
 
-    if WRITE_PLOT:
+    if settings.paths.plots is not None:
         write_plot_image(fig)
 
     # display the object using available environment context
@@ -172,8 +171,6 @@ def plot(
 
 
 if __name__ == "__main__":
-    print("write plot:", WRITE_PLOT)
-
     e = pl.lit(True)
     max_query = 8
 

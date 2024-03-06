@@ -1,13 +1,13 @@
 import timeit
 from pathlib import Path
 
+import pandas as pd
 from linetimer import CodeTimer, linetimer
-from pandas.core.frame import DataFrame as PandasDF
+from pandas.testing import assert_series_equal
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
 from queries.common_utils import (
-    ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     LOG_TIMINGS,
     append_row,
@@ -31,32 +31,28 @@ def _read_parquet_ds(path: Path, table_name: str) -> SparkDF:
     return df
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
-    import pandas as pd
+def test_results(query_number: int, result_df: pd.DataFrame) -> None:
+    answer = _get_query_answer(query_number)
 
-    path = base_dir / f"q{query}.parquet"
-    return pd.read_parquet(path)
+    for c, t in answer.dtypes.items():
+        s1 = result_df[c]
+        s2 = answer[c]
+
+        if t.name == "object":
+            s1 = s1.astype("string").apply(lambda x: x.strip())
+            s2 = s2.astype("string").apply(lambda x: x.strip())
+
+        elif t.name.startswith("int"):
+            s1 = s1.astype("int64")
+            s2 = s2.astype("int64")
+
+        assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
 
 
-def test_results(q_num: int, result_df: PandasDF) -> None:
-    import pandas as pd
-
-    with CodeTimer(name=f"Testing result of PySpark Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num)
-
-        for c, t in answer.dtypes.items():
-            s1 = result_df[c]
-            s2 = answer[c]
-
-            if t.name == "object":
-                s1 = s1.astype("string").apply(lambda x: x.strip())
-                s2 = s2.astype("string").apply(lambda x: x.strip())
-
-            elif t.name.startswith("int"):
-                s1 = s1.astype("int64")
-                s2 = s2.astype("int64")
-
-            pd.testing.assert_series_equal(left=s1, right=s2, check_index=False)
+def _get_query_answer(query_number: int) -> pd.DataFrame:
+    file_name = f"q{query_number}.parquet"
+    file_path = settings.paths.answers / file_name
+    return pd.read_parquet(file_path, dtype_backend="pyarrow")
 
 
 @on_second_call

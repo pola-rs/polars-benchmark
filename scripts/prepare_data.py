@@ -5,7 +5,7 @@ import polars as pl
 from queries.common_utils import settings
 
 ROOT_DIR = Path(__file__).parent.parent
-TABLES_DIR = ROOT_DIR / "data" / "tables" / f"scale-{settings.scale_factor}"
+TABLES_DIR = settings.paths.tables / f"scale-{settings.scale_factor}"
 
 table_columns = {
     "customer": [

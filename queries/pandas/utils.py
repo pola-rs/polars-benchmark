@@ -6,11 +6,9 @@ from typing import Any
 import pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.api.types import is_string_dtype
-from pandas.core.frame import DataFrame as PandasDF
 from pandas.testing import assert_series_equal
 
 from queries.common_utils import (
-    ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,
     LOG_TIMINGS,
@@ -22,7 +20,7 @@ from queries.common_utils import (
 pd.options.mode.copy_on_write = True
 
 
-def _read_ds(path: Path) -> PandasDF:
+def _read_ds(path: Path) -> pd.DataFrame:
     path_str = f"{path}.{FILE_TYPE}"
     if FILE_TYPE == "parquet":
         return pd.read_parquet(path_str, dtype_backend="pyarrow")
@@ -33,62 +31,62 @@ def _read_ds(path: Path) -> PandasDF:
         raise ValueError(msg)
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
-    path = base_dir / f"q{query}.parquet"
-    return pd.read_parquet(path, dtype_backend="pyarrow")
+def test_results(query_number: int, result_df: pd.DataFrame) -> None:
+    answer = _get_query_answer(query_number)
+
+    for c, t in answer.dtypes.items():
+        s1 = result_df[c]
+        s2 = answer[c]
+
+        if is_string_dtype(t):
+            s1 = s1.apply(lambda x: x.strip())
+
+        assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
 
 
-def test_results(q_num: int, result_df: PandasDF) -> None:
-    with CodeTimer(name=f"Testing result of pandas Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num)
-
-        for c, t in answer.dtypes.items():
-            s1 = result_df[c]
-            s2 = answer[c]
-
-            if is_string_dtype(t):
-                s1 = s1.apply(lambda x: x.strip())
-
-            assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
+def _get_query_answer(query_number: int) -> pd.DataFrame:
+    file_name = f"q{query_number}.parquet"
+    file_path = settings.paths.answers / file_name
+    return pd.read_parquet(file_path, dtype_backend="pyarrow")
 
 
 @on_second_call
-def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "lineitem")
 
 
 @on_second_call
-def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "orders")
 
 
 @on_second_call
-def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "customer")
 
 
 @on_second_call
-def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "region")
 
 
 @on_second_call
-def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "nation")
 
 
 @on_second_call
-def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "supplier")
 
 
 @on_second_call
-def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "part")
 
 
 @on_second_call
-def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> PandasDF:
+def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> pd.DataFrame:
     return _read_ds(base_dir / "partsupp")
 
 

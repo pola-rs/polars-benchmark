@@ -9,7 +9,6 @@ from linetimer import CodeTimer, linetimer
 from polars.testing import assert_frame_equal
 
 from queries.common_utils import (
-    ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
     FILE_TYPE,
     INCLUDE_IO,
@@ -40,15 +39,15 @@ def _scan_ds(path: Path) -> str:
     return path_str
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pl.LazyFrame:
-    path = base_dir / f"q{query}.parquet"
-    return pl.scan_parquet(path)
+def test_results(query_number: int, result: pl.DataFrame) -> None:
+    answer = _get_query_answer(query_number)
+    assert_frame_equal(result, answer, check_dtype=False)
 
 
-def test_results(q_num: int, result_df: pl.DataFrame) -> None:
-    with CodeTimer(name=f"Testing result of duckdb Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num).collect()
-        assert_frame_equal(left=result_df, right=answer, check_dtype=False)
+def _get_query_answer(query_number: int) -> pl.DataFrame:
+    file_name = f"q{query_number}.parquet"
+    file_path = settings.paths.answers / file_name
+    return pl.read_parquet(file_path)
 
 
 def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> str:

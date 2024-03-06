@@ -1,101 +1,103 @@
-import os
-import timeit
-from pathlib import Path
-
 import polars as pl
-from linetimer import CodeTimer, linetimer
+from linetimer import CodeTimer
 from polars.testing import assert_frame_equal
 
 from queries.common_utils import (
-    ANSWERS_BASE_DIR,
     DATASET_BASE_DIR,
-    FILE_TYPE,
-    INCLUDE_IO,
-    LOG_TIMINGS,
     append_row,
     settings,
 )
-
-SHOW_PLAN = bool(os.environ.get("SHOW_PLAN", False))
-STREAMING = bool(os.environ.get("STREAMING", False))
+from queries.settings import FILE_FORMAT
 
 
-def _scan_ds(path: Path) -> pl.LazyFrame:
-    path_str = f"{path}.{FILE_TYPE}"
-    if FILE_TYPE == "parquet":
-        scan = pl.scan_parquet(path_str)
-    elif FILE_TYPE == "feather":
-        scan = pl.scan_ipc(path_str)
+def check_result(result: pl.DataFrame, query_number: int) -> None:
+    """Check the result of a query against the pre-defined answers."""
+    answer = _get_query_answer(query_number)
+    assert_frame_equal(result, answer, check_dtype=False)
+
+
+def _get_query_answer(query_number: int) -> pl.DataFrame:
+    """Load the query answer from a Parquet file."""
+    file_name = f"q{query_number}.parquet"
+    file_path = settings.paths.answers / file_name
+    return pl.read_parquet(file_path)
+
+
+def _scan_table(table_name: str, file_format: FILE_FORMAT) -> pl.LazyFrame:
+    preload_data = file_format == "skip"
+    if preload_data:
+        file_format = "parquet"
+
+    file_name = f"{table_name}.{file_format}"
+    file_path = DATASET_BASE_DIR / file_name
+
+    if file_format == "parquet":
+        scan = pl.scan_parquet(file_path)
+    elif file_format == "feather":
+        scan = pl.scan_ipc(file_path)
     else:
-        msg = f"file type: {FILE_TYPE} not expected"
+        msg = f"unexpected file format: {file_format}"
         raise ValueError(msg)
-    if INCLUDE_IO:
-        return scan
-    return scan.collect().rechunk().lazy()
+
+    if preload_data:
+        return scan.collect().rechunk().lazy()
+
+    return scan
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pl.LazyFrame:
-    return pl.scan_parquet(base_dir / f"q{query}.parquet")
+def get_customer_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("customer", file_format)
 
 
-def test_results(q_num: int, result_df: pl.DataFrame) -> None:
-    with CodeTimer(name=f"Testing result of polars Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num).collect()
-        assert_frame_equal(left=result_df, right=answer, check_dtype=False)
+def get_line_item_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("lineitem", file_format)
 
 
-def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "lineitem")
+def get_nation_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("nation", file_format)
 
 
-def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "orders")
+def get_orders_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("orders", file_format)
 
 
-def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "customer")
+def get_part_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("part", file_format)
 
 
-def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "region")
+def get_part_supp_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("partsupp", file_format)
 
 
-def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "nation")
+def get_region_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("region", file_format)
 
 
-def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "supplier")
+def get_supplier_ds(file_format: FILE_FORMAT = "skip") -> pl.LazyFrame:
+    return _scan_table("supplier", file_format)
 
 
-def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "part")
+def run_query(
+    query_number: int,
+    query_plan: pl.LazyFrame,
+    print_query_plan: bool = False,
+    streaming: bool = False,
+) -> None:
+    if print_query_plan:
+        print(query_plan.explain())
 
+    with CodeTimer(name=f"Execute Polars query {query_number}", unit="s") as timer:
+        result = query_plan.collect(streaming=streaming)
 
-def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "partsupp")
+    if settings.print_query_output:
+        print(result)
 
+    check_result(result, query_number)
 
-def run_query(q_num: int, lp: pl.LazyFrame) -> None:
-    @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")  # type: ignore[misc]
-    def query() -> None:
-        if SHOW_PLAN:
-            print(lp.explain())
-
-        with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            result = lp.collect(streaming=STREAMING)
-
-            secs = timeit.default_timer() - t0
-
-        if LOG_TIMINGS:
-            append_row(
-                solution="polars", version=pl.__version__, q=f"q{q_num}", secs=secs
-            )
-        else:
-            test_results(q_num, result)
-
-        if settings.print_query_output:
-            print(result)
-
-    query()
+    if settings.paths.timings is not None:
+        append_row(
+            solution="polars",
+            version=pl.__version__,
+            query_number=query_number,
+            time=timer.took,
+        )

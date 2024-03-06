@@ -14,7 +14,7 @@ class Library(BaseModel):
 
 
 class Paths(BaseSettings):
-    dataset: Path = Path("data/tables")
+    tables: Path = Path("data/tables")
     answers: Path = Path("data/answers")
 
     timings: Path | None = None
