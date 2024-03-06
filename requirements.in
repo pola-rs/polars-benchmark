@@ -1,3 +1,11 @@
+linetimer
+pydantic
+pydantic-settings
+uv
+
+plotnine
+plotly
+
 duckdb
 pandas>=2.0
 polars
@@ -6,9 +14,3 @@ pyspark
 pyarrow  # Required by duckdb/pandas
 fastparquet  # Required by pandas
 setuptools  # Required by pyspark
-
-linetimer
-plotnine
-plotly
-pydantic
-pydantic-settings

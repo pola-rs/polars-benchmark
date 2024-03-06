@@ -9,13 +9,14 @@ type FILE_FORMAT = Literal["skip", "parquet", "feather"]
 
 class Library(BaseModel):
     name: str
-    version: str = "latest"
+    version: str | None = None
     parameters: dict[str, Any] = {}
 
 
 class Paths(BaseSettings):
     tables: Path = Path("data/tables")
     answers: Path = Path("data/answers")
+    venvs: Path = Path("venvs")
 
     timings: Path | None = None
     plots: Path | None = None

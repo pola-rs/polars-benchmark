@@ -1,3 +1,4 @@
+import os
 import re
 import subprocess
 import sys
@@ -75,3 +76,47 @@ def get_query_numbers(library_name: str) -> list[int]:
 
 def run_query(library_name: str, query_number: int) -> None:
     subprocess.run([sys.executable, "-m", f"queries.{library_name}.q{query_number}"])
+
+
+def set_up_venv(lib: Library) -> str:
+    """Set up a virtual environment for the given library.
+
+    Returns the path to the Python executable.
+    """
+    venv_path = _create_venv(lib)
+    _install_lib(lib, venv_path)
+    return venv_path / "bin" / "python"
+
+
+def _create_venv(lib: Library) -> str:
+    """Create a virtual environment for the given library.
+
+    Returns the path to the virtual environment root.
+    """
+    venv_name = f".venv-{lib.name}-{lib.version}"
+    venv_path = settings.paths.venvs / venv_name
+    subprocess.run([sys.executable, "-m", "uv", "venv", str(venv_path)])
+    return venv_path
+
+
+def _install_lib(lib: Library, venv_path: Path) -> None:
+    """Install the library in the given virtual environment."""
+    current_venv = os.environ.pop("VIRTUAL_ENV", None)
+    current_conda = os.environ.pop("CONDA_PREFIX", None)
+
+    os.environ["VIRTUAL_ENV"] = str(venv_path)
+    pip_spec = _get_pip_specifier(lib)
+    subprocess.run([sys.executable, "-m", "uv", "pip", "install", pip_spec])
+    os.environ.pop("VIRTUAL_ENV")
+
+    if current_venv is not None:
+        os.environ["VIRTUAL_ENV"] = current_venv
+    if current_conda is not None:
+        os.environ["CONDA_PREFIX"] = current_conda
+
+
+def _get_pip_specifier(lib: Library) -> str:
+    if lib.version is None:
+        return lib.name
+    else:
+        return f"{lib.name}=={lib.version}"
