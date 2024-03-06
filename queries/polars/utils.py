@@ -1,3 +1,5 @@
+import argparse
+
 import polars as pl
 from linetimer import CodeTimer
 from polars.testing import assert_frame_equal
@@ -101,3 +103,33 @@ def run_query(
             query_number=query_number,
             time=timer.took,
         )
+
+
+def parse_parameters() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Process library-specific parameters")
+    parser.add_argument(
+        "--streaming",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Run the query in streaming mode.",
+    )
+    parser.add_argument(
+        "--print-query-plan",
+        action=argparse.BooleanOptionalAction,
+        default=False,
+        help="Print the query plan before executing the query.",
+    )
+    return parser.parse_args()
+
+
+def str2bool(v):
+    if isinstance(v, bool):
+        print("SUP BRO")
+        return v
+    if v.lower() in ("yes", "true", "t", "y", "1"):
+        return True
+    elif v.lower() in ("no", "false", "f", "n", "0"):
+        return False
+    else:
+        msg = "Boolean value expected."
+        raise argparse.ArgumentTypeError(msg)

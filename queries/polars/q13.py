@@ -5,7 +5,7 @@ from queries.polars import utils
 Q_NUM = 13
 
 
-def q() -> None:
+def q() -> pl.LazyFrame:
     var_1 = "special"
     var_2 = "requests"
 
@@ -25,8 +25,14 @@ def q() -> None:
         .sort(by=["custdist", "c_count"], descending=[True, True])
     )
 
-    utils.run_query(Q_NUM, q_final)
+    return q_final
+
+
+def main() -> None:
+    args = utils.parse_parameters()
+    query_plan = q()
+    utils.run_query(Q_NUM, query_plan, **vars(args))
 
 
 if __name__ == "__main__":
-    q()
+    main()

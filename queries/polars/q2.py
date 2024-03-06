@@ -5,7 +5,7 @@ from queries.polars import utils
 Q_NUM = 2
 
 
-def q() -> None:
+def q() -> pl.LazyFrame:
     var_1 = 15
     var_2 = "BRASS"
     var_3 = "EUROPE"
@@ -50,8 +50,14 @@ def q() -> None:
         .with_columns(pl.col(pl.String).str.strip_chars().name.keep())
     )
 
-    utils.run_query(Q_NUM, q_final)
+    return q_final
+
+
+def main() -> None:
+    args = utils.parse_parameters()
+    query_plan = q()
+    utils.run_query(Q_NUM, query_plan, **vars(args))
 
 
 if __name__ == "__main__":
-    q()
+    main()

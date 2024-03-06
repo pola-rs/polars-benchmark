@@ -7,7 +7,7 @@ from queries.polars import utils
 Q_NUM = 7
 
 
-def q() -> None:
+def q() -> pl.LazyFrame:
     nation_ds = utils.get_nation_ds()
     customer_ds = utils.get_customer_ds()
     line_item_ds = utils.get_line_item_ds()
@@ -52,8 +52,14 @@ def q() -> None:
         .sort(by=["supp_nation", "cust_nation", "l_year"])
     )
 
-    utils.run_query(Q_NUM, q_final)
+    return q_final
+
+
+def main() -> None:
+    args = utils.parse_parameters()
+    query_plan = q()
+    utils.run_query(Q_NUM, query_plan, **vars(args))
 
 
 if __name__ == "__main__":
-    q()
+    main()

@@ -7,9 +7,10 @@ from queries.polars import utils
 Q_NUM = 1
 
 
-def q() -> None:
+def q() -> pl.LazyFrame:
     var_1 = date(1998, 9, 2)
     q = utils.get_line_item_ds()
+
     q_final = (
         q.filter(pl.col("l_shipdate") <= var_1)
         .group_by("l_returnflag", "l_linestatus")
@@ -34,8 +35,14 @@ def q() -> None:
         .sort("l_returnflag", "l_linestatus")
     )
 
-    utils.run_query(Q_NUM, q_final)
+    return q_final
+
+
+def main() -> None:
+    args = utils.parse_parameters()
+    query_plan = q()
+    utils.run_query(Q_NUM, query_plan, **vars(args))
 
 
 if __name__ == "__main__":
-    q()
+    main()

@@ -3,6 +3,7 @@ import re
 import subprocess
 import sys
 from pathlib import Path
+from typing import Any
 
 from linetimer import CodeTimer
 
@@ -50,35 +51,18 @@ def append_row(solution: str, version: str, query_number: int, time: float) -> N
 #     return helper
 
 
-def execute_all(library: Library) -> None:
-    """Run all queries for the given library."""
-    query_numbers = get_query_numbers(library.name)
+def run_all_queries(lib: Library) -> None:
+    executable = _set_up_venv(lib)
+    args = _parameters_to_cli_args(lib.parameters)
 
-    with CodeTimer(name=f"Overall execution of ALL {library.name} queries", unit="s"):
+    query_numbers = get_query_numbers(lib.name)
+
+    with CodeTimer(name=f"Overall execution of ALL {lib.name} queries", unit="s"):
         for i in query_numbers:
-            run_query(library.name, i)
+            run_query(lib.name, i, args=args, executable=str(executable))
 
 
-def get_query_numbers(library_name: str) -> list[int]:
-    """Get the query numbers that are implemented for the given library."""
-    query_numbers = []
-
-    path = Path(__file__).parent / library_name
-    expr = re.compile(r"q(\d+).py$")
-
-    for file in path.iterdir():
-        match = expr.search(str(file))
-        if match is not None:
-            query_numbers.append(int(match.group(1)))
-
-    return sorted(query_numbers)
-
-
-def run_query(library_name: str, query_number: int) -> None:
-    subprocess.run([sys.executable, "-m", f"queries.{library_name}.q{query_number}"])
-
-
-def set_up_venv(lib: Library) -> str:
+def _set_up_venv(lib: Library) -> Path:
     """Set up a virtual environment for the given library.
 
     Returns the path to the Python executable.
@@ -101,14 +85,30 @@ def _create_venv(lib: Library) -> str:
 
 def _install_lib(lib: Library, venv_path: Path) -> None:
     """Install the library in the given virtual environment."""
+    # Prepare environment
     current_venv = os.environ.pop("VIRTUAL_ENV", None)
     current_conda = os.environ.pop("CONDA_PREFIX", None)
-
     os.environ["VIRTUAL_ENV"] = str(venv_path)
+
+    # Install
     pip_spec = _get_pip_specifier(lib)
     subprocess.run([sys.executable, "-m", "uv", "pip", "install", pip_spec])
-    os.environ.pop("VIRTUAL_ENV")
+    # TODO: Clean up installing dependencies
+    subprocess.run(
+        [
+            sys.executable,
+            "-m",
+            "uv",
+            "pip",
+            "install",
+            "linetimer",
+            "pydantic",
+            "pydantic-settings",
+        ]
+    )
 
+    # Restore environment
+    os.environ.pop("VIRTUAL_ENV")
     if current_venv is not None:
         os.environ["VIRTUAL_ENV"] = current_venv
     if current_conda is not None:
@@ -120,3 +120,50 @@ def _get_pip_specifier(lib: Library) -> str:
         return lib.name
     else:
         return f"{lib.name}=={lib.version}"
+
+
+def _parameters_to_cli_args(params: dict[str, Any] | None) -> list[str]:
+    if params is None:
+        return []
+    args = []
+    for name, value in params.items():
+        name = name.replace("_", "-")
+        if value is True:
+            command = f"--{name}"
+        elif value is False:
+            command = f"--no-{name}"
+        else:
+            command = f"--{name}={value}"
+        args.append(command)
+    return args
+
+
+def get_query_numbers(library_name: str) -> list[int]:
+    """Get the query numbers that are implemented for the given library."""
+    query_numbers = []
+
+    path = Path(__file__).parent / library_name
+    expr = re.compile(r"q(\d+).py$")
+
+    for file in path.iterdir():
+        match = expr.search(str(file))
+        if match is not None:
+            query_numbers.append(int(match.group(1)))
+
+    return sorted(query_numbers)
+
+
+def run_query(
+    library_name: str,
+    query_number: int,
+    args: list[str] | None = None,
+    executable: str = sys.executable,
+) -> None:
+    """Run a single query for the specified library."""
+    module = f"queries.{library_name}.q{query_number}"
+    command = [executable, "-m", module]
+    if args:
+        command += args
+
+    print(command)
+    subprocess.run(command)
