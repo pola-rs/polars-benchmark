@@ -10,7 +10,6 @@ from linetimer import CodeTimer
 from queries.settings import Library, Settings
 
 settings = Settings()
-print(settings.model_dump_json())
 
 
 DATASET_BASE_DIR = settings.paths.tables / f"scale-{settings.scale_factor}"
@@ -27,31 +26,29 @@ def append_row(solution: str, version: str, query_number: int, time: float) -> N
         f.write(line)
 
 
-# def on_second_call(func: Any) -> Any:
-#     def helper(*args: Any, **kwargs: Any) -> Any:
-#         helper.calls += 1  # type: ignore[attr-defined]
+def run_all_queries_all_libs() -> None:
+    for lib in settings.libraries:
+        run_all_queries(lib)
 
-#         # first call is outside the function
-#         # this call must set the result
-#         if helper.calls == 1:  # type: ignore[attr-defined]
-#             # include IO will compute the result on the 2nd call
-#             if not INCLUDE_IO:
-#                 helper.result = func(*args, **kwargs)  # type: ignore[attr-defined]
-#             return helper.result  # type: ignore[attr-defined]
 
-#         # second call is in the query, now we set the result
-#         if INCLUDE_IO and helper.calls == 2:  # type: ignore[attr-defined]
-#             helper.result = func(*args, **kwargs)  # type: ignore[attr-defined]
+def run_query(
+    lib_name: str,
+    query_number: int,
+    args: list[str] | None = None,
+    executable: str = sys.executable,
+) -> None:
+    """Run a single query for the specified library."""
+    module = f"queries.{lib_name}.q{query_number}"
+    command = [executable, "-m", module]
+    if args:
+        command += args
 
-#         return helper.result  # type: ignore[attr-defined]
-
-#     helper.calls = 0  # type: ignore[attr-defined]
-#     helper.result = None  # type: ignore[attr-defined]
-
-#     return helper
+    subprocess.run(command)
 
 
 def run_all_queries(lib: Library) -> None:
+    print(settings.model_dump_json())
+
     executable = _set_up_venv(lib)
     args = _parameters_to_cli_args(lib.parameters)
 
@@ -77,7 +74,9 @@ def _create_venv(lib: Library) -> str:
 
     Returns the path to the virtual environment root.
     """
-    venv_name = f".venv-{lib.name}-{lib.version}"
+    venv_name = f".venv-{lib.name}"
+    if lib.version is not None:
+        venv_name += f"-{lib.version}"
     venv_path = settings.paths.venvs / venv_name
     subprocess.run([sys.executable, "-m", "uv", "venv", str(venv_path)])
     return venv_path
@@ -151,19 +150,3 @@ def get_query_numbers(library_name: str) -> list[int]:
             query_numbers.append(int(match.group(1)))
 
     return sorted(query_numbers)
-
-
-def run_query(
-    library_name: str,
-    query_number: int,
-    args: list[str] | None = None,
-    executable: str = sys.executable,
-) -> None:
-    """Run a single query for the specified library."""
-    module = f"queries.{library_name}.q{query_number}"
-    command = [executable, "-m", module]
-    if args:
-        command += args
-
-    print(command)
-    subprocess.run(command)

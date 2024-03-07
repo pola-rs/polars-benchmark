@@ -9,7 +9,7 @@ from queries.common_utils import (
     append_row,
     settings,
 )
-from queries.settings import FILE_FORMAT
+from queries.settings import FILE_FORMAT, Library
 
 
 def check_result(result: pl.DataFrame, query_number: int) -> None:
@@ -106,6 +106,11 @@ def run_query(
 
 
 def parse_parameters() -> argparse.Namespace:
+    parser = _set_up_arg_parser()
+    return parser.parse_args()
+
+
+def _set_up_arg_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Process library-specific parameters")
     parser.add_argument(
         "--streaming",
@@ -119,17 +124,17 @@ def parse_parameters() -> argparse.Namespace:
         default=False,
         help="Print the query plan before executing the query.",
     )
-    return parser.parse_args()
+    return parser
 
 
-def str2bool(v):
-    if isinstance(v, bool):
-        print("SUP BRO")
-        return v
-    if v.lower() in ("yes", "true", "t", "y", "1"):
-        return True
-    elif v.lower() in ("no", "false", "f", "n", "0"):
-        return False
-    else:
-        msg = "Boolean value expected."
-        raise argparse.ArgumentTypeError(msg)
+def parse_lib_settings() -> argparse.Namespace:
+    parser = _set_up_arg_parser()
+    parser.add_argument(
+        "--version",
+        help="The library version to use. Defaults to the latest published version.",
+    )
+    args = parser.parse_args()
+
+    args_dict = vars(args)
+    version = args_dict.pop("version", None)
+    return Library(name="polars", version=version, parameters=args_dict)
