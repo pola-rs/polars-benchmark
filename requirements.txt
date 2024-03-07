@@ -2,11 +2,16 @@
 #    uv pip compile requirements.in
 contourpy==1.2.0
     # via matplotlib
+cramjam==2.8.2
+    # via fastparquet
 cycler==0.12.1
     # via matplotlib
 duckdb==0.10.0
+fastparquet==2024.2.0
 fonttools==4.49.0
     # via matplotlib
+fsspec==2024.2.0
+    # via fastparquet
 kiwisolver==1.4.5
     # via matplotlib
 linetimer==0.1.5
@@ -17,20 +22,24 @@ mizani==0.11.0
 numpy==1.26.4
     # via
     #   contourpy
+    #   fastparquet
     #   matplotlib
     #   mizani
     #   pandas
     #   patsy
     #   plotnine
+    #   pyarrow
     #   scipy
     #   statsmodels
 packaging==23.2
     # via
+    #   fastparquet
     #   matplotlib
     #   plotly
     #   statsmodels
 pandas==2.2.1
     # via
+    #   fastparquet
     #   mizani
     #   plotnine
     #   statsmodels
@@ -39,11 +48,12 @@ patsy==0.5.6
 pillow==10.2.0
     # via matplotlib
 plotly==5.19.0
-plotnine==0.13.0
-polars==0.20.13
+plotnine==0.13.1
+polars==0.20.14
 py4j==0.10.9.7
     # via pyspark
-pyparsing==3.1.1
+pyarrow==15.0.0
+pyparsing==3.1.2
     # via matplotlib
 pyspark==3.5.1
 python-dateutil==2.9.0.post0
@@ -57,6 +67,7 @@ scipy==1.12.0
     #   mizani
     #   plotnine
     #   statsmodels
+setuptools==69.1.1
 six==1.16.0
     # via
     #   patsy
