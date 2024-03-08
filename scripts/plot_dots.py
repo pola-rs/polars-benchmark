@@ -19,10 +19,10 @@ except ImportError:
 def get_styles(exclude_solutions: list[str]) -> pl.DataFrame:
     all_styles = pl.DataFrame(
         data=[
-            ["polars", "Polars", "#0075ff", "s", 6.0],
-            ["duckdb", "DuckDB", "#73BFB8", "^", 5.5],
-            ["pandas", "pandas", "#26413C", "o", 5.0],
-            ["pyspark", "PySpark", "#EFA9AE", "D", 4.5],
+            ["polars", "Polars", "#0075ff", "d", 6.0],
+            ["duckdb", "DuckDB", "#73BFB8", "d", 5.5],
+            ["pandas", "pandas", "#26413C", "d", 5.0],
+            ["pyspark", "PySpark", "#EFA9AE", "d", 4.5],
         ],
         schema=["solution", "name", "color", "shape", "size"],
     )
@@ -158,6 +158,9 @@ def create_plot(
         pl.col("name_version").sort_by("solution").unique(maintain_order=True)
     ).to_series()
     timings = timings.with_columns(pl.col("name_version").cast(pl.Enum(name_versions)))
+
+    # Plot polars last to make sure it's on top
+    timings = timings.sort("name_version", descending=True)
 
     plot = (
         p9.ggplot(
