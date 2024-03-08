@@ -7,20 +7,27 @@ To use this script, run:
 ```
 """
 
+from __future__ import annotations
+
 from pathlib import Path
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 import plotly.express as px
 import polars as pl
 
 from queries.common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WRITE_PLOT
 
+if TYPE_CHECKING:
+    from plotly.graph_objects import Figure
+
+TIMINGS_FILE = "timings-10.csv"
+
 # colors for each bar
 COLORS = {
-    "polars": "#f7c5a0",
-    "duckdb": "#fff000",
-    "pandas": "#72ccff",
-    "pyspark": "#87f7cf",
+    "polars": "#0075ff",
+    "duckdb": "#73bfb8",
+    "pandas": "#efa9ae",
+    "pyspark": "#26413c",
 }
 
 # default base template for plot's theme
@@ -80,7 +87,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
             v[0]: (offsets[int(v[1])], v[2])
             for v in df.select(["query_no", "index", "labels"])
             .transpose()
-            .to_dict(False)
+            .to_dict(as_series=False)
             .values()
         }
     else:
@@ -115,7 +122,7 @@ def plot(
     y: str = "duration[s]",
     group: str = "solution",
     limit: int = 120,
-) -> px.Figure:
+) -> Figure:
     """Generate a Plotly Figure of a grouped bar chart displaying benchmark results.
 
     Parameters
@@ -133,16 +140,16 @@ def plot(
 
     Returns
     -------
-    px.Figure: Plotly Figure (histogram)
+    Figure: Plotly Figure (histogram)
     """
     # build plotly figure object
     fig = px.histogram(
         x=df[x],
         y=df[y],
         color=df[group],
+        color_discrete_sequence=list(COLORS.values()),
         barmode=BAR_TYPE,
         template=DEFAULT_THEME,
-        color_discrete_map=COLORS,
         pattern_shape=df[group],
         labels=LABEL_UPDATES,
     )
