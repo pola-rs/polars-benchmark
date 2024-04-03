@@ -40,9 +40,9 @@ def q() -> None:
         part_ds = part_ds()
         part_supp_ds = part_supp_ds()
 
-        nation_filtered = nation_ds[["n_nationkey", "n_name", "n_regionkey"]]
+        nation_filtered = nation_ds.loc[:, ["n_nationkey", "n_name", "n_regionkey"]]
         region_filtered = region_ds[(region_ds["r_name"] == var3)]
-        region_filtered = region_filtered[["r_regionkey"]]
+        region_filtered = region_filtered.loc[:, ["r_regionkey"]]
         r_n_merged = nation_filtered.merge(
             region_filtered, left_on="n_regionkey", right_on="r_regionkey", how="inner"
         )
@@ -99,7 +99,8 @@ def q() -> None:
         part_filtered = part_ds.loc[:, ["p_partkey", "p_mfgr", "p_size", "p_type"]]
         part_filtered = part_filtered[
             (part_filtered["p_size"] == var1)
-            & (part_filtered["p_type"].astype(str).str.endswith(var2))
+            # & (part_filtered["p_type"].astype(str).str.endswith(var2))
+            & (part_filtered["p_type"].str.endswith(var2))
         ]
         part_filtered = part_filtered.loc[:, ["p_partkey", "p_mfgr"]]
         merged_df = part_filtered.merge(
@@ -119,7 +120,12 @@ def q() -> None:
                 "p_mfgr",
             ],
         ]
+
+        # We have to deviate from pandas here because `groupby(as_index=False)` is not
+        # implemented yet by Dask.
+        # https://github.com/dask/dask/issues/5834
         min_values = merged_df.groupby("p_partkey")["ps_supplycost"].min().reset_index()
+
         min_values.columns = ["P_PARTKEY_CPY", "MIN_SUPPLYCOST"]
         merged_df = merged_df.merge(
             min_values,
