@@ -6,33 +6,39 @@ Q_NUM = 8
 
 
 def q() -> None:
-    nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
+    nation_ds = utils.get_nation_ds
     orders_ds = utils.get_orders_ds
+    part_ds = utils.get_part_ds
+    region_ds = utils.get_region_ds
     supplier_ds = utils.get_supplier_ds
 
     # first call one time to cache in case we don't include the IO times
-    nation_ds()
     customer_ds()
     line_item_ds()
+    nation_ds()
     orders_ds()
+    part_ds()
+    region_ds()
     supplier_ds()
 
     def query() -> pd.DataFrame:
-        nonlocal nation_ds
         nonlocal customer_ds
         nonlocal line_item_ds
+        nonlocal nation_ds
         nonlocal orders_ds
+        nonlocal part_ds
+        nonlocal region_ds
         nonlocal supplier_ds
 
-        part_ds = utils.get_part_ds()
-        supplier_ds = supplier_ds()
-        lineitem_ds = line_item_ds()
-        orders_ds = orders_ds()
         customer_ds = customer_ds()
+        lineitem_ds = line_item_ds()
         nation_ds = nation_ds()
-        region_ds = utils.get_region_ds()
+        orders_ds = orders_ds()
+        part_ds = part_ds()
+        region_ds = region_ds()
+        supplier_ds = supplier_ds()
 
         part_filtered = part_ds[(part_ds["p_type"] == "ECONOMY ANODIZED STEEL")]
         part_filtered = part_filtered.loc[:, ["p_partkey"]]
