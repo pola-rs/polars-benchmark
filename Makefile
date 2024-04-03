@@ -42,17 +42,21 @@ tables: .venv  ## Generate data tables
 run-polars: .venv  ## Run polars benchmarks
 	$(VENV_BIN)/python -m queries.polars.executor
 
+.PHONY: run-duckdb
+run-duckdb: .venv  ## Run duckdb benchmarks
+	$(VENV_BIN)/python -m queries.duckdb.executor
+
 .PHONY: run-pandas
 run-pandas: .venv  ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas.executor
 
+.PHONY: run-dask
+run-dask: .venv  ## Run dask benchmarks
+	$(VENV_BIN)/python -m queries.dask.executor
+
 .PHONY: run-pyspark
 run-pyspark: .venv  ## Run pyspark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark.executor
-
-.PHONY: run-duckdb
-run-duckdb: .venv  ## Run duckdb benchmarks
-	$(VENV_BIN)/python -m queries.duckdb.executor
 
 .PHONY: run-all
 run-all: run-polars run-pandas run-pyspark run-duckdb   ## Run all benchmarks
