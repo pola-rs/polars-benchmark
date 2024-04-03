@@ -1,13 +1,6 @@
+# IDE
 .idea/
-.swp
-*.tbl
-*.o
-dbgen
-qgen
-timings*.csv
-**/spark-warehouse
-perf.*
-**/flamegraph.svg
+.vscode/
 
 # Python
 __pycache__/
@@ -20,6 +13,26 @@ __pycache__/
 target/
 Cargo.lock
 
+# Dask
+dask_user_space/
+dask-worker-space/
+
+# Spark
+**/spark-warehouse
+
+# Perf
+perf.*
+**/flamegraph.svg
+
+# Other
+.swp
+*.tbl
+*.o
+dbgen
+qgen
+
 # Project
 /data/tables/
 plots/
+.env*
+timings*.csv

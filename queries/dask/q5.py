@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from datetime import date
+from typing import TYPE_CHECKING
 
-import pandas as pd
+from queries.dask import utils
 
-from queries.pandas import utils
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 5
 
@@ -57,10 +61,14 @@ def q() -> None:
             & (jn5.o_orderdate < date2)
             & (jn5.r_name == "ASIA")
         ]
-        gb = jn5.groupby("n_name", as_index=False)["revenue"].sum()
+
+        # `groupby(as_index=False)` is not yet implemented by Dask:
+        # https://github.com/dask/dask/issues/5834
+        gb = jn5.groupby("n_name")["revenue"].sum().reset_index()
+
         result_df = gb.sort_values("revenue", ascending=False)
 
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

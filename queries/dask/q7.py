@@ -1,8 +1,17 @@
+from __future__ import annotations
+
+import warnings
 from datetime import date
+from typing import TYPE_CHECKING
 
-import pandas as pd
+from queries.dask import utils
 
-from queries.pandas import utils
+with warnings.catch_warnings():
+    warnings.filterwarnings("ignore", category=DeprecationWarning)
+    import dask.dataframe as dd
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 7
 
@@ -114,7 +123,7 @@ def q() -> None:
         total2 = total2.drop(columns=["o_orderkey", "l_orderkey"])
 
         # concat results
-        total = pd.concat([total1, total2])
+        total = dd.concat([total1, total2])  # type: ignore[attr-defined,no-untyped-call]
         result_df = (
             total.groupby(["supp_nation", "cust_nation", "l_year"])
             .revenue.agg("sum")
@@ -126,7 +135,7 @@ def q() -> None:
             by=["supp_nation", "cust_nation", "l_year"],
             ascending=[True, True, True],
         )
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

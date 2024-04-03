@@ -1,8 +1,12 @@
+from __future__ import annotations
+
 from datetime import date
+from typing import TYPE_CHECKING
 
-import pandas as pd
+from queries.dask import utils
 
-from queries.pandas import utils
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 3
 
@@ -45,17 +49,18 @@ def q() -> None:
         jn2 = jn1.merge(flineitem, left_on="o_orderkey", right_on="l_orderkey")
         jn2["revenue"] = jn2.l_extendedprice * (1 - jn2.l_discount)
 
+        # `groupby(as_index=False)` is not yet implemented by Dask:
+        # https://github.com/dask/dask/issues/5834
         total = (
-            jn2.groupby(
-                ["l_orderkey", "o_orderdate", "o_shippriority"], as_index=False
-            )["revenue"]
+            jn2.groupby(["l_orderkey", "o_orderdate", "o_shippriority"])["revenue"]
             .sum()
+            .reset_index()
             .sort_values(["revenue"], ascending=False)
         )
-        result_df = total.head(10).loc[
+        result_df = total.head(10, compute=False).loc[
             :, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]
         ]
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

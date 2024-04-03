@@ -20,6 +20,7 @@ COLORS = {
     "polars": "#f7c5a0",
     "duckdb": "#fff000",
     "pandas": "#72ccff",
+    "dask": "#efa9ae",
     "pyspark": "#87f7cf",
 }
 
@@ -200,7 +201,9 @@ if __name__ == "__main__":
         .last()
         .collect()
     )
-    order = pl.DataFrame({"solution": ["polars", "duckdb", "pandas", "pyspark"]})
+    order = pl.DataFrame(
+        {"solution": ["polars", "duckdb", "pandas", "dask", "pyspark"]}
+    )
     df = order.join(df, on="solution", how="left")
 
     plot(df, limit=LIMIT, group="solution-version")

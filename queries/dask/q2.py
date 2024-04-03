@@ -1,6 +1,11 @@
-import pandas as pd
+from __future__ import annotations
 
-from queries.pandas import utils
+from typing import TYPE_CHECKING
+
+from queries.dask import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 2
 
@@ -94,6 +99,7 @@ def q() -> None:
         part_filtered = part_ds.loc[:, ["p_partkey", "p_mfgr", "p_size", "p_type"]]
         part_filtered = part_filtered[
             (part_filtered["p_size"] == var1)
+            # & (part_filtered["p_type"].astype(str).str.endswith(var2))
             & (part_filtered["p_type"].str.endswith(var2))
         ]
         part_filtered = part_filtered.loc[:, ["p_partkey", "p_mfgr"]]
@@ -114,9 +120,11 @@ def q() -> None:
                 "p_mfgr",
             ],
         ]
-        min_values = merged_df.groupby("p_partkey", as_index=False)[
-            "ps_supplycost"
-        ].min()
+
+        # `groupby(as_index=False)` is not yet implemented by Dask:
+        # https://github.com/dask/dask/issues/5834
+        min_values = merged_df.groupby("p_partkey")["ps_supplycost"].min().reset_index()
+
         min_values.columns = ["P_PARTKEY_CPY", "MIN_SUPPLYCOST"]
         merged_df = merged_df.merge(
             min_values,
@@ -150,9 +158,9 @@ def q() -> None:
                 True,
                 True,
             ],
-        ).head(100)
+        ).head(100, compute=False)
 
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

@@ -19,10 +19,11 @@ except ImportError:
 def get_styles(exclude_solutions: list[str]) -> pl.DataFrame:
     all_styles = pl.DataFrame(
         data=[
-            ["polars", "Polars", "#0075ff", "s", 6.0],
-            ["duckdb", "DuckDB", "#73BFB8", "^", 5.5],
-            ["pandas", "pandas", "#26413C", "o", 5.0],
-            ["pyspark", "PySpark", "#EFA9AE", "D", 4.5],
+            ["polars", "Polars", "#0075FF", "d", 6.0],
+            ["duckdb", "DuckDB", "#73BFB8", "d", 5.5],
+            ["pandas", "pandas", "#26413C", "d", 5.0],
+            ["dask", "Dask", "#EFA9AE", "d", 4.5],
+            ["pyspark", "PySpark", "#87F7CF", "d", 4.5],
         ],
         schema=["solution", "name", "color", "shape", "size"],
     )
