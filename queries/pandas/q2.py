@@ -150,7 +150,7 @@ def q() -> None:
                 True,
                 True,
             ],
-        )[:100]
+        ).head(100)
 
         return result_df  # type: ignore[no-any-return]
 

@@ -50,11 +50,9 @@ def q() -> None:
             count_order=pd.NamedAgg(column="l_orderkey", aggfunc="size"),
         )
 
-        result_df = (
-            total.compute().reset_index().sort_values(["l_returnflag", "l_linestatus"])
-        )
+        result_df = total.reset_index().sort_values(["l_returnflag", "l_linestatus"])
 
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

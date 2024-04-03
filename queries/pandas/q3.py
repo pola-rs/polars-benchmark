@@ -52,7 +52,7 @@ def q() -> None:
             .sum()
             .sort_values(["revenue"], ascending=False)
         )
-        result_df = total[:10].loc[
+        result_df = total.head(10).loc[
             :, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]
         ]
         return result_df  # type: ignore[no-any-return]

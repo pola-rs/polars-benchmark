@@ -144,7 +144,7 @@ def q() -> None:
                 "s_phone",
                 "s_comment",
             ],
-        ].compute()
+        ]
         result_df = result_df.sort_values(
             by=[
                 "s_acctbal",
@@ -158,9 +158,9 @@ def q() -> None:
                 True,
                 True,
             ],
-        )[:100]
+        ).head(100, compute=False)
 
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

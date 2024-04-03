@@ -54,14 +54,13 @@ def q() -> None:
         total = (
             jn2.groupby(["l_orderkey", "o_orderdate", "o_shippriority"])["revenue"]
             .sum()
-            .compute()
             .reset_index()
             .sort_values(["revenue"], ascending=False)
         )
-        result_df = total[:10].loc[
+        result_df = total.head(10, compute=False).loc[
             :, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]
         ]
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

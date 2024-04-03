@@ -131,11 +131,11 @@ def q() -> None:
         )
         result_df.columns = ["supp_nation", "cust_nation", "l_year", "revenue"]
 
-        result_df = result_df.compute().sort_values(
+        result_df = result_df.sort_values(
             by=["supp_nation", "cust_nation", "l_year"],
             ascending=[True, True, True],
         )
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 

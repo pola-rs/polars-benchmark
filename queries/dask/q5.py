@@ -64,11 +64,11 @@ def q() -> None:
 
         # `groupby(as_index=False)` is not yet implemented by Dask:
         # https://github.com/dask/dask/issues/5834
-        gb = jn5.groupby("n_name")["revenue"].sum()
+        gb = jn5.groupby("n_name")["revenue"].sum().reset_index()
 
-        result_df = gb.compute().reset_index().sort_values("revenue", ascending=False)
+        result_df = gb.sort_values("revenue", ascending=False)
 
-        return result_df  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 
