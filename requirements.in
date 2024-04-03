@@ -1,3 +1,4 @@
+dask
 duckdb
 pandas>=2.0
 polars
