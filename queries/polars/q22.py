@@ -5,7 +5,7 @@ from queries.polars import utils
 Q_NUM = 22
 
 
-def q() -> None:
+def q() -> pl.LazyFrame:
     orders_ds = utils.get_orders_ds()
     customer_ds = utils.get_customer_ds()
 
@@ -39,8 +39,14 @@ def q() -> None:
         .sort("cntrycode")
     )
 
-    utils.run_query(Q_NUM, q_final)
+    return q_final
+
+
+def main() -> None:
+    args = utils.parse_parameters()
+    query_plan = q()
+    utils.run_query(Q_NUM, query_plan, **vars(args))
 
 
 if __name__ == "__main__":
-    q()
+    main()

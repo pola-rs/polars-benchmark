@@ -1,12 +1,11 @@
-import sys
 from pathlib import Path
 
 import polars as pl
 
-SCALE_FACTOR = int(sys.argv[1])
+from queries.common_utils import settings
 
 ROOT_DIR = Path(__file__).parent.parent
-TABLES_DIR = ROOT_DIR / "data" / "tables" / f"scale-{SCALE_FACTOR}"
+TABLES_DIR = settings.paths.tables / f"scale-{settings.scale_factor}"
 
 table_columns = {
     "customer": [

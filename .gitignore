@@ -20,6 +20,9 @@ __pycache__/
 target/
 Cargo.lock
 
+# Environment
+.env*
+
 # Project
 /data/tables/
-plots/
+/output/

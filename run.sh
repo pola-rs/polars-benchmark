@@ -1,6 +1,6 @@
-export LOG_TIMINGS=1
-export WRITE_PLOT=1
-export SCALE_FACTOR=1
+export TPCH_PATH_TIMINGS=results/timings.csv
+export TPCH_PATH_PLOTS=results/plots
+export TPCH_SCALE_FACTOR=1
 
 echo run with cached IO
 make tables

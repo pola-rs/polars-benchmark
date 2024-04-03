@@ -5,7 +5,7 @@ from queries.polars import utils
 Q_NUM = 17
 
 
-def q() -> None:
+def q() -> pl.LazyFrame:
     var_1 = "Brand#23"
     var_2 = "MED BOX"
 
@@ -27,8 +27,14 @@ def q() -> None:
         .select((pl.col("l_extendedprice").sum() / 7.0).round(2).alias("avg_yearly"))
     )
 
-    utils.run_query(Q_NUM, q_final)
+    return q_final
+
+
+def main() -> None:
+    args = utils.parse_parameters()
+    query_plan = q()
+    utils.run_query(Q_NUM, query_plan, **vars(args))
 
 
 if __name__ == "__main__":
-    q()
+    main()
