@@ -1,4 +1,4 @@
-dask
+dask[dataframe]
 duckdb
 pandas>=2.0
 polars

@@ -11,6 +11,9 @@ cramjam==2.8.3
 cycler==0.12.1
     # via matplotlib
 dask==2024.4.0
+    # via dask-expr
+dask-expr==1.0.9
+    # via dask
 duckdb==0.10.1
 fastparquet==2024.2.0
 fonttools==4.50.0
@@ -31,6 +34,7 @@ mizani==0.11.1
 numpy==1.26.4
     # via
     #   contourpy
+    #   dask
     #   fastparquet
     #   matplotlib
     #   mizani
@@ -49,6 +53,8 @@ packaging==24.0
     #   statsmodels
 pandas==2.2.1
     # via
+    #   dask
+    #   dask-expr
     #   fastparquet
     #   mizani
     #   plotnine
@@ -65,6 +71,7 @@ polars==0.20.18
 py4j==0.10.9.7
     # via pyspark
 pyarrow==15.0.2
+    # via dask-expr
 pyparsing==3.1.2
     # via matplotlib
 pyspark==3.5.1
