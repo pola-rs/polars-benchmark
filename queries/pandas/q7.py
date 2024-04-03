@@ -8,6 +8,9 @@ Q_NUM = 7
 
 
 def q() -> None:
+    var1 = date(1995, 1, 1)
+    var2 = date(1997, 1, 1)
+
     nation_ds = utils.get_nation_ds
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
@@ -35,8 +38,7 @@ def q() -> None:
         supplier_ds = supplier_ds()
 
         lineitem_filtered = line_item_ds[
-            (line_item_ds["l_shipdate"] >= date(1995, 1, 1))
-            & (line_item_ds["l_shipdate"] < date(1997, 1, 1))
+            (line_item_ds["l_shipdate"] >= var1) & (line_item_ds["l_shipdate"] < var2)
         ]
         lineitem_filtered["l_year"] = lineitem_filtered["l_shipdate"].dt.year
         lineitem_filtered["revenue"] = lineitem_filtered["l_extendedprice"] * (
@@ -122,11 +124,7 @@ def q() -> None:
 
         result_df = result_df.sort_values(
             by=["supp_nation", "cust_nation", "l_year"],
-            ascending=[
-                True,
-                True,
-                True,
-            ],
+            ascending=[True, True, True],
         )
         return result_df  # type: ignore[no-any-return]
 
