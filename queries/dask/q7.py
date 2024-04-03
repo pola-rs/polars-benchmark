@@ -123,7 +123,7 @@ def q() -> None:
         total2 = total2.drop(columns=["o_orderkey", "l_orderkey"])
 
         # concat results
-        total = dd.concat([total1, total2])  # type: ignore[attr-defined]
+        total = dd.concat([total1, total2])  # type: ignore[attr-defined,no-untyped-call]
         result_df = (
             total.groupby(["supp_nation", "cust_nation", "l_year"])
             .revenue.agg("sum")
