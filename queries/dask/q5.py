@@ -45,13 +45,9 @@ def q() -> None:
         orders_ds = orders_ds()
         supplier_ds = supplier_ds()
 
-        rsel = region_ds.r_name == "ASIA"
-        osel = (orders_ds.o_orderdate >= date1) & (orders_ds.o_orderdate < date2)
-        forders = orders_ds[osel]
-        fregion = region_ds[rsel]
-        jn1 = fregion.merge(nation_ds, left_on="r_regionkey", right_on="n_regionkey")
+        jn1 = region_ds.merge(nation_ds, left_on="r_regionkey", right_on="n_regionkey")
         jn2 = jn1.merge(customer_ds, left_on="n_nationkey", right_on="c_nationkey")
-        jn3 = jn2.merge(forders, left_on="c_custkey", right_on="o_custkey")
+        jn3 = jn2.merge(orders_ds, left_on="c_custkey", right_on="o_custkey")
         jn4 = jn3.merge(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
         jn5 = supplier_ds.merge(
             jn4,
@@ -59,8 +55,19 @@ def q() -> None:
             right_on=["l_suppkey", "n_nationkey"],
         )
         jn5["revenue"] = jn5.l_extendedprice * (1.0 - jn5.l_discount)
+
+        jn5 = jn5[
+            (jn5.o_orderdate >= date1)
+            & (jn5.o_orderdate < date2)
+            & (jn5.r_name == "ASIA")
+        ]
+
+        # `groupby(as_index=False)` is not yet implemented by Dask:
+        # https://github.com/dask/dask/issues/5834
         gb = jn5.groupby("n_name")["revenue"].sum()
+
         result_df = gb.compute().reset_index().sort_values("revenue", ascending=False)
+
         return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
