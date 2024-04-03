@@ -49,8 +49,7 @@ def q() -> None:
         jn2 = jn1.merge(flineitem, left_on="o_orderkey", right_on="l_orderkey")
         jn2["revenue"] = jn2.l_extendedprice * (1 - jn2.l_discount)
 
-        # We have to deviate from pandas here because `groupby(as_index=False)` is not
-        # implemented yet by Dask.
+        # `groupby(as_index=False)` is not yet implemented by Dask:
         # https://github.com/dask/dask/issues/5834
         total = (
             jn2.groupby(["l_orderkey", "o_orderdate", "o_shippriority"])["revenue"]

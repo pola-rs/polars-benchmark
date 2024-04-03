@@ -35,8 +35,7 @@ def q() -> None:
             * (1 + lineitem_filtered.l_tax)
         )
 
-        # We have to deviate from pandas here because `groupby(as_index=False)` is not
-        # implemented yet by Dask.
+        # `groupby(as_index=False)` is not yet implemented by Dask:
         # https://github.com/dask/dask/issues/5834
         gb = lineitem_filtered.groupby(["l_returnflag", "l_linestatus"])
 

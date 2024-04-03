@@ -121,8 +121,7 @@ def q() -> None:
             ],
         ]
 
-        # We have to deviate from pandas here because `groupby(as_index=False)` is not
-        # implemented yet by Dask.
+        # `groupby(as_index=False)` is not yet implemented by Dask:
         # https://github.com/dask/dask/issues/5834
         min_values = merged_df.groupby("p_partkey")["ps_supplycost"].min().reset_index()
 

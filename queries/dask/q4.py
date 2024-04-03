@@ -18,7 +18,7 @@ def q() -> None:
     line_item_ds = utils.get_line_item_ds
     orders_ds = utils.get_orders_ds
 
-    # first call one time to cache in case we don't include the IO times
+    # First call one time to cache in case we don't include the IO times
     line_item_ds()
     orders_ds()
 
@@ -32,22 +32,24 @@ def q() -> None:
         osel = (orders_ds.o_orderdate < date1) & (orders_ds.o_orderdate >= date2)
         flineitem = line_item_ds[lsel]
         forders = orders_ds[osel]
+
+        # `isin(Series)` is not yet implemented by Dask.
+        # https://github.com/dask/dask/issues/4227
         forders = forders[["o_orderkey", "o_orderpriority"]]
-
-        # doesn't support isin
-        # jn = forders[forders["o_orderkey"].compute().isin(flineitem["l_orderkey"])]
-
         jn = forders.merge(
             flineitem, left_on="o_orderkey", right_on="l_orderkey"
         ).drop_duplicates(subset=["o_orderkey"])[["o_orderpriority", "o_orderkey"]]
+
+        # `groupby(as_index=False)` is not yet implemented by Dask:
+        # https://github.com/dask/dask/issues/5834
         result_df = (
             jn.groupby("o_orderpriority")["o_orderkey"]
             .count()
             .reset_index()
             .sort_values(["o_orderpriority"])
+            .rename(columns={"o_orderkey": "order_count"})
         )
-        result_df = result_df.compute()
-        return result_df.rename({"o_orderkey": "order_count"}, axis=1)  # type: ignore[no-any-return]
+        return result_df.compute()  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 
