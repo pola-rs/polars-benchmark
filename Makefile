@@ -33,10 +33,10 @@ pre-commit: fmt  ## Run all code quality checks
 .PHONY: tables
 tables: .venv  ## Generate data tables
 	$(MAKE) -C tpch-dbgen all
-	cd tpch-dbgen && ./dbgen -vf -s $(SCALE) && cd ..
-	mkdir -p "data/tables/scale-$(SCALE)"
-	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE)/
-	$(VENV_BIN)/python scripts/prepare_data.py $(SCALE)
+	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
+	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
+	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
+	$(VENV_BIN)/python scripts/prepare_data.py $(SCALE_FACTOR)
 
 .PHONY: run-polars
 run-polars: .venv  ## Run polars benchmarks
