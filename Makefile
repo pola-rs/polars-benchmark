@@ -5,18 +5,18 @@ SHELL=/bin/bash
 VENV=.venv
 VENV_BIN=$(VENV)/bin
 
-.venv:  ## Set up Python virtual environment and install dependencies
+venv:  ## Set up Python virtual environment and install dependencies
 	python3 -m venv $(VENV)
 	$(MAKE) install-deps
 
 .PHONY: install-deps
-install-deps: .venv  ## Install Python project dependencies
+install-deps:  ## Install Python project dependencies
 	$(VENV_BIN)/python -m pip install --upgrade uv
 	$(VENV_BIN)/uv pip install -r requirements.txt
 	$(VENV_BIN)/uv pip install -r requirements-dev.txt
 
 .PHONY: bump-deps
-bump-deps: .venv  ## Bump Python project dependencies
+bump-deps: venv  ## Bump Python project dependencies
 	$(VENV_BIN)/python -m pip install --upgrade uv
 	$(VENV_BIN)/uv pip compile requirements.in > requirements.txt
 	$(VENV_BIN)/uv pip compile requirements-dev.in > requirements-dev.txt
@@ -31,7 +31,7 @@ fmt:  ## Run autoformatting and linting
 pre-commit: fmt  ## Run all code quality checks
 
 .PHONY: tables
-tables: .venv  ## Generate data tables
+tables: venv  ## Generate data tables
 	$(MAKE) -C tpch-dbgen all
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
@@ -39,30 +39,30 @@ tables: .venv  ## Generate data tables
 	$(VENV_BIN)/python scripts/prepare_data.py $(SCALE_FACTOR)
 
 .PHONY: run-polars
-run-polars: .venv  ## Run polars benchmarks
+run-polars: venv  ## Run polars benchmarks
 	$(VENV_BIN)/python -m queries.polars.executor
 
 .PHONY: run-duckdb
-run-duckdb: .venv  ## Run duckdb benchmarks
+run-duckdb: venv  ## Run duckdb benchmarks
 	$(VENV_BIN)/python -m queries.duckdb.executor
 
 .PHONY: run-pandas
-run-pandas: .venv  ## Run pandas benchmarks
+run-pandas: venv  ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas.executor
 
 .PHONY: run-dask
-run-dask: .venv  ## Run dask benchmarks
+run-dask: venv  ## Run dask benchmarks
 	$(VENV_BIN)/python -m queries.dask.executor
 
 .PHONY: run-pyspark
-run-pyspark: .venv  ## Run pyspark benchmarks
+run-pyspark: venv  ## Run pyspark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark.executor
 
 .PHONY: run-all
 run-all: run-polars run-pandas run-pyspark run-duckdb   ## Run all benchmarks
 
 .PHONY: plot
-plot: .venv  ## Plot results
+plot: venv  ## Plot results
 	$(VENV_BIN)/python -m scripts.plot_results
 
 
