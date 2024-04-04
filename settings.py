@@ -4,11 +4,14 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Paths(BaseSettings):
+    answers: Path = Path("data/answers")
+    tables: Path = Path("data/tables")
+
     timings: Path = Path("output/run/timings.csv")
     plots: Path = Path("output/plot")
 
     model_config = SettingsConfigDict(
-        env_prefix="tpch_path_", env_file=".env", extra="ignore"
+        env_prefix="path_", env_file=".env", extra="ignore"
     )
 
 
@@ -16,7 +19,7 @@ class Run(BaseSettings):
     include_io: bool = False
 
     model_config = SettingsConfigDict(
-        env_prefix="tpch_run_", env_file=".env", extra="ignore"
+        env_prefix="run_", env_file=".env", extra="ignore"
     )
 
 
@@ -27,7 +30,7 @@ class Plot(BaseSettings):
     limit_without_io: int = 15
 
     model_config = SettingsConfigDict(
-        env_prefix="tpch_plot_", env_file=".env", extra="ignore"
+        env_prefix="plot_", env_file=".env", extra="ignore"
     )
 
 
@@ -38,6 +41,4 @@ class Settings(BaseSettings):
     plot: Plot = Plot()
     run: Run = Run()
 
-    model_config = SettingsConfigDict(
-        env_prefix="tpch_", env_file=".env", extra="ignore"
-    )
+    model_config = SettingsConfigDict(env_file=".env", extra="ignore")

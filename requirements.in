@@ -11,3 +11,4 @@ setuptools  # Required by pyspark
 linetimer
 plotnine
 plotly
+pydantic-settings

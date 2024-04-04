@@ -36,7 +36,7 @@ tables: .venv  ## Generate data tables
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
-	$(VENV_BIN)/python scripts/prepare_data.py $(SCALE_FACTOR)
+	$(VENV_BIN)/python -m scripts.prepare_data
 
 .PHONY: run-polars
 run-polars: .venv  ## Run polars benchmarks
