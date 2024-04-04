@@ -63,11 +63,11 @@ run-all: run-polars run-pandas run-pyspark run-duckdb   ## Run all benchmarks
 
 .PHONY: plot
 plot: .venv  ## Plot results
-	$(VENV_BIN)/python -m scripts.plot_results
-
+	$(VENV_BIN)/python -m scripts.plot_bars
 
 .PHONY: clean
 clean:  clean-tpch-dbgen clean-tables  ## Clean up everything
+	@rm -rf .mypy_cache/
 	@rm -rf .ruff_cache/
 	@rm -rf .venv/
 

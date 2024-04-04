@@ -5,6 +5,8 @@ import sys
 import textwrap
 import warnings
 
+from settings import Settings
+
 try:
     import plotnine as p9
     import polars as pl
@@ -14,6 +16,8 @@ try:
 except ImportError:
     print("Please install Polars and Plotnine to use this script.")
     sys.exit(1)
+
+settings = Settings()
 
 
 def get_styles(exclude_solutions: list[str]) -> pl.DataFrame:
@@ -43,7 +47,7 @@ def parse_queries(s: str) -> list[str]:
 
 def read_csv(filename: str) -> pl.DataFrame:
     if filename == "-":
-        df = pl.read_csv(sys.stdin.buffer)
+        df = pl.read_csv(settings.paths.timings)
     else:
         df = pl.read_csv(filename)
     return df
@@ -319,7 +323,7 @@ def main() -> None:
 
     plot = create_plot(timings, styles, queries, caption, args)
 
-    plot.save(args.output)
+    plot.save(settings.paths.plots / args.output)
 
 
 if __name__ == "__main__":
