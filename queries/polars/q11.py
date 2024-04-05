@@ -6,12 +6,12 @@ Q_NUM = 11
 
 
 def q() -> None:
+    var_1 = "GERMANY"
+    var_2 = 0.0001
+
     supplier_ds = utils.get_supplier_ds()
     part_supp_ds = utils.get_part_supp_ds()
     nation_ds = utils.get_nation_ds()
-
-    var_1 = "GERMANY"
-    var_2 = 0.0001
 
     res_1 = (
         part_supp_ds.join(supplier_ds, left_on="ps_suppkey", right_on="s_suppkey")

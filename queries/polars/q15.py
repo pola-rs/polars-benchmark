@@ -8,11 +8,11 @@ Q_NUM = 15
 
 
 def q() -> None:
-    line_item_ds = utils.get_line_item_ds()
-    supplier_ds = utils.get_supplier_ds()
-
     var_1 = date(1996, 1, 1)
     var_2 = date(1996, 4, 1)
+
+    line_item_ds = utils.get_line_item_ds()
+    supplier_ds = utils.get_supplier_ds()
 
     revenue_ds = (
         line_item_ds.filter(

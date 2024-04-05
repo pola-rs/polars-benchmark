@@ -9,7 +9,9 @@ Q_NUM = 1
 
 def q() -> None:
     var_1 = date(1998, 9, 2)
+
     q = utils.get_line_item_ds()
+
     q_final = (
         q.filter(pl.col("l_shipdate") <= var_1)
         .group_by("l_returnflag", "l_linestatus")

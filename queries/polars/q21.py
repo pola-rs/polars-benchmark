@@ -6,12 +6,12 @@ Q_NUM = 21
 
 
 def q() -> None:
+    var_1 = "SAUDI ARABIA"
+
     line_item_ds = utils.get_line_item_ds()
     supplier_ds = utils.get_supplier_ds()
     nation_ds = utils.get_nation_ds()
     orders_ds = utils.get_orders_ds()
-
-    var_1 = "SAUDI ARABIA"
 
     res_1 = (
         line_item_ds.group_by("l_orderkey")

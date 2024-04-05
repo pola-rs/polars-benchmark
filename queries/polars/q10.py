@@ -8,13 +8,13 @@ Q_NUM = 10
 
 
 def q() -> None:
+    var_1 = date(1993, 10, 1)
+    var_2 = date(1994, 1, 1)
+
     customer_ds = utils.get_customer_ds()
     orders_ds = utils.get_orders_ds()
     line_item_ds = utils.get_line_item_ds()
     nation_ds = utils.get_nation_ds()
-
-    var_1 = date(1993, 10, 1)
-    var_2 = date(1994, 1, 1)
 
     q_final = (
         customer_ds.join(orders_ds, left_on="c_custkey", right_on="o_custkey")

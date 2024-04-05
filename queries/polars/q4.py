@@ -22,7 +22,6 @@ def q() -> None:
         .group_by("o_orderpriority")
         .agg(pl.len().alias("order_count"))
         .sort("o_orderpriority")
-        .with_columns(pl.col("order_count").cast(pl.Int64))
     )
 
     utils.run_query(Q_NUM, q_final)

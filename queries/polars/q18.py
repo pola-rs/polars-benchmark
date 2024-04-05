@@ -6,11 +6,11 @@ Q_NUM = 18
 
 
 def q() -> None:
+    var_1 = 300
+
     customer_ds = utils.get_customer_ds()
     line_item_ds = utils.get_line_item_ds()
     orders_ds = utils.get_orders_ds()
-
-    var_1 = 300
 
     q_final = (
         line_item_ds.group_by("l_orderkey")

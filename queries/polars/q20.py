@@ -8,16 +8,16 @@ Q_NUM = 20
 
 
 def q() -> None:
+    var_1 = date(1994, 1, 1)
+    var_2 = date(1995, 1, 1)
+    var_3 = "CANADA"
+    var_4 = "forest"
+
     line_item_ds = utils.get_line_item_ds()
     nation_ds = utils.get_nation_ds()
     supplier_ds = utils.get_supplier_ds()
     part_ds = utils.get_part_ds()
     part_supp_ds = utils.get_part_supp_ds()
-
-    var_1 = date(1994, 1, 1)
-    var_2 = date(1995, 1, 1)
-    var_3 = "CANADA"
-    var_4 = "forest"
 
     res_1 = (
         line_item_ds.filter(
