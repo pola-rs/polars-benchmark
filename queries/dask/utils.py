@@ -8,14 +8,7 @@ import pandas as pd
 from linetimer import CodeTimer, linetimer
 from pandas.testing import assert_series_equal
 
-from queries.common_utils import (
-    FILE_TYPE,
-    INCLUDE_IO,
-    LOG_TIMINGS,
-    SHOW_RESULTS,
-    append_row,
-    on_second_call,
-)
+from queries.common_utils import append_row, on_second_call
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -24,16 +17,16 @@ if TYPE_CHECKING:
 
     from dask.dataframe.core import DataFrame
 
-
 settings = Settings()
 
 
 def read_ds(path: Path) -> DataFrame:
-    if INCLUDE_IO:
-        return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
-    if FILE_TYPE == "feather":
-        msg = "file type feather not supported for dask queries"
+    if settings.run.file_type != "parquet":
+        msg = f"unsupported file type: {settings.run.file_type!r}"
         raise ValueError(msg)
+
+    if settings.run.include_io:
+        return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
 
     # TODO: Load into memory before returning the Dask DataFrame.
     # Code below is tripped up by date types and pyarrow backend is not yet supported
@@ -114,14 +107,14 @@ def run_query(q_num: int, query: Callable[..., Any]) -> None:
             result = query()
             secs = timeit.default_timer() - t0
 
-        if LOG_TIMINGS:
+        if settings.run.log_timings:
             append_row(
                 solution="dask", version=dask.__version__, q=f"q{q_num}", secs=secs
             )
         else:
             test_results(q_num, result)
 
-        if SHOW_RESULTS:
+        if settings.run.show_results:
             print(result)
 
     run()

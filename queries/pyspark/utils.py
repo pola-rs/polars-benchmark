@@ -6,25 +6,17 @@ from pandas.core.frame import DataFrame as PandasDF
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
-from queries.common_utils import (
-    LOG_TIMINGS,
-    SHOW_RESULTS,
-    SPARK_LOG_LEVEL,
-    append_row,
-    on_second_call,
-)
+from queries.common_utils import append_row, on_second_call
 from settings import Settings
 
 settings = Settings()
-
-print("SPARK_LOG_LEVEL:", SPARK_LOG_LEVEL)
 
 
 def get_or_create_spark() -> SparkSession:
     spark = (
         SparkSession.builder.appName("spark_queries").master("local[*]").getOrCreate()
     )
-    spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
+    spark.sparkContext.setLogLevel(settings.run.spark_log_level)
 
     return spark
 
@@ -120,7 +112,7 @@ def run_query(q_num: int, result: SparkDF) -> None:
             pdf = result.toPandas()
             secs = timeit.default_timer() - t0
 
-        if LOG_TIMINGS:
+        if settings.run.log_timings:
             append_row(
                 solution="pyspark",
                 version=get_or_create_spark().version,
@@ -130,7 +122,7 @@ def run_query(q_num: int, result: SparkDF) -> None:
         else:
             test_results(q_num, pdf)
 
-        if SHOW_RESULTS:
+        if settings.run.show_results:
             print(pdf)
 
     run()

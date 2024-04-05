@@ -18,6 +18,14 @@ class Paths(BaseSettings):
 
 class Run(BaseSettings):
     include_io: bool = False
+    file_type: str = "parquet"
+
+    log_timings: bool = False
+    show_results: bool = False
+
+    spark_log_level: str = "ERROR"
+    polars_show_plan: bool = False
+    polars_streaming: bool = False
 
     model_config = SettingsConfigDict(
         env_prefix="run_", env_file=".env", extra="ignore"

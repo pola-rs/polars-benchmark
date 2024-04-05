@@ -9,13 +9,7 @@ from pandas.api.types import is_string_dtype
 from pandas.core.frame import DataFrame as PandasDF
 from pandas.testing import assert_series_equal
 
-from queries.common_utils import (
-    FILE_TYPE,
-    LOG_TIMINGS,
-    SHOW_RESULTS,
-    append_row,
-    on_second_call,
-)
+from queries.common_utils import append_row, on_second_call
 from settings import Settings
 
 settings = Settings()
@@ -24,13 +18,13 @@ pd.options.mode.copy_on_write = True
 
 
 def _read_ds(path: Path) -> PandasDF:
-    path_str = f"{path}.{FILE_TYPE}"
-    if FILE_TYPE == "parquet":
+    path_str = f"{path}.{settings.run.file_type}"
+    if settings.run.file_type == "parquet":
         return pd.read_parquet(path_str, dtype_backend="pyarrow")
-    elif FILE_TYPE == "feather":
+    elif settings.run.file_type == "feather":
         return pd.read_feather(path_str, dtype_backend="pyarrow")
     else:
-        msg = f"file type: {FILE_TYPE} not expected"
+        msg = f"unsupported file type: {settings.run.file_type!r}"
         raise ValueError(msg)
 
 
@@ -101,14 +95,14 @@ def run_query(q_num: int, query: Callable[..., Any]) -> None:
             result = query()
             secs = timeit.default_timer() - t0
 
-        if LOG_TIMINGS:
+        if settings.run.log_timings:
             append_row(
                 solution="pandas", version=pd.__version__, q=f"q{q_num}", secs=secs
             )
         else:
             test_results(q_num, result)
 
-        if SHOW_RESULTS:
+        if settings.run.show_results:
             print(result)
 
     run()

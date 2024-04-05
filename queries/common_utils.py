@@ -1,4 +1,3 @@
-import os
 import re
 import sys
 from pathlib import Path
@@ -11,18 +10,7 @@ from settings import Settings
 
 settings = Settings()
 
-INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
-SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
-LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
-SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
-WRITE_PLOT = bool(os.environ.get("WRITE_PLOT", False))
-FILE_TYPE = os.environ.get("FILE_TYPE", "parquet")
-SPARK_LOG_LEVEL = os.environ.get("SPARK_LOG_LEVEL", "ERROR")
-
-print("include io:", INCLUDE_IO)
-print("show results:", SHOW_RESULTS)
-print("log timings:", LOG_TIMINGS)
-print("file type:", FILE_TYPE)
+print(settings)
 
 
 def append_row(
@@ -31,7 +19,9 @@ def append_row(
     with settings.paths.timings.open("a") as f:
         if f.tell() == 0:
             f.write("solution,version,query_no,duration[s],include_io,success\n")
-        f.write(f"{solution},{version},{q},{secs},{INCLUDE_IO},{success}\n")
+        f.write(
+            f"{solution},{version},{q},{secs},{settings.run.include_io},{success}\n"
+        )
 
 
 def on_second_call(func: Any) -> Any:
@@ -42,12 +32,12 @@ def on_second_call(func: Any) -> Any:
         # this call must set the result
         if helper.calls == 1:  # type: ignore[attr-defined]
             # include IO will compute the result on the 2nd call
-            if not INCLUDE_IO:
+            if not settings.run.include_io:
                 helper.result = func(*args, **kwargs)  # type: ignore[attr-defined]
             return helper.result  # type: ignore[attr-defined]
 
         # second call is in the query, now we set the result
-        if INCLUDE_IO and helper.calls == 2:  # type: ignore[attr-defined]
+        if settings.run.include_io and helper.calls == 2:  # type: ignore[attr-defined]
             helper.result = func(*args, **kwargs)  # type: ignore[attr-defined]
 
         return helper.result  # type: ignore[attr-defined]
