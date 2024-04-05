@@ -1,23 +1,33 @@
-import timeit
-from pathlib import Path
+from __future__ import annotations
 
+import timeit
+from typing import TYPE_CHECKING
+
+import pandas as pd
 from linetimer import CodeTimer, linetimer
-from pandas.core.frame import DataFrame as PandasDF
-from pyspark.sql import DataFrame as SparkDF
+from pandas.testing import assert_frame_equal
 from pyspark.sql import SparkSession
 
-from queries.common_utils import append_row, on_second_call
+from queries.common_utils import log_query_timing, on_second_call
 from settings import Settings
+
+if TYPE_CHECKING:
+    from pathlib import Path
+
+    from pyspark.sql import DataFrame as SparkDF
 
 settings = Settings()
 
 
 def get_or_create_spark() -> SparkSession:
     spark = (
-        SparkSession.builder.appName("spark_queries").master("local[*]").getOrCreate()
+        SparkSession.builder.appName("spark_queries")
+        .master("local[*]")
+        .config("spark.driver.memory", settings.run.spark_driver_memory)
+        .config("spark.executor.memory", settings.run.spark_executor_memory)
+        .config("spark.log.level", settings.run.spark_log_level)
+        .getOrCreate()
     )
-    spark.sparkContext.setLogLevel(settings.run.spark_log_level)
-
     return spark
 
 
@@ -25,34 +35,6 @@ def _read_parquet_ds(path: Path, table_name: str) -> SparkDF:
     df = get_or_create_spark().read.parquet(str(path))
     df.createOrReplaceTempView(table_name)
     return df
-
-
-def get_query_answer(query: int) -> PandasDF:
-    import pandas as pd
-
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pd.read_parquet(path)
-
-
-def test_results(q_num: int, result_df: PandasDF) -> None:
-    import pandas as pd
-
-    with CodeTimer(name=f"Testing result of PySpark Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num)
-
-        for c, t in answer.dtypes.items():
-            s1 = result_df[c]
-            s2 = answer[c]
-
-            if t.name == "object":
-                s1 = s1.astype("string").apply(lambda x: x.strip())
-                s2 = s2.astype("string").apply(lambda x: x.strip())
-
-            elif t.name.startswith("int"):
-                s1 = s1.astype("int64")
-                s2 = s2.astype("int64")
-
-            pd.testing.assert_series_equal(left=s1, right=s2, check_index=False)
 
 
 @on_second_call
@@ -109,20 +91,40 @@ def run_query(q_num: int, result: SparkDF) -> None:
     def run() -> None:
         with CodeTimer(name=f"Get result of PySpark Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
-            pdf = result.toPandas()
+            result_pd = result.toPandas()
             secs = timeit.default_timer() - t0
 
         if settings.run.log_timings:
-            append_row(
+            log_query_timing(
                 solution="pyspark",
                 version=get_or_create_spark().version,
-                q=f"q{q_num}",
-                secs=secs,
+                query_number=q_num,
+                time=secs,
             )
-        else:
-            test_results(q_num, pdf)
+
+        if settings.run.check_results:
+            if settings.scale_factor != 1:
+                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+                raise RuntimeError(msg)
+            _check_result(result_pd, q_num)
 
         if settings.run.show_results:
-            print(pdf)
+            print(result_pd)
 
     run()
+
+
+def _check_result(result: pd.DataFrame, query_number: int) -> None:
+    """Assert that the result of the query is correct."""
+    expected = _get_query_answer(query_number)
+    assert_frame_equal(
+        result.reset_index(drop=True),
+        expected,
+        check_dtype=False,
+    )
+
+
+def _get_query_answer(query: int) -> pd.DataFrame:
+    """Read the true answer to the query from disk."""
+    path = settings.paths.answers / f"q{query}.parquet"
+    return pd.read_parquet(path, dtype_backend="pyarrow")

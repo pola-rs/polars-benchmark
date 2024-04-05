@@ -19,9 +19,9 @@ def q() -> None:
         n_name,
         p_partkey,
         p_mfgr,
-        trim(s_address) as s_address,
+        s_address,
         s_phone,
-        trim(s_comment) as s_comment
+        s_comment
     from
         {part_ds},
         {supplier_ds},

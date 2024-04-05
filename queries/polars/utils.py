@@ -5,7 +5,7 @@ import polars as pl
 from linetimer import CodeTimer, linetimer
 from polars.testing import assert_frame_equal
 
-from queries.common_utils import append_row
+from queries.common_utils import log_query_timing
 from settings import Settings
 
 settings = Settings()
@@ -23,17 +23,6 @@ def _scan_ds(path: Path) -> pl.LazyFrame:
     if settings.run.include_io:
         return scan
     return scan.collect().rechunk().lazy()
-
-
-def get_query_answer(query: int) -> pl.LazyFrame:
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pl.scan_parquet(path)
-
-
-def test_results(q_num: int, result_df: pl.DataFrame) -> None:
-    with CodeTimer(name=f"Testing result of polars Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num).collect()
-        assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
 def get_line_item_ds() -> pl.LazyFrame:
@@ -68,26 +57,45 @@ def get_part_supp_ds() -> pl.LazyFrame:
     return _scan_ds(settings.dataset_base_dir / "partsupp")
 
 
-def run_query(q_num: int, lp: pl.LazyFrame) -> None:
+def run_query(q_num: int, lf: pl.LazyFrame) -> None:
     @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")  # type: ignore[misc]
     def query() -> None:
         if settings.run.polars_show_plan:
-            print(lp.explain())
+            print(lf.explain())
 
         with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
-            result = lp.collect(streaming=settings.run.polars_streaming)
+            result = lf.collect(streaming=settings.run.polars_streaming)
 
             secs = timeit.default_timer() - t0
 
         if settings.run.log_timings:
-            append_row(
-                solution="polars", version=pl.__version__, q=f"q{q_num}", secs=secs
+            log_query_timing(
+                solution="polars",
+                version=pl.__version__,
+                query_number=q_num,
+                time=secs,
             )
-        else:
-            test_results(q_num, result)
+
+        if settings.run.check_results:
+            if settings.scale_factor != 1:
+                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+                raise RuntimeError(msg)
+            _check_result(result, q_num)
 
         if settings.run.show_results:
             print(result)
 
     query()
+
+
+def _check_result(result: pl.DataFrame, query_number: int) -> None:
+    """Assert that the result of the query is correct."""
+    expected = _get_query_answer(query_number)
+    assert_frame_equal(result, expected, check_dtype=False)
+
+
+def _get_query_answer(query: int) -> pl.DataFrame:
+    """Read the true answer to the query from disk."""
+    path = settings.paths.answers / f"q{query}.parquet"
+    return pl.read_parquet(path)

@@ -46,8 +46,7 @@ def q() -> None:
             by=["s_acctbal", "n_name", "s_name", "p_partkey"],
             descending=[True, False, False, False],
         )
-        .limit(100)
-        .with_columns(pl.col(pl.String).str.strip_chars().name.keep())
+        .head(100)
     )
 
     utils.run_query(Q_NUM, q_final)

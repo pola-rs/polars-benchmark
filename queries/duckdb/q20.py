@@ -15,7 +15,7 @@ def q() -> None:
     query_str = f"""
     select
         s_name,
-        trim(s_address) as s_address
+        s_address
     from
         {supplier_ds},
         {nation_ds}

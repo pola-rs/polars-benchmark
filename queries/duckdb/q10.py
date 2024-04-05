@@ -18,9 +18,9 @@ def q() -> None:
         round(sum(l_extendedprice * (1 - l_discount)), 2) as revenue,
         c_acctbal,
         n_name,
-        trim(c_address) as c_address,
+        c_address,
         c_phone,
-        trim(c_comment) as c_comment
+        c_comment
     from
         {customer_ds},
         {orders_ds},
