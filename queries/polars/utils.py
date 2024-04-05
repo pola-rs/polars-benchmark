@@ -1,8 +1,7 @@
-import timeit
 from pathlib import Path
 
 import polars as pl
-from linetimer import CodeTimer, linetimer
+from linetimer import CodeTimer
 
 from queries.common_utils import check_query_result_pl, log_query_timing
 from settings import Settings
@@ -56,33 +55,26 @@ def get_part_supp_ds() -> pl.LazyFrame:
     return _scan_ds(settings.dataset_base_dir / "partsupp")
 
 
-def run_query(q_num: int, lf: pl.LazyFrame) -> None:
-    @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")  # type: ignore[misc]
-    def query() -> None:
-        if settings.run.polars_show_plan:
-            print(lf.explain())
+def run_query(query_number: int, lf: pl.LazyFrame) -> None:
+    if settings.run.polars_show_plan:
+        print(lf.explain(streaming=settings.run.polars_streaming))
 
-        with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            result = lf.collect(streaming=settings.run.polars_streaming)
+    with CodeTimer(name=f"Run Polars query {query_number}", unit="s") as timer:
+        result = lf.collect(streaming=settings.run.polars_streaming)
 
-            secs = timeit.default_timer() - t0
+    if settings.run.log_timings:
+        log_query_timing(
+            solution="polars",
+            version=pl.__version__,
+            query_number=query_number,
+            time=timer.took,
+        )
 
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="polars",
-                version=pl.__version__,
-                query_number=q_num,
-                time=secs,
-            )
+    if settings.run.check_results:
+        if settings.scale_factor != 1:
+            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+            raise RuntimeError(msg)
+        check_query_result_pl(result, query_number)
 
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            check_query_result_pl(result, q_num)
-
-        if settings.run.show_results:
-            print(result)
-
-    query()
+    if settings.run.show_results:
+        print(result)

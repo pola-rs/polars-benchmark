@@ -1,10 +1,9 @@
-import timeit
 from importlib.metadata import version
 from pathlib import Path
 
 import duckdb
 from duckdb import DuckDBPyRelation
-from linetimer import CodeTimer, linetimer
+from linetimer import CodeTimer
 
 from queries.common_utils import check_query_result_pl, log_query_timing
 from settings import Settings
@@ -65,31 +64,23 @@ def get_part_supp_ds() -> str:
     return _scan_ds(settings.dataset_base_dir / "partsupp")
 
 
-def run_query(q_num: int, context: DuckDBPyRelation) -> None:
-    @linetimer(name=f"Overall execution of duckdb Query {q_num}", unit="s")  # type: ignore[misc]
-    def query() -> None:
-        with CodeTimer(name=f"Get result of duckdb Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            # force duckdb to materialize
-            result = context.pl()
+def run_query(query_number: int, context: DuckDBPyRelation) -> None:
+    with CodeTimer(name=f"Run DuckDB query {query_number}", unit="s") as timer:
+        result = context.pl()  # Force DuckDB to materialize
 
-            secs = timeit.default_timer() - t0
+    if settings.run.log_timings:
+        log_query_timing(
+            solution="duckdb",
+            version=version("duckdb"),
+            query_number=query_number,
+            time=timer.took,
+        )
 
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="duckdb",
-                version=version("duckdb"),
-                query_number=q_num,
-                time=secs,
-            )
+    if settings.run.check_results:
+        if settings.scale_factor != 1:
+            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+            raise RuntimeError(msg)
+        check_query_result_pl(result, query_number)
 
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            check_query_result_pl(result, q_num)
-
-        if settings.run.show_results:
-            print(result)
-
-    query()
+    if settings.run.show_results:
+        print(result)

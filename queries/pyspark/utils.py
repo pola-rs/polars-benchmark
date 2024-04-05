@@ -1,9 +1,8 @@
 from __future__ import annotations
 
-import timeit
 from typing import TYPE_CHECKING
 
-from linetimer import CodeTimer, linetimer
+from linetimer import CodeTimer
 from pyspark.sql import SparkSession
 
 from queries.common_utils import check_query_result_pd, log_query_timing, on_second_call
@@ -84,29 +83,23 @@ def drop_temp_view() -> None:
     ]
 
 
-def run_query(q_num: int, result: SparkDF) -> None:
-    @linetimer(name=f"Overall execution of PySpark Query {q_num}", unit="s")  # type: ignore[misc]
-    def run() -> None:
-        with CodeTimer(name=f"Get result of PySpark Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            result_pd = result.toPandas()
-            secs = timeit.default_timer() - t0
+def run_query(query_number: int, query: SparkDF) -> None:
+    with CodeTimer(name=f"Run PySpark query {query_number}", unit="s") as timer:
+        result = query.toPandas()
 
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="pyspark",
-                version=get_or_create_spark().version,
-                query_number=q_num,
-                time=secs,
-            )
+    if settings.run.log_timings:
+        log_query_timing(
+            solution="pyspark",
+            version=get_or_create_spark().version,
+            query_number=query_number,
+            time=timer.took,
+        )
 
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            check_query_result_pd(result_pd, q_num)
+    if settings.run.check_results:
+        if settings.scale_factor != 1:
+            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+            raise RuntimeError(msg)
+        check_query_result_pd(result, query_number)
 
-        if settings.run.show_results:
-            print(result_pd)
-
-    run()
+    if settings.run.show_results:
+        print(result)

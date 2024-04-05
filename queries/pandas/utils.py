@@ -1,10 +1,9 @@
 from __future__ import annotations
 
-import timeit
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
-from linetimer import CodeTimer, linetimer
+from linetimer import CodeTimer
 
 from queries.common_utils import check_query_result_pd, log_query_timing, on_second_call
 from settings import Settings
@@ -70,28 +69,22 @@ def get_part_supp_ds() -> pd.DataFrame:
 
 
 def run_query(q_num: int, query: Callable[..., Any]) -> None:
-    @linetimer(name=f"Overall execution of pandas Query {q_num}", unit="s")  # type: ignore[misc]
-    def run() -> None:
-        with CodeTimer(name=f"Get result of pandas Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            result = query()
-            secs = timeit.default_timer() - t0
+    with CodeTimer(name=f"Run pandas query {q_num}", unit="s") as timer:
+        result = query()
 
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="pandas",
-                version=pd.__version__,
-                query_number=q_num,
-                time=secs,
-            )
+    if settings.run.log_timings:
+        log_query_timing(
+            solution="pandas",
+            version=pd.__version__,
+            query_number=q_num,
+            time=timer.took,
+        )
 
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            check_query_result_pd(result, q_num)
+    if settings.run.check_results:
+        if settings.scale_factor != 1:
+            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+            raise RuntimeError(msg)
+        check_query_result_pd(result, q_num)
 
-        if settings.run.show_results:
-            print(result)
-
-    run()
+    if settings.run.show_results:
+        print(result)

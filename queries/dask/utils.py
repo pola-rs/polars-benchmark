@@ -1,10 +1,10 @@
 from __future__ import annotations
 
-import timeit
 from typing import TYPE_CHECKING, Any
 
+import dask
 import dask.dataframe as dd
-from linetimer import CodeTimer, linetimer
+from linetimer import CodeTimer
 
 from queries.common_utils import check_query_result_pd, log_query_timing, on_second_call
 from settings import Settings
@@ -16,6 +16,8 @@ if TYPE_CHECKING:
     from dask.dataframe.core import DataFrame
 
 settings = Settings()
+
+dask.config.set(scheduler="threads")
 
 
 def read_ds(path: Path) -> DataFrame:
@@ -74,34 +76,23 @@ def get_part_supp_ds() -> DataFrame:
     return read_ds(settings.dataset_base_dir / "partsupp.parquet")
 
 
-def run_query(q_num: int, query: Callable[..., Any]) -> None:
-    @linetimer(name=f"Overall execution of dask Query {q_num}", unit="s")  # type: ignore[misc]
-    def run() -> None:
-        import dask
+def run_query(query_number: int, query: Callable[..., Any]) -> None:
+    with CodeTimer(name=f"Run Dask query {query_number}", unit="s") as timer:
+        result = query()
 
-        dask.config.set(scheduler="threads")
+    if settings.run.log_timings:
+        log_query_timing(
+            solution="dask",
+            version=dask.__version__,
+            query_number=query_number,
+            time=timer.took,
+        )
 
-        with CodeTimer(name=f"Get result of dask Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
+    if settings.run.check_results:
+        if settings.scale_factor != 1:
+            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+            raise RuntimeError(msg)
+        check_query_result_pd(result, query_number)
 
-            result = query()
-            secs = timeit.default_timer() - t0
-
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="dask",
-                version=dask.__version__,
-                query_number=q_num,
-                time=secs,
-            )
-
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            check_query_result_pd(result, q_num)
-
-        if settings.run.show_results:
-            print(result)
-
-    run()
+    if settings.run.show_results:
+        print(result)
