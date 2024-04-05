@@ -1,9 +1,9 @@
+from functools import partial
 from pathlib import Path
 
 import polars as pl
-from linetimer import CodeTimer
 
-from queries.common_utils import check_query_result_pl, log_query_timing
+from queries.common_utils import check_query_result_pl, run_query_generic
 from settings import Settings
 
 settings = Settings()
@@ -56,25 +56,12 @@ def get_part_supp_ds() -> pl.LazyFrame:
 
 
 def run_query(query_number: int, lf: pl.LazyFrame) -> None:
+    streaming = settings.run.polars_streaming
+
     if settings.run.polars_show_plan:
-        print(lf.explain(streaming=settings.run.polars_streaming))
+        print(lf.explain(streaming=streaming))
 
-    with CodeTimer(name=f"Run Polars query {query_number}", unit="s") as timer:
-        result = lf.collect(streaming=settings.run.polars_streaming)
-
-    if settings.run.log_timings:
-        log_query_timing(
-            solution="polars",
-            version=pl.__version__,
-            query_number=query_number,
-            time=timer.took,
-        )
-
-    if settings.run.check_results:
-        if settings.scale_factor != 1:
-            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-            raise RuntimeError(msg)
-        check_query_result_pl(result, query_number)
-
-    if settings.run.show_results:
-        print(result)
+    query = partial(lf.collect, streaming=streaming)
+    run_query_generic(
+        query, query_number, "polars", query_checker=check_query_result_pl
+    )

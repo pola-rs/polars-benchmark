@@ -1,11 +1,9 @@
-from importlib.metadata import version
 from pathlib import Path
 
 import duckdb
 from duckdb import DuckDBPyRelation
-from linetimer import CodeTimer
 
-from queries.common_utils import check_query_result_pl, log_query_timing
+from queries.common_utils import check_query_result_pl, run_query_generic
 from settings import Settings
 
 settings = Settings()
@@ -65,22 +63,7 @@ def get_part_supp_ds() -> str:
 
 
 def run_query(query_number: int, context: DuckDBPyRelation) -> None:
-    with CodeTimer(name=f"Run DuckDB query {query_number}", unit="s") as timer:
-        result = context.pl()  # Force DuckDB to materialize
-
-    if settings.run.log_timings:
-        log_query_timing(
-            solution="duckdb",
-            version=version("duckdb"),
-            query_number=query_number,
-            time=timer.took,
-        )
-
-    if settings.run.check_results:
-        if settings.scale_factor != 1:
-            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-            raise RuntimeError(msg)
-        check_query_result_pl(result, query_number)
-
-    if settings.run.show_results:
-        print(result)
+    query = context.pl
+    run_query_generic(
+        query, query_number, "duckdb", query_checker=check_query_result_pl
+    )

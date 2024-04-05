@@ -3,9 +3,12 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
-from linetimer import CodeTimer
 
-from queries.common_utils import check_query_result_pd, log_query_timing, on_second_call
+from queries.common_utils import (
+    check_query_result_pd,
+    on_second_call,
+    run_query_generic,
+)
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -68,23 +71,7 @@ def get_part_supp_ds() -> pd.DataFrame:
     return _read_ds(settings.dataset_base_dir / "partsupp")
 
 
-def run_query(q_num: int, query: Callable[..., Any]) -> None:
-    with CodeTimer(name=f"Run pandas query {q_num}", unit="s") as timer:
-        result = query()
-
-    if settings.run.log_timings:
-        log_query_timing(
-            solution="pandas",
-            version=pd.__version__,
-            query_number=q_num,
-            time=timer.took,
-        )
-
-    if settings.run.check_results:
-        if settings.scale_factor != 1:
-            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-            raise RuntimeError(msg)
-        check_query_result_pd(result, q_num)
-
-    if settings.run.show_results:
-        print(result)
+def run_query(query_number: int, query: Callable[..., Any]) -> None:
+    run_query_generic(
+        query, query_number, "pandas", query_checker=check_query_result_pd
+    )

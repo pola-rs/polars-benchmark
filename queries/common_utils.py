@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import re
 import sys
+from importlib.metadata import version
 from pathlib import Path
 from subprocess import run
 from typing import TYPE_CHECKING, Any
@@ -11,6 +12,8 @@ from linetimer import CodeTimer
 from settings import Settings
 
 if TYPE_CHECKING:
+    from collections.abc import Callable
+
     import pandas as pd
     import polars as pl
 
@@ -91,6 +94,37 @@ def _get_query_numbers(library_name: str) -> list[int]:
             query_numbers.append(int(match.group(1)))
 
     return sorted(query_numbers)
+
+
+def run_query_generic(
+    query: Callable[..., Any],
+    query_number: int,
+    library_name: str,
+    query_checker: Callable[..., None] | None = None,
+) -> None:
+    """Execute a query."""
+    with CodeTimer(name=f"Run {library_name} query {query_number}", unit="s") as timer:
+        result = query()
+
+    if settings.run.log_timings:
+        log_query_timing(
+            solution=library_name,
+            version=version(library_name),
+            query_number=query_number,
+            time=timer.took,
+        )
+
+    if settings.run.check_results:
+        if query_checker is None:
+            msg = "cannot check results if no query checking function is provided"
+            raise ValueError(msg)
+        if settings.scale_factor != 1:
+            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+            raise RuntimeError(msg)
+        query_checker(result, query_number)
+
+    if settings.run.show_results:
+        print(result)
 
 
 def check_query_result_pl(result: pl.DataFrame, query_number: int) -> None:
