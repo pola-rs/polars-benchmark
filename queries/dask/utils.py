@@ -27,9 +27,11 @@ def read_ds(path: Path) -> DataFrame:
         return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
 
     # TODO: Load into memory before returning the Dask DataFrame.
-    # Code below is tripped up by date types and pyarrow backend is not yet supported
-    # return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
-    return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
+    # Code below is tripped up by date types
+    # df = pd.read_parquet(path, dtype_backend="pyarrow")
+    # return dd.from_pandas(df, npartitions=os.cpu_count())
+    msg = "cannot run Dask starting from an in-memory representation"
+    raise RuntimeError(msg)
 
 
 @on_second_call
