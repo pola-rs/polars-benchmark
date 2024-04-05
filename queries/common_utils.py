@@ -1,12 +1,18 @@
+from __future__ import annotations
+
 import re
 import sys
 from pathlib import Path
 from subprocess import run
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from linetimer import CodeTimer
 
 from settings import Settings
+
+if TYPE_CHECKING:
+    import pandas as pd
+    import polars as pl
 
 settings = Settings()
 
@@ -85,3 +91,35 @@ def _get_query_numbers(library_name: str) -> list[int]:
             query_numbers.append(int(match.group(1)))
 
     return sorted(query_numbers)
+
+
+def check_query_result_pl(result: pl.DataFrame, query_number: int) -> None:
+    """Assert that the Polars result of the query is correct."""
+    from polars.testing import assert_frame_equal
+
+    expected = _get_query_answer_pl(query_number)
+    assert_frame_equal(result, expected, check_dtype=False)
+
+
+def check_query_result_pd(result: pd.DataFrame, query_number: int) -> None:
+    """Assert that the pandas result of the query is correct."""
+    from pandas.testing import assert_frame_equal
+
+    expected = _get_query_answer_pd(query_number)
+    assert_frame_equal(result.reset_index(drop=True), expected, check_dtype=False)
+
+
+def _get_query_answer_pl(query: int) -> pl.DataFrame:
+    """Read the true answer to the query from disk as a Polars DataFrame."""
+    from polars import read_parquet
+
+    path = settings.paths.answers / f"q{query}.parquet"
+    return read_parquet(path)
+
+
+def _get_query_answer_pd(query: int) -> pd.DataFrame:
+    """Read the true answer to the query from disk as a pandas DataFrame."""
+    from pandas import read_parquet
+
+    path = settings.paths.answers / f"q{query}.parquet"
+    return read_parquet(path, dtype_backend="pyarrow")

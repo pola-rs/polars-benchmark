@@ -3,12 +3,10 @@ from importlib.metadata import version
 from pathlib import Path
 
 import duckdb
-import polars as pl
 from duckdb import DuckDBPyRelation
 from linetimer import CodeTimer, linetimer
-from polars.testing import assert_frame_equal
 
-from queries.common_utils import log_query_timing
+from queries.common_utils import check_query_result_pl, log_query_timing
 from settings import Settings
 
 settings = Settings()
@@ -89,21 +87,9 @@ def run_query(q_num: int, context: DuckDBPyRelation) -> None:
             if settings.scale_factor != 1:
                 msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
                 raise RuntimeError(msg)
-            _check_result(result, q_num)
+            check_query_result_pl(result, q_num)
 
         if settings.run.show_results:
             print(result)
 
     query()
-
-
-def _check_result(result: pl.DataFrame, query_number: int) -> None:
-    """Assert that the result of the query is correct."""
-    expected = _get_query_answer(query_number)
-    assert_frame_equal(result, expected, check_dtype=False)
-
-
-def _get_query_answer(query: int) -> pl.DataFrame:
-    """Read the true answer to the query from disk."""
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pl.read_parquet(path)

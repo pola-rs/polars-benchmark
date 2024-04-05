@@ -3,12 +3,10 @@ from __future__ import annotations
 import timeit
 from typing import TYPE_CHECKING
 
-import pandas as pd
 from linetimer import CodeTimer, linetimer
-from pandas.testing import assert_frame_equal
 from pyspark.sql import SparkSession
 
-from queries.common_utils import log_query_timing, on_second_call
+from queries.common_utils import check_query_result_pd, log_query_timing, on_second_call
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -106,25 +104,9 @@ def run_query(q_num: int, result: SparkDF) -> None:
             if settings.scale_factor != 1:
                 msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
                 raise RuntimeError(msg)
-            _check_result(result_pd, q_num)
+            check_query_result_pd(result_pd, q_num)
 
         if settings.run.show_results:
             print(result_pd)
 
     run()
-
-
-def _check_result(result: pd.DataFrame, query_number: int) -> None:
-    """Assert that the result of the query is correct."""
-    expected = _get_query_answer(query_number)
-    assert_frame_equal(
-        result.reset_index(drop=True),
-        expected,
-        check_dtype=False,
-    )
-
-
-def _get_query_answer(query: int) -> pd.DataFrame:
-    """Read the true answer to the query from disk."""
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pd.read_parquet(path, dtype_backend="pyarrow")
