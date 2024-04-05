@@ -37,9 +37,6 @@ def q() -> None:
             .round(2)
             .alias("revenue")
         )
-        .with_columns(
-            pl.col("c_address").str.strip_chars(), pl.col("c_comment").str.strip_chars()
-        )
         .select(
             "c_custkey",
             "c_name",

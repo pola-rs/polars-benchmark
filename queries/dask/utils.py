@@ -6,8 +6,7 @@ from typing import TYPE_CHECKING, Any
 import dask.dataframe as dd
 import pandas as pd
 from linetimer import CodeTimer, linetimer
-from pandas.api.types import is_string_dtype
-from pandas.testing import assert_series_equal
+from pandas.testing import assert_frame_equal
 
 from queries.common_utils import log_query_timing, on_second_call
 from settings import Settings
@@ -111,15 +110,11 @@ def run_query(q_num: int, query: Callable[..., Any]) -> None:
 def _check_result(result: pd.DataFrame, query_number: int) -> None:
     """Assert that the result of the query is correct."""
     expected = _get_query_answer(query_number)
-
-    for c, t in expected.dtypes.items():
-        s1 = result[c]
-        s2 = expected[c]
-
-        if is_string_dtype(t):
-            s1 = s1.apply(lambda x: x.strip())
-
-        assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
+    assert_frame_equal(
+        result.reset_index(drop=True),
+        expected,
+        check_dtype=False,
+    )
 
 
 def _get_query_answer(query: int) -> pd.DataFrame:
