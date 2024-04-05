@@ -33,6 +33,7 @@ qgen
 
 # Project
 /data/tables/
+/output/
 plots/
 .env*
 timings*.csv

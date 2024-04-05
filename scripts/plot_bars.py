@@ -7,13 +7,24 @@ To use this script, run:
 ```
 """
 
-from pathlib import Path
-from typing import Any
+from __future__ import annotations
+
+from typing import TYPE_CHECKING, Any
 
 import plotly.express as px
 import polars as pl
 
-from queries.common_utils import DEFAULT_PLOTS_DIR, INCLUDE_IO, TIMINGS_FILE, WRITE_PLOT
+from settings import Settings
+
+if TYPE_CHECKING:
+    from plotly.graph_objects import Figure
+
+settings = Settings()
+
+if settings.run.include_io:
+    LIMIT = settings.plot.limit_with_io
+else:
+    LIMIT = settings.plot.limit_without_io
 
 # colors for each bar
 COLORS = {
@@ -81,7 +92,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
             v[0]: (offsets[int(v[1])], v[2])
             for v in df.select(["query_no", "index", "labels"])
             .transpose()
-            .to_dict(False)
+            .to_dict(as_series=False)
             .values()
         }
     else:
@@ -102,11 +113,15 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
 
 
 def write_plot_image(fig: Any) -> None:
-    path = Path(DEFAULT_PLOTS_DIR)
+    path = settings.paths.plots
     if not path.exists():
         path.mkdir()
 
-    file_name = "plot_with_io.html" if INCLUDE_IO else "plot_without_io.html"
+    if settings.run.include_io:
+        file_name = "plot_with_io.html"
+    else:
+        file_name = "plot_without_io.html"
+
     fig.write_html(path / file_name)
 
 
@@ -116,7 +131,7 @@ def plot(
     y: str = "duration[s]",
     group: str = "solution",
     limit: int = 120,
-) -> px.Figure:
+) -> Figure:
     """Generate a Plotly Figure of a grouped bar chart displaying benchmark results.
 
     Parameters
@@ -165,31 +180,29 @@ def plot(
 
     add_annotations(fig, limit, df)
 
-    if WRITE_PLOT:
-        write_plot_image(fig)
+    write_plot_image(fig)
 
     # display the object using available environment context
-    fig.show()
+    if settings.plot.show:
+        fig.show()
 
 
-if __name__ == "__main__":
-    print("write plot:", WRITE_PLOT)
-
+def main() -> None:
     e = pl.lit(True)
-    max_query = 8
 
-    if INCLUDE_IO:
-        LIMIT = 15
+    if settings.run.include_io:
         e = e & pl.col("include_io")
     else:
-        LIMIT = 15
         e = e & ~pl.col("include_io")
 
     df = (
-        pl.scan_csv(TIMINGS_FILE)
+        pl.scan_csv(settings.paths.timings)
         .filter(e)
         # filter the max query to plot
-        .filter(pl.col("query_no").str.extract(r"q(\d+)", 1).cast(int) <= max_query)
+        .filter(
+            pl.col("query_no").str.extract(r"q(\d+)", 1).cast(int)
+            <= settings.plot.n_queries
+        )
         # create a version no
         .with_columns(
             pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0),
@@ -207,3 +220,7 @@ if __name__ == "__main__":
     df = order.join(df, on="solution", how="left")
 
     plot(df, limit=LIMIT, group="solution-version")
+
+
+if __name__ == "__main__":
+    main()

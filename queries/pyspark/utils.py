@@ -6,24 +6,17 @@ from pandas.core.frame import DataFrame as PandasDF
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
-from queries.common_utils import (
-    ANSWERS_BASE_DIR,
-    DATASET_BASE_DIR,
-    LOG_TIMINGS,
-    SHOW_RESULTS,
-    SPARK_LOG_LEVEL,
-    append_row,
-    on_second_call,
-)
+from queries.common_utils import append_row, on_second_call
+from settings import Settings
 
-print("SPARK_LOG_LEVEL:", SPARK_LOG_LEVEL)
+settings = Settings()
 
 
 def get_or_create_spark() -> SparkSession:
     spark = (
         SparkSession.builder.appName("spark_queries").master("local[*]").getOrCreate()
     )
-    spark.sparkContext.setLogLevel(SPARK_LOG_LEVEL)
+    spark.sparkContext.setLogLevel(settings.run.spark_log_level)
 
     return spark
 
@@ -34,10 +27,10 @@ def _read_parquet_ds(path: Path, table_name: str) -> SparkDF:
     return df
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> PandasDF:
+def get_query_answer(query: int) -> PandasDF:
     import pandas as pd
 
-    path = base_dir / f"q{query}.parquet"
+    path = settings.paths.answers / f"q{query}.parquet"
     return pd.read_parquet(path)
 
 
@@ -63,43 +56,43 @@ def test_results(q_num: int, result_df: PandasDF) -> None:
 
 
 @on_second_call
-def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "lineitem.parquet", "lineitem")
+def get_line_item_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "lineitem.parquet", "lineitem")
 
 
 @on_second_call
-def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "orders.parquet", "orders")
+def get_orders_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "orders.parquet", "orders")
 
 
 @on_second_call
-def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "customer.parquet", "customer")
+def get_customer_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "customer.parquet", "customer")
 
 
 @on_second_call
-def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "region.parquet", "region")
+def get_region_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "region.parquet", "region")
 
 
 @on_second_call
-def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "nation.parquet", "nation")
+def get_nation_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "nation.parquet", "nation")
 
 
 @on_second_call
-def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "supplier.parquet", "supplier")
+def get_supplier_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "supplier.parquet", "supplier")
 
 
 @on_second_call
-def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "part.parquet", "part")
+def get_part_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "part.parquet", "part")
 
 
 @on_second_call
-def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> SparkDF:
-    return _read_parquet_ds(base_dir / "partsupp.parquet", "partsupp")
+def get_part_supp_ds() -> SparkDF:
+    return _read_parquet_ds(settings.dataset_base_dir / "partsupp.parquet", "partsupp")
 
 
 def drop_temp_view() -> None:
@@ -119,7 +112,7 @@ def run_query(q_num: int, result: SparkDF) -> None:
             pdf = result.toPandas()
             secs = timeit.default_timer() - t0
 
-        if LOG_TIMINGS:
+        if settings.run.log_timings:
             append_row(
                 solution="pyspark",
                 version=get_or_create_spark().version,
@@ -129,7 +122,7 @@ def run_query(q_num: int, result: SparkDF) -> None:
         else:
             test_results(q_num, pdf)
 
-        if SHOW_RESULTS:
+        if settings.run.show_results:
             print(pdf)
 
     run()

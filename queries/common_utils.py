@@ -1,4 +1,3 @@
-import os
 import re
 import sys
 from pathlib import Path
@@ -7,35 +6,24 @@ from typing import Any
 
 from linetimer import CodeTimer
 
-INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
-SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
-LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
-SCALE_FACTOR = os.environ.get("SCALE_FACTOR", "1")
-WRITE_PLOT = bool(os.environ.get("WRITE_PLOT", False))
-FILE_TYPE = os.environ.get("FILE_TYPE", "parquet")
-SPARK_LOG_LEVEL = os.environ.get("SPARK_LOG_LEVEL", "ERROR")
+from settings import Settings
 
-print("include io:", INCLUDE_IO)
-print("show results:", SHOW_RESULTS)
-print("log timings:", LOG_TIMINGS)
-print("file type:", FILE_TYPE)
-
-
-CWD = Path(__file__).parent
-ROOT = CWD.parent
-DATASET_BASE_DIR = ROOT / "data" / "tables" / f"scale-{SCALE_FACTOR}"
-ANSWERS_BASE_DIR = ROOT / "data" / "answers"
-TIMINGS_FILE = ROOT / os.environ.get("TIMINGS_FILE", "timings.csv")
-DEFAULT_PLOTS_DIR = ROOT / "plots"
+settings = Settings()
 
 
 def append_row(
     solution: str, q: str, secs: float, version: str, success: bool = True
 ) -> None:
-    with TIMINGS_FILE.open("a") as f:
+    path = settings.paths.timings
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True)
+
+    with path.open("a") as f:
         if f.tell() == 0:
             f.write("solution,version,query_no,duration[s],include_io,success\n")
-        f.write(f"{solution},{version},{q},{secs},{INCLUDE_IO},{success}\n")
+        f.write(
+            f"{solution},{version},{q},{secs},{settings.run.include_io},{success}\n"
+        )
 
 
 def on_second_call(func: Any) -> Any:
@@ -46,12 +34,12 @@ def on_second_call(func: Any) -> Any:
         # this call must set the result
         if helper.calls == 1:  # type: ignore[attr-defined]
             # include IO will compute the result on the 2nd call
-            if not INCLUDE_IO:
+            if not settings.run.include_io:
                 helper.result = func(*args, **kwargs)  # type: ignore[attr-defined]
             return helper.result  # type: ignore[attr-defined]
 
         # second call is in the query, now we set the result
-        if INCLUDE_IO and helper.calls == 2:  # type: ignore[attr-defined]
+        if settings.run.include_io and helper.calls == 2:  # type: ignore[attr-defined]
             helper.result = func(*args, **kwargs)  # type: ignore[attr-defined]
 
         return helper.result  # type: ignore[attr-defined]
@@ -62,16 +50,18 @@ def on_second_call(func: Any) -> Any:
     return helper
 
 
-def execute_all(solution: str) -> None:
-    package_name = f"{solution}"
+def execute_all(package_name: str) -> None:
+    print(settings.model_dump_json())
 
     expr = re.compile(r"q(\d+).py$")
     num_queries = 0
-    for file in (CWD / package_name).iterdir():
+
+    cwd = Path(__file__).parent
+    for file in (cwd / package_name).iterdir():
         g = expr.search(str(file))
         if g is not None:
             num_queries = max(int(g.group(1)), num_queries)
 
-    with CodeTimer(name=f"Overall execution of ALL {solution} queries", unit="s"):
+    with CodeTimer(name=f"Overall execution of ALL {package_name} queries", unit="s"):
         for i in range(1, num_queries + 1):
             run([sys.executable, "-m", f"queries.{package_name}.q{i}"])

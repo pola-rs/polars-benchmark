@@ -1,4 +1,3 @@
-import os
 import timeit
 from pathlib import Path
 
@@ -6,36 +5,29 @@ import polars as pl
 from linetimer import CodeTimer, linetimer
 from polars.testing import assert_frame_equal
 
-from queries.common_utils import (
-    ANSWERS_BASE_DIR,
-    DATASET_BASE_DIR,
-    FILE_TYPE,
-    INCLUDE_IO,
-    LOG_TIMINGS,
-    SHOW_RESULTS,
-    append_row,
-)
+from queries.common_utils import append_row
+from settings import Settings
 
-SHOW_PLAN = bool(os.environ.get("SHOW_PLAN", False))
-STREAMING = bool(os.environ.get("STREAMING", False))
+settings = Settings()
 
 
 def _scan_ds(path: Path) -> pl.LazyFrame:
-    path_str = f"{path}.{FILE_TYPE}"
-    if FILE_TYPE == "parquet":
+    path_str = f"{path}.{settings.run.file_type}"
+    if settings.run.file_type == "parquet":
         scan = pl.scan_parquet(path_str)
-    elif FILE_TYPE == "feather":
+    elif settings.run.file_type == "feather":
         scan = pl.scan_ipc(path_str)
     else:
-        msg = f"file type: {FILE_TYPE} not expected"
+        msg = f"unsupported file type: {settings.run.file_type!r}"
         raise ValueError(msg)
-    if INCLUDE_IO:
+    if settings.run.include_io:
         return scan
     return scan.collect().rechunk().lazy()
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pl.LazyFrame:
-    return pl.scan_parquet(base_dir / f"q{query}.parquet")
+def get_query_answer(query: int) -> pl.LazyFrame:
+    path = settings.paths.answers / f"q{query}.parquet"
+    return pl.scan_parquet(path)
 
 
 def test_results(q_num: int, result_df: pl.DataFrame) -> None:
@@ -44,58 +36,58 @@ def test_results(q_num: int, result_df: pl.DataFrame) -> None:
         assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
-def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "lineitem")
+def get_line_item_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "lineitem")
 
 
-def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "orders")
+def get_orders_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "orders")
 
 
-def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "customer")
+def get_customer_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "customer")
 
 
-def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "region")
+def get_region_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "region")
 
 
-def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "nation")
+def get_nation_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "nation")
 
 
-def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "supplier")
+def get_supplier_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "supplier")
 
 
-def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "part")
+def get_part_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "part")
 
 
-def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "partsupp")
+def get_part_supp_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "partsupp")
 
 
 def run_query(q_num: int, lp: pl.LazyFrame) -> None:
     @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")  # type: ignore[misc]
     def query() -> None:
-        if SHOW_PLAN:
+        if settings.run.polars_show_plan:
             print(lp.explain())
 
         with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
-            result = lp.collect(streaming=STREAMING)
+            result = lp.collect(streaming=settings.run.polars_streaming)
 
             secs = timeit.default_timer() - t0
 
-        if LOG_TIMINGS:
+        if settings.run.log_timings:
             append_row(
                 solution="polars", version=pl.__version__, q=f"q{q_num}", secs=secs
             )
         else:
             test_results(q_num, result)
 
-        if SHOW_RESULTS:
+        if settings.run.show_results:
             print(result)
 
     query()

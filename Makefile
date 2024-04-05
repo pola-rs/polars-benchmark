@@ -36,7 +36,7 @@ tables: .venv  ## Generate data tables
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
-	$(VENV_BIN)/python scripts/prepare_data.py $(SCALE_FACTOR)
+	$(VENV_BIN)/python -m scripts.prepare_data
 
 .PHONY: run-polars
 run-polars: .venv  ## Run polars benchmarks
@@ -59,17 +59,18 @@ run-pyspark: .venv  ## Run pyspark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark.executor
 
 .PHONY: run-all
-run-all: run-polars run-pandas run-pyspark run-duckdb   ## Run all benchmarks
+run-all: run-polars run-duckdb run-pandas run-dask run-pyspark  ## Run all benchmarks
 
 .PHONY: plot
 plot: .venv  ## Plot results
-	$(VENV_BIN)/python -m scripts.plot_results
-
+	$(VENV_BIN)/python -m scripts.plot_bars
 
 .PHONY: clean
 clean:  clean-tpch-dbgen clean-tables  ## Clean up everything
+	@rm -rf .mypy_cache/
 	@rm -rf .ruff_cache/
 	@rm -rf .venv/
+	@rm -rf output/
 
 .PHONY: clean-tpch-dbgen
 clean-tpch-dbgen:  ## Clean up TPC-H folder

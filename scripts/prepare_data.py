@@ -1,12 +1,9 @@
-import sys
-from pathlib import Path
-
 import polars as pl
 
-SCALE_FACTOR = int(sys.argv[1])
+from settings import Settings
 
-ROOT_DIR = Path(__file__).parent.parent
-TABLES_DIR = ROOT_DIR / "data" / "tables" / f"scale-{SCALE_FACTOR}"
+settings = Settings()
+
 
 table_columns = {
     "customer": [
@@ -88,12 +85,12 @@ table_columns = {
     ],
 }
 
-
 for table_name, columns in table_columns.items():
     print(f"Processing table: {table_name}")
 
+    path = settings.dataset_base_dir / f"{table_name}.tbl"
     lf = pl.scan_csv(
-        TABLES_DIR / f"{table_name}.tbl",
+        path,
         has_header=False,
         separator="|",
         try_parse_dates=True,
@@ -103,5 +100,7 @@ for table_name, columns in table_columns.items():
     # Drop empty last column because CSV ends with a separator
     lf = lf.select(columns)
 
-    lf.sink_parquet(TABLES_DIR / f"{table_name}.parquet")
-    lf.sink_ipc(TABLES_DIR / f"{table_name}.ipc")
+    lf.sink_parquet(settings.dataset_base_dir / f"{table_name}.parquet")
+
+    # IPC currently not relevant
+    # lf.sink_ipc(base_path / f"{table_name}.ipc")
