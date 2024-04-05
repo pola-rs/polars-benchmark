@@ -6,15 +6,15 @@ Q_NUM = 16
 
 
 def q() -> None:
+    var_1 = "Brand#45"
+
     part_supp_ds = utils.get_part_supp_ds()
     part_ds = utils.get_part_ds()
-    supplier_ds = (
-        utils.get_supplier_ds()
-        .filter(pl.col("s_comment").str.contains(".*Customer.*Complaints.*"))
-        .select(pl.col("s_suppkey"), pl.col("s_suppkey").alias("ps_suppkey"))
-    )
+    supplier_ds = utils.get_supplier_ds()
 
-    var_1 = "Brand#45"
+    supplier_ds = supplier_ds.filter(
+        pl.col("s_comment").str.contains(".*Customer.*Complaints.*")
+    ).select(pl.col("s_suppkey"), pl.col("s_suppkey").alias("ps_suppkey"))
 
     q_final = (
         part_ds.join(part_supp_ds, left_on="p_partkey", right_on="ps_partkey")

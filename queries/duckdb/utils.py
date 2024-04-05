@@ -1,14 +1,9 @@
-import timeit
-from importlib.metadata import version
 from pathlib import Path
 
 import duckdb
-import polars as pl
 from duckdb import DuckDBPyRelation
-from linetimer import CodeTimer, linetimer
-from polars.testing import assert_frame_equal
 
-from queries.common_utils import log_query_timing
+from queries.common_utils import check_query_result_pl, run_query_generic
 from settings import Settings
 
 settings = Settings()
@@ -67,43 +62,8 @@ def get_part_supp_ds() -> str:
     return _scan_ds(settings.dataset_base_dir / "partsupp")
 
 
-def run_query(q_num: int, context: DuckDBPyRelation) -> None:
-    @linetimer(name=f"Overall execution of duckdb Query {q_num}", unit="s")  # type: ignore[misc]
-    def query() -> None:
-        with CodeTimer(name=f"Get result of duckdb Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            # force duckdb to materialize
-            result = context.pl()
-
-            secs = timeit.default_timer() - t0
-
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="duckdb",
-                version=version("duckdb"),
-                query_number=q_num,
-                time=secs,
-            )
-
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            _check_result(result, q_num)
-
-        if settings.run.show_results:
-            print(result)
-
-    query()
-
-
-def _check_result(result: pl.DataFrame, query_number: int) -> None:
-    """Assert that the result of the query is correct."""
-    expected = _get_query_answer(query_number)
-    assert_frame_equal(result, expected, check_dtype=False)
-
-
-def _get_query_answer(query: int) -> pl.DataFrame:
-    """Read the true answer to the query from disk."""
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pl.read_parquet(path)
+def run_query(query_number: int, context: DuckDBPyRelation) -> None:
+    query = context.pl
+    run_query_generic(
+        query, query_number, "duckdb", query_checker=check_query_result_pl
+    )

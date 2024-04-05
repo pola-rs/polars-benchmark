@@ -1,14 +1,14 @@
 from __future__ import annotations
 
-import timeit
 from typing import TYPE_CHECKING
 
-import pandas as pd
-from linetimer import CodeTimer, linetimer
-from pandas.testing import assert_frame_equal
 from pyspark.sql import SparkSession
 
-from queries.common_utils import log_query_timing, on_second_call
+from queries.common_utils import (
+    check_query_result_pd,
+    on_second_call,
+    run_query_generic,
+)
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -86,45 +86,8 @@ def drop_temp_view() -> None:
     ]
 
 
-def run_query(q_num: int, result: SparkDF) -> None:
-    @linetimer(name=f"Overall execution of PySpark Query {q_num}", unit="s")  # type: ignore[misc]
-    def run() -> None:
-        with CodeTimer(name=f"Get result of PySpark Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            result_pd = result.toPandas()
-            secs = timeit.default_timer() - t0
-
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="pyspark",
-                version=get_or_create_spark().version,
-                query_number=q_num,
-                time=secs,
-            )
-
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            _check_result(result_pd, q_num)
-
-        if settings.run.show_results:
-            print(result_pd)
-
-    run()
-
-
-def _check_result(result: pd.DataFrame, query_number: int) -> None:
-    """Assert that the result of the query is correct."""
-    expected = _get_query_answer(query_number)
-    assert_frame_equal(
-        result.reset_index(drop=True),
-        expected,
-        check_dtype=False,
+def run_query(query_number: int, df: SparkDF) -> None:
+    query = df.toPandas
+    run_query_generic(
+        query, query_number, "pyspark", query_checker=check_query_result_pd
     )
-
-
-def _get_query_answer(query: int) -> pd.DataFrame:
-    """Read the true answer to the query from disk."""
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pd.read_parquet(path, dtype_backend="pyarrow")

@@ -1,12 +1,21 @@
+from __future__ import annotations
+
 import re
 import sys
+from importlib.metadata import version
 from pathlib import Path
 from subprocess import run
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from linetimer import CodeTimer
 
 from settings import Settings
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+
+    import pandas as pd
+    import polars as pl
 
 settings = Settings()
 
@@ -85,3 +94,66 @@ def _get_query_numbers(library_name: str) -> list[int]:
             query_numbers.append(int(match.group(1)))
 
     return sorted(query_numbers)
+
+
+def run_query_generic(
+    query: Callable[..., Any],
+    query_number: int,
+    library_name: str,
+    query_checker: Callable[..., None] | None = None,
+) -> None:
+    """Execute a query."""
+    with CodeTimer(name=f"Run {library_name} query {query_number}", unit="s") as timer:
+        result = query()
+
+    if settings.run.log_timings:
+        log_query_timing(
+            solution=library_name,
+            version=version(library_name),
+            query_number=query_number,
+            time=timer.took,
+        )
+
+    if settings.run.check_results:
+        if query_checker is None:
+            msg = "cannot check results if no query checking function is provided"
+            raise ValueError(msg)
+        if settings.scale_factor != 1:
+            msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+            raise RuntimeError(msg)
+        query_checker(result, query_number)
+
+    if settings.run.show_results:
+        print(result)
+
+
+def check_query_result_pl(result: pl.DataFrame, query_number: int) -> None:
+    """Assert that the Polars result of the query is correct."""
+    from polars.testing import assert_frame_equal
+
+    expected = _get_query_answer_pl(query_number)
+    assert_frame_equal(result, expected, check_dtype=False)
+
+
+def check_query_result_pd(result: pd.DataFrame, query_number: int) -> None:
+    """Assert that the pandas result of the query is correct."""
+    from pandas.testing import assert_frame_equal
+
+    expected = _get_query_answer_pd(query_number)
+    assert_frame_equal(result.reset_index(drop=True), expected, check_dtype=False)
+
+
+def _get_query_answer_pl(query: int) -> pl.DataFrame:
+    """Read the true answer to the query from disk as a Polars DataFrame."""
+    from polars import read_parquet
+
+    path = settings.paths.answers / f"q{query}.parquet"
+    return read_parquet(path)
+
+
+def _get_query_answer_pd(query: int) -> pd.DataFrame:
+    """Read the true answer to the query from disk as a pandas DataFrame."""
+    from pandas import read_parquet
+
+    path = settings.paths.answers / f"q{query}.parquet"
+    return read_parquet(path, dtype_backend="pyarrow")

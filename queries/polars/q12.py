@@ -8,13 +8,13 @@ Q_NUM = 12
 
 
 def q() -> None:
-    line_item_ds = utils.get_line_item_ds()
-    orders_ds = utils.get_orders_ds()
-
     var_1 = "MAIL"
     var_2 = "SHIP"
     var_3 = date(1994, 1, 1)
     var_4 = date(1995, 1, 1)
+
+    line_item_ds = utils.get_line_item_ds()
+    orders_ds = utils.get_orders_ds()
 
     q_final = (
         orders_ds.join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")

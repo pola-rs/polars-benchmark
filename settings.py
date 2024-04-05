@@ -29,7 +29,7 @@ class Run(BaseSettings):
     polars_show_plan: bool = False
     polars_streaming: bool = False
 
-    spark_driver_memory: str = "1g"  # Tune as needed for optimal performance
+    spark_driver_memory: str = "2g"  # Tune as needed for optimal performance
     spark_executor_memory: str = "1g"  # Tune as needed for optimal performance
     spark_log_level: str = "ERROR"
 

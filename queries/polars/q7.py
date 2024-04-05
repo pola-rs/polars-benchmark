@@ -8,6 +8,9 @@ Q_NUM = 7
 
 
 def q() -> None:
+    var_1 = date(1995, 1, 1)
+    var_2 = date(1996, 12, 31)
+
     nation_ds = utils.get_nation_ds()
     customer_ds = utils.get_customer_ds()
     line_item_ds = utils.get_line_item_ds()
@@ -16,9 +19,6 @@ def q() -> None:
 
     n1 = nation_ds.filter(pl.col("n_name") == "FRANCE")
     n2 = nation_ds.filter(pl.col("n_name") == "GERMANY")
-
-    var_1 = date(1995, 1, 1)
-    var_2 = date(1996, 12, 31)
 
     df1 = (
         customer_ds.join(n1, left_on="c_nationkey", right_on="n_nationkey")

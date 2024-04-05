@@ -1,13 +1,14 @@
 from __future__ import annotations
 
-import timeit
 from typing import TYPE_CHECKING, Any
 
 import pandas as pd
-from linetimer import CodeTimer, linetimer
-from pandas.testing import assert_frame_equal
 
-from queries.common_utils import log_query_timing, on_second_call
+from queries.common_utils import (
+    check_query_result_pd,
+    on_second_call,
+    run_query_generic,
+)
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -70,45 +71,7 @@ def get_part_supp_ds() -> pd.DataFrame:
     return _read_ds(settings.dataset_base_dir / "partsupp")
 
 
-def run_query(q_num: int, query: Callable[..., Any]) -> None:
-    @linetimer(name=f"Overall execution of pandas Query {q_num}", unit="s")  # type: ignore[misc]
-    def run() -> None:
-        with CodeTimer(name=f"Get result of pandas Query {q_num}", unit="s"):
-            t0 = timeit.default_timer()
-            result = query()
-            secs = timeit.default_timer() - t0
-
-        if settings.run.log_timings:
-            log_query_timing(
-                solution="pandas",
-                version=pd.__version__,
-                query_number=q_num,
-                time=secs,
-            )
-
-        if settings.run.check_results:
-            if settings.scale_factor != 1:
-                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
-                raise RuntimeError(msg)
-            _check_result(result, q_num)
-
-        if settings.run.show_results:
-            print(result)
-
-    run()
-
-
-def _check_result(result: pd.DataFrame, query_number: int) -> None:
-    """Assert that the result of the query is correct."""
-    expected = _get_query_answer(query_number)
-    assert_frame_equal(
-        result.reset_index(drop=True),
-        expected,
-        check_dtype=False,
+def run_query(query_number: int, query: Callable[..., Any]) -> None:
+    run_query_generic(
+        query, query_number, "pandas", query_checker=check_query_result_pd
     )
-
-
-def _get_query_answer(query: int) -> pd.DataFrame:
-    """Read the true answer to the query from disk."""
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pd.read_parquet(path, dtype_backend="pyarrow")
