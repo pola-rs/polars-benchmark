@@ -70,6 +70,7 @@ enable_error_code = [
   "truthy-bool",
   "ignore-without-code",
 ]
+plugins = ["pydantic.mypy"]
 
 
 [[tool.mypy.overrides]]

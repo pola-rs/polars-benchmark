@@ -7,14 +7,15 @@ from linetimer import CodeTimer, linetimer
 from polars.testing import assert_frame_equal
 
 from queries.common_utils import (
-    ANSWERS_BASE_DIR,
-    DATASET_BASE_DIR,
     FILE_TYPE,
     INCLUDE_IO,
     LOG_TIMINGS,
     SHOW_RESULTS,
     append_row,
 )
+from settings import Settings
+
+settings = Settings()
 
 SHOW_PLAN = bool(os.environ.get("SHOW_PLAN", False))
 STREAMING = bool(os.environ.get("STREAMING", False))
@@ -34,8 +35,9 @@ def _scan_ds(path: Path) -> pl.LazyFrame:
     return scan.collect().rechunk().lazy()
 
 
-def get_query_answer(query: int, base_dir: Path = ANSWERS_BASE_DIR) -> pl.LazyFrame:
-    return pl.scan_parquet(base_dir / f"q{query}.parquet")
+def get_query_answer(query: int) -> pl.LazyFrame:
+    path = settings.paths.answers / f"q{query}.parquet"
+    return pl.scan_parquet(path)
 
 
 def test_results(q_num: int, result_df: pl.DataFrame) -> None:
@@ -44,36 +46,36 @@ def test_results(q_num: int, result_df: pl.DataFrame) -> None:
         assert_frame_equal(left=result_df, right=answer, check_dtype=False)
 
 
-def get_line_item_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "lineitem")
+def get_line_item_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "lineitem")
 
 
-def get_orders_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "orders")
+def get_orders_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "orders")
 
 
-def get_customer_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "customer")
+def get_customer_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "customer")
 
 
-def get_region_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "region")
+def get_region_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "region")
 
 
-def get_nation_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "nation")
+def get_nation_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "nation")
 
 
-def get_supplier_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "supplier")
+def get_supplier_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "supplier")
 
 
-def get_part_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "part")
+def get_part_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "part")
 
 
-def get_part_supp_ds(base_dir: Path = DATASET_BASE_DIR) -> pl.LazyFrame:
-    return _scan_ds(base_dir / "partsupp")
+def get_part_supp_ds() -> pl.LazyFrame:
+    return _scan_ds(settings.dataset_base_dir / "partsupp")
 
 
 def run_query(q_num: int, lp: pl.LazyFrame) -> None:

@@ -85,12 +85,10 @@ table_columns = {
     ],
 }
 
-base_path = settings.paths.tables / f"scale-{settings.scale_factor}"
-
 for table_name, columns in table_columns.items():
     print(f"Processing table: {table_name}")
 
-    path = base_path / f"{table_name}.tbl"
+    path = settings.dataset_base_dir / f"{table_name}.tbl"
     lf = pl.scan_csv(
         path,
         has_header=False,
@@ -102,7 +100,7 @@ for table_name, columns in table_columns.items():
     # Drop empty last column because CSV ends with a separator
     lf = lf.select(columns)
 
-    lf.sink_parquet(base_path / f"{table_name}.parquet")
+    lf.sink_parquet(settings.dataset_base_dir / f"{table_name}.parquet")
 
     # IPC currently not relevant
     # lf.sink_ipc(base_path / f"{table_name}.ipc")

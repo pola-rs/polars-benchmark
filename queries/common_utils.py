@@ -7,6 +7,10 @@ from typing import Any
 
 from linetimer import CodeTimer
 
+from settings import Settings
+
+settings = Settings()
+
 INCLUDE_IO = bool(os.environ.get("INCLUDE_IO", False))
 SHOW_RESULTS = bool(os.environ.get("SHOW_RESULTS", False))
 LOG_TIMINGS = bool(os.environ.get("LOG_TIMINGS", False))
@@ -21,18 +25,10 @@ print("log timings:", LOG_TIMINGS)
 print("file type:", FILE_TYPE)
 
 
-CWD = Path(__file__).parent
-ROOT = CWD.parent
-DATASET_BASE_DIR = ROOT / "data" / "tables" / f"scale-{SCALE_FACTOR}"
-ANSWERS_BASE_DIR = ROOT / "data" / "answers"
-TIMINGS_FILE = ROOT / os.environ.get("TIMINGS_FILE", "timings.csv")
-DEFAULT_PLOTS_DIR = ROOT / "plots"
-
-
 def append_row(
     solution: str, q: str, secs: float, version: str, success: bool = True
 ) -> None:
-    with TIMINGS_FILE.open("a") as f:
+    with settings.paths.timings.open("a") as f:
         if f.tell() == 0:
             f.write("solution,version,query_no,duration[s],include_io,success\n")
         f.write(f"{solution},{version},{q},{secs},{INCLUDE_IO},{success}\n")
@@ -67,7 +63,9 @@ def execute_all(solution: str) -> None:
 
     expr = re.compile(r"q(\d+).py$")
     num_queries = 0
-    for file in (CWD / package_name).iterdir():
+
+    cwd = Path(__file__).parent
+    for file in (cwd / package_name).iterdir():
         g = expr.search(str(file))
         if g is not None:
             num_queries = max(int(g.group(1)), num_queries)

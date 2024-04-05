@@ -1,5 +1,6 @@
 from pathlib import Path
 
+from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -40,5 +41,10 @@ class Settings(BaseSettings):
     paths: Paths = Paths()
     plot: Plot = Plot()
     run: Run = Run()
+
+    @computed_field  # type: ignore[misc]
+    @property
+    def dataset_base_dir(self) -> Path:
+        return self.paths.tables / f"scale-{self.scale_factor}"
 
     model_config = SettingsConfigDict(env_file=".env", extra="ignore")

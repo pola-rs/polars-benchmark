@@ -12,9 +12,9 @@ cramjam==2.8.3
     # via fastparquet
 cycler==0.12.1
     # via matplotlib
-dask==2024.4.0
+dask==2024.4.1
     # via dask-expr
-dask-expr==1.0.9
+dask-expr==1.0.10
     # via dask
 duckdb==0.10.1
 fastparquet==2024.2.0
