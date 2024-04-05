@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Any
 import dask.dataframe as dd
 import pandas as pd
 from linetimer import CodeTimer, linetimer
+from pandas.api.types import is_string_dtype
 from pandas.testing import assert_series_equal
 
 from queries.common_utils import log_query_timing, on_second_call
@@ -32,26 +33,6 @@ def read_ds(path: Path) -> DataFrame:
     # Code below is tripped up by date types and pyarrow backend is not yet supported
     # return dd.from_pandas(pd.read_parquet(path), npartitions=os.cpu_count())
     return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
-
-
-def get_query_answer(query: int) -> pd.DataFrame:
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pd.read_parquet(path)
-
-
-def test_results(q_num: int, result_df: pd.DataFrame) -> None:
-    with CodeTimer(name=f"Testing result of dask Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num)
-
-        for c, t in answer.dtypes.items():
-            s1 = result_df[c]
-            s2 = answer[c]
-
-            if t.name == "object":
-                s1 = s1.astype("string").apply(lambda x: x.strip())
-                s2 = s2.astype("string").apply(lambda x: x.strip())
-
-            assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
 
 
 @on_second_call
@@ -115,10 +96,33 @@ def run_query(q_num: int, query: Callable[..., Any]) -> None:
                 time=secs,
             )
 
-        if settings.scale_factor == 1:
-            test_results(q_num, result)
+        if settings.run.check_results:
+            if settings.scale_factor != 1:
+                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+                raise RuntimeError(msg)
+            _check_result(result, q_num)
 
         if settings.run.show_results:
             print(result)
 
     run()
+
+
+def _check_result(result: pd.DataFrame, query_number: int) -> None:
+    """Assert that the result of the query is correct."""
+    expected = _get_query_answer(query_number)
+
+    for c, t in expected.dtypes.items():
+        s1 = result[c]
+        s2 = expected[c]
+
+        if is_string_dtype(t):
+            s1 = s1.apply(lambda x: x.strip())
+
+        assert_series_equal(left=s1, right=s2, check_index=False, check_dtype=False)
+
+
+def _get_query_answer(query: int) -> pd.DataFrame:
+    """Read the true answer to the query from disk."""
+    path = settings.paths.answers / f"q{query}.parquet"
+    return pd.read_parquet(path, dtype_backend="pyarrow")

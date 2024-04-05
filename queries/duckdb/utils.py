@@ -35,17 +35,6 @@ def _scan_ds(path: Path) -> str:
     return path_str
 
 
-def get_query_answer(query: int) -> pl.LazyFrame:
-    path = settings.paths.answers / f"q{query}.parquet"
-    return pl.scan_parquet(path)
-
-
-def test_results(q_num: int, result_df: pl.DataFrame) -> None:
-    with CodeTimer(name=f"Testing result of duckdb Query {q_num}", unit="s"):
-        answer = get_query_answer(q_num).collect()
-        assert_frame_equal(left=result_df, right=answer, check_dtype=False)
-
-
 def get_line_item_ds() -> str:
     return _scan_ds(settings.dataset_base_dir / "lineitem")
 
@@ -96,10 +85,25 @@ def run_query(q_num: int, context: DuckDBPyRelation) -> None:
                 time=secs,
             )
 
-        if settings.scale_factor == 1:
-            test_results(q_num, result)
+        if settings.run.check_results:
+            if settings.scale_factor != 1:
+                msg = f"cannot check results when scale factor is not 1, got {settings.scale_factor}"
+                raise RuntimeError(msg)
+            _check_result(result, q_num)
 
         if settings.run.show_results:
             print(result)
 
     query()
+
+
+def _check_result(result: pl.DataFrame, query_number: int) -> None:
+    """Assert that the result of the query is correct."""
+    expected = _get_query_answer(query_number)
+    assert_frame_equal(result, expected, check_dtype=False)
+
+
+def _get_query_answer(query: int) -> pl.DataFrame:
+    """Read the true answer to the query from disk."""
+    path = settings.paths.answers / f"q{query}.parquet"
+    return pl.read_parquet(path)

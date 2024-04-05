@@ -62,24 +62,17 @@ def on_second_call(func: Any) -> Any:
     return helper
 
 
-def execute_all(package_name: str) -> None:
+def execute_all(library_name: str) -> None:
     print(settings.model_dump_json())
 
-    expr = re.compile(r"q(\d+).py$")
-    num_queries = 0
+    query_numbers = _get_query_numbers(library_name)
 
-    cwd = Path(__file__).parent
-    for file in (cwd / package_name).iterdir():
-        g = expr.search(str(file))
-        if g is not None:
-            num_queries = max(int(g.group(1)), num_queries)
-
-    with CodeTimer(name=f"Overall execution of ALL {package_name} queries", unit="s"):
-        for i in range(1, num_queries + 1):
-            run([sys.executable, "-m", f"queries.{package_name}.q{i}"])
+    with CodeTimer(name=f"Overall execution of ALL {library_name} queries", unit="s"):
+        for i in query_numbers:
+            run([sys.executable, "-m", f"queries.{library_name}.q{i}"])
 
 
-def get_query_numbers(library_name: str) -> list[int]:
+def _get_query_numbers(library_name: str) -> list[int]:
     """Get the query numbers that are implemented for the given library."""
     query_numbers = []
 

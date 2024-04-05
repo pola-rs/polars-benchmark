@@ -24,6 +24,7 @@ class Run(BaseSettings):
 
     log_timings: bool = False
     show_results: bool = False
+    check_results: bool = False  # Only available for SCALE_FACTOR=1
 
     spark_log_level: str = "ERROR"
     polars_show_plan: bool = False
