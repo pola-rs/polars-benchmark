@@ -11,19 +11,31 @@ from settings import Settings
 settings = Settings()
 
 
-def append_row(
-    solution: str, q: str, secs: float, version: str, success: bool = True
+def log_query_timing(
+    solution: str, version: str, query_number: int, time: float
 ) -> None:
-    path = settings.paths.timings
-    if not path.parent.exists():
-        path.parent.mkdir(parents=True)
+    settings.paths.timings.mkdir(parents=True, exist_ok=True)
 
-    with path.open("a") as f:
+    with (settings.paths.timings / settings.paths.timings_filename).open("a") as f:
         if f.tell() == 0:
-            f.write("solution,version,query_no,duration[s],include_io,success\n")
-        f.write(
-            f"{solution},{version},{q},{secs},{settings.run.include_io},{success}\n"
+            f.write(
+                "solution,version,query_number,duration[s],include_io,scale_factor\n"
+            )
+
+        line = (
+            ",".join(
+                [
+                    solution,
+                    version,
+                    str(query_number),
+                    str(time),
+                    str(settings.run.include_io),
+                    str(settings.scale_factor),
+                ]
+            )
+            + "\n"
         )
+        f.write(line)
 
 
 def on_second_call(func: Any) -> Any:
@@ -65,3 +77,18 @@ def execute_all(package_name: str) -> None:
     with CodeTimer(name=f"Overall execution of ALL {package_name} queries", unit="s"):
         for i in range(1, num_queries + 1):
             run([sys.executable, "-m", f"queries.{package_name}.q{i}"])
+
+
+def get_query_numbers(library_name: str) -> list[int]:
+    """Get the query numbers that are implemented for the given library."""
+    query_numbers = []
+
+    path = Path(__file__).parent / library_name
+    expr = re.compile(r"q(\d+).py$")
+
+    for file in path.iterdir():
+        match = expr.search(str(file))
+        if match is not None:
+            query_numbers.append(int(match.group(1)))
+
+    return sorted(query_numbers)

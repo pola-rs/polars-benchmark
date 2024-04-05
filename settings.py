@@ -8,7 +8,9 @@ class Paths(BaseSettings):
     answers: Path = Path("data/answers")
     tables: Path = Path("data/tables")
 
-    timings: Path = Path("output/run/timings.csv")
+    timings: Path = Path("output/run")
+    timings_filename: str = "timings.csv"
+
     plots: Path = Path("output/plot")
 
     model_config = SettingsConfigDict(

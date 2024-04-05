@@ -6,7 +6,7 @@ from pandas.core.frame import DataFrame as PandasDF
 from pyspark.sql import DataFrame as SparkDF
 from pyspark.sql import SparkSession
 
-from queries.common_utils import append_row, on_second_call
+from queries.common_utils import log_query_timing, on_second_call
 from settings import Settings
 
 settings = Settings()
@@ -113,13 +113,14 @@ def run_query(q_num: int, result: SparkDF) -> None:
             secs = timeit.default_timer() - t0
 
         if settings.run.log_timings:
-            append_row(
+            log_query_timing(
                 solution="pyspark",
                 version=get_or_create_spark().version,
-                q=f"q{q_num}",
-                secs=secs,
+                query_number=q_num,
+                time=secs,
             )
-        else:
+
+        if settings.scale_factor == 1:
             test_results(q_num, pdf)
 
         if settings.run.show_results:

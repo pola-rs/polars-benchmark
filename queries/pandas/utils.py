@@ -9,7 +9,7 @@ from pandas.api.types import is_string_dtype
 from pandas.core.frame import DataFrame as PandasDF
 from pandas.testing import assert_series_equal
 
-from queries.common_utils import append_row, on_second_call
+from queries.common_utils import log_query_timing, on_second_call
 from settings import Settings
 
 settings = Settings()
@@ -96,10 +96,14 @@ def run_query(q_num: int, query: Callable[..., Any]) -> None:
             secs = timeit.default_timer() - t0
 
         if settings.run.log_timings:
-            append_row(
-                solution="pandas", version=pd.__version__, q=f"q{q_num}", secs=secs
+            log_query_timing(
+                solution="pandas",
+                version=pd.__version__,
+                query_number=q_num,
+                time=secs,
             )
-        else:
+
+        if settings.scale_factor == 1:
             test_results(q_num, result)
 
         if settings.run.show_results:
