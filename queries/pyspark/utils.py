@@ -21,10 +21,13 @@ settings = Settings()
 
 def get_or_create_spark() -> SparkSession:
     spark = (
-        SparkSession.builder.appName("spark_queries").master("local[*]").getOrCreate()
+        SparkSession.builder.appName("spark_queries")
+        .master("local[*]")
+        .config("spark.driver.memory", settings.run.spark_driver_memory)
+        .config("spark.executor.memory", settings.run.spark_executor_memory)
+        .config("spark.log.level", settings.run.spark_log_level)
+        .getOrCreate()
     )
-    spark.sparkContext.setLogLevel(settings.run.spark_log_level)
-
     return spark
 
 

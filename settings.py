@@ -26,9 +26,12 @@ class Run(BaseSettings):
     show_results: bool = False
     check_results: bool = False  # Only available for SCALE_FACTOR=1
 
-    spark_log_level: str = "ERROR"
     polars_show_plan: bool = False
     polars_streaming: bool = False
+
+    spark_driver_memory: str = "1g"  # Tune as needed for optimal performance
+    spark_executor_memory: str = "1g"  # Tune as needed for optimal performance
+    spark_log_level: str = "ERROR"
 
     model_config = SettingsConfigDict(
         env_prefix="run_", env_file=".env", extra="ignore"
