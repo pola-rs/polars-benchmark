@@ -57,15 +57,15 @@ def get_part_supp_ds() -> pl.LazyFrame:
     return _scan_ds(settings.dataset_base_dir / "partsupp")
 
 
-def run_query(q_num: int, lp: pl.LazyFrame) -> None:
+def run_query(q_num: int, lf: pl.LazyFrame) -> None:
     @linetimer(name=f"Overall execution of polars Query {q_num}", unit="s")  # type: ignore[misc]
     def query() -> None:
         if settings.run.polars_show_plan:
-            print(lp.explain())
+            print(lf.explain())
 
         with CodeTimer(name=f"Get result of polars Query {q_num}", unit="s"):
             t0 = timeit.default_timer()
-            result = lp.collect(streaming=settings.run.polars_streaming)
+            result = lf.collect(streaming=settings.run.polars_streaming)
 
             secs = timeit.default_timer() - t0
 
