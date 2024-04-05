@@ -10,13 +10,15 @@ from settings import Settings
 
 settings = Settings()
 
-print(settings)
-
 
 def append_row(
     solution: str, q: str, secs: float, version: str, success: bool = True
 ) -> None:
-    with settings.paths.timings.open("a") as f:
+    path = settings.paths.timings
+    if not path.parent.exists():
+        path.parent.mkdir(parents=True)
+
+    with path.open("a") as f:
         if f.tell() == 0:
             f.write("solution,version,query_no,duration[s],include_io,success\n")
         f.write(
@@ -48,8 +50,8 @@ def on_second_call(func: Any) -> Any:
     return helper
 
 
-def execute_all(solution: str) -> None:
-    package_name = f"{solution}"
+def execute_all(package_name: str) -> None:
+    print(settings.model_dump_json())
 
     expr = re.compile(r"q(\d+).py$")
     num_queries = 0
@@ -60,6 +62,6 @@ def execute_all(solution: str) -> None:
         if g is not None:
             num_queries = max(int(g.group(1)), num_queries)
 
-    with CodeTimer(name=f"Overall execution of ALL {solution} queries", unit="s"):
+    with CodeTimer(name=f"Overall execution of ALL {package_name} queries", unit="s"):
         for i in range(1, num_queries + 1):
             run([sys.executable, "-m", f"queries.{package_name}.q{i}"])
