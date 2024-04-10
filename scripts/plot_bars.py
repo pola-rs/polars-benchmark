@@ -26,13 +26,24 @@ if settings.run.include_io:
 else:
     LIMIT = settings.plot.limit_without_io
 
+SOLUTION_ORDER = ["polars", "duckdb", "pandas", "dask", "pyspark"]
+# COLOR_ORDER = ["#0075FF", "#73BFB8", "#73BFB8", "#26413C", "#EFA9AE"]
+
 # colors for each bar
 COLORS = {
     "polars": "#0075FF",
     "duckdb": "#73BFB8",
-    "pandas": "#26413C",
-    "dask": "#EFA9AE",
-    "pyspark": "#87F7CF",
+    "pandas": "#2b8c5d",
+    "dask": "#F9CFF2",
+    "pyspark": "#EFA9AE",
+}
+
+SOLUTION_NAME_MAP = {
+    "polars": "Polars",
+    "duckdb": "DuckDB",
+    "pandas": "pandas",
+    "dask": "Dask",
+    "pyspark": "PySpark",
 }
 
 
@@ -71,38 +82,23 @@ def prep_data() -> pl.DataFrame:
     lf = lf.with_columns(pl.col("duration[s]").fill_null(0))
 
     # Order the groups
-    solution = pl.LazyFrame({"solution": list(COLORS)})
+    solution = pl.LazyFrame({"solution": SOLUTION_ORDER})
     lf = solution.join(lf, on=["solution"], how="left")
 
     # Make query number a string
-    lf = lf.with_columns(pl.col("query_number").cast(pl.String))
+    lf = lf.with_columns(pl.format("Q{}", "query_number").alias("query_number"))
 
     return lf.collect()
 
 
 def plot(df: pl.DataFrame) -> Figure:
-    """Generate a Plotly Figure of a grouped bar chart displaying benchmark results.
-
-    Parameters
-    ----------
-    df
-        DataFrame containing `x`, `y`, and `group`.
-    x
-        Column for X Axis. Defaults to "query_number".
-    y
-        Column for Y Axis. Defaults to "duration[s]".
-    group
-        Column for group. Defaults to "solution".
-    limit
-        height limit in seconds
-
-    Returns
-    -------
-    px.Figure: Plotly Figure (histogram)
-    """
-    x = df.select(pl.col("query_number").cast(pl.String)).to_series()
+    """Generate a Plotly Figure of a grouped bar chart displaying benchmark results."""
+    x = df.get_column("query_number")
     y = df.get_column("duration[s]")
-    group = df.select(pl.concat_str("solution", "version")).to_series()
+
+    group = df.select(
+        pl.format("{} ({})", pl.col("solution").replace(SOLUTION_NAME_MAP), "version")
+    ).to_series()
 
     # build plotly figure object
     fig = px.histogram(
@@ -110,28 +106,28 @@ def plot(df: pl.DataFrame) -> Figure:
         y=y,
         color=group,
         barmode="group",
-        template="plotly_dark",
-        color_discrete_map=COLORS,
+        template="plotly_white",
+        color_discrete_sequence=list(COLORS.values()),
     )
 
     fig.update_layout(
         bargroupgap=0.1,
-        paper_bgcolor="rgba(41,52,65,1)",
+        # paper_bgcolor="rgba(41,52,65,1)",
         xaxis_title="Query",
         yaxis_title="Seconds",
         yaxis_range=[0, LIMIT],
-        plot_bgcolor="rgba(41,52,65,1)",
+        # plot_bgcolor="rgba(41,52,65,1)",
         margin={"t": 100},
         legend={
+            "title": "",
             "orientation": "h",
-            "xanchor": "left",
+            "xanchor": "center",
             "yanchor": "top",
-            "x": 0.37,
-            "y": -0.1,
+            "x": 0.5,
         },
     )
 
-    # add_annotations(fig, limit, df)
+    add_annotations(fig, LIMIT, df)
 
     write_plot_image(fig)
 
@@ -151,8 +147,9 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
     )
 
     # every bar in the plot has a different offset for the text
-    start_offset = 10
-    offsets = [start_offset + 12 * i for i in range(bar_order.height)]
+    # start_offset = 22
+    # offsets = [start_offset + 12 * i for i in range(bar_order.height)]
+    offsets = [0 for _ in range(bar_order.height)]
 
     # we look for the solutions that surpassed the limit
     # and create a text label for them
@@ -160,7 +157,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
         df.filter(pl.col("duration[s]") > limit)
         .with_columns(
             pl.format(
-                "{} took {} s", "solution", pl.col("duration[s]").cast(pl.Int32)
+                "{} took {}s", "solution", pl.col("duration[s]").cast(pl.Int32)
             ).alias("labels")
         )
         .join(bar_order, on="solution")
@@ -194,7 +191,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
             y=LIMIT,
             xshift=x_shift,
             yshift=30,
-            font={"color": "white"},
+            # font={"color": "white"},
             showarrow=False,
             text=anno_text,
         )
