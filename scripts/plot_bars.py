@@ -3,7 +3,7 @@
 To use this script, run:
 
 ```shell
-.venv/bin/python ./scripts/plot_results.py
+.venv/bin/python -m scripts.plot_bars
 ```
 """
 
@@ -28,24 +28,116 @@ else:
 
 # colors for each bar
 COLORS = {
-    "polars": "#f7c5a0",
-    "duckdb": "#fff000",
-    "pandas": "#72ccff",
-    "dask": "#efa9ae",
-    "pyspark": "#87f7cf",
+    "polars": "#0075FF",
+    "duckdb": "#73BFB8",
+    "pandas": "#26413C",
+    "dask": "#EFA9AE",
+    "pyspark": "#87F7CF",
 }
 
-# default base template for plot's theme
-DEFAULT_THEME = "plotly_dark"
 
-# other configuration
-BAR_TYPE = "group"
-LABEL_UPDATES = {
-    "x": "query",
-    "y": "seconds",
-    "color": "Solution",
-    "pattern_shape": "Solution",
-}
+def main() -> None:
+    pl.Config.set_tbl_rows(40)
+
+    df = prep_data()
+    print(df)
+    plot(df)
+
+
+def prep_data() -> pl.DataFrame:
+    lf = pl.scan_csv(settings.paths.timings / settings.paths.timings_filename)
+
+    # Scale factor not used at the moment
+    lf = lf.drop("scale_factor")
+
+    # Select timings either with or without IO
+    if settings.run.include_io:
+        io = pl.col("include_io")
+    else:
+        io = ~pl.col("include_io")
+    lf = lf.filter(io).drop("include_io")
+
+    # Select relevant queries
+    lf = lf.filter(pl.col("query_number") <= settings.plot.n_queries)
+
+    # Get the last timing entry per solution/version/query combination
+    lf = lf.group_by("solution", "version", "query_number").last()
+
+    # Insert missing query entries
+    groups = lf.select("solution", "version").unique()
+    queries = pl.LazyFrame({"query_number": range(1, settings.plot.n_queries + 1)})
+    groups_queries = groups.join(queries, how="cross")
+    lf = groups_queries.join(lf, on=["solution", "version", "query_number"], how="left")
+    lf = lf.with_columns(pl.col("duration[s]").fill_null(0))
+
+    # Order the groups
+    solution = pl.LazyFrame({"solution": list(COLORS)})
+    lf = solution.join(lf, on=["solution"], how="left")
+
+    # Make query number a string
+    lf = lf.with_columns(pl.col("query_number").cast(pl.String))
+
+    return lf.collect()
+
+
+def plot(df: pl.DataFrame) -> Figure:
+    """Generate a Plotly Figure of a grouped bar chart displaying benchmark results.
+
+    Parameters
+    ----------
+    df
+        DataFrame containing `x`, `y`, and `group`.
+    x
+        Column for X Axis. Defaults to "query_number".
+    y
+        Column for Y Axis. Defaults to "duration[s]".
+    group
+        Column for group. Defaults to "solution".
+    limit
+        height limit in seconds
+
+    Returns
+    -------
+    px.Figure: Plotly Figure (histogram)
+    """
+    x = df.select(pl.col("query_number").cast(pl.String)).to_series()
+    y = df.get_column("duration[s]")
+    group = df.select(pl.concat_str("solution", "version")).to_series()
+
+    # build plotly figure object
+    fig = px.histogram(
+        x=x,
+        y=y,
+        color=group,
+        barmode="group",
+        template="plotly_dark",
+        color_discrete_map=COLORS,
+    )
+
+    fig.update_layout(
+        bargroupgap=0.1,
+        paper_bgcolor="rgba(41,52,65,1)",
+        xaxis_title="Query",
+        yaxis_title="Seconds",
+        yaxis_range=[0, LIMIT],
+        plot_bgcolor="rgba(41,52,65,1)",
+        margin={"t": 100},
+        legend={
+            "orientation": "h",
+            "xanchor": "left",
+            "yanchor": "top",
+            "x": 0.37,
+            "y": -0.1,
+        },
+    )
+
+    # add_annotations(fig, limit, df)
+
+    write_plot_image(fig)
+
+    # display the object using available environment context
+    if settings.plot.show:
+        fig.show()
 
 
 def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
@@ -67,16 +159,12 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
     df = (
         df.filter(pl.col("duration[s]") > limit)
         .with_columns(
-            pl.when(pl.col("success"))
-            .then(
-                pl.format(
-                    "{} took {} s", "solution", pl.col("duration[s]").cast(pl.Int32)
-                ).alias("labels")
-            )
-            .otherwise(pl.format("{} had an internal error", "solution"))
+            pl.format(
+                "{} took {} s", "solution", pl.col("duration[s]").cast(pl.Int32)
+            ).alias("labels")
         )
         .join(bar_order, on="solution")
-        .group_by("query_no")
+        .group_by("query_number")
         .agg(pl.col("labels"), pl.col("index").min())
         .with_columns(pl.col("labels").list.join(",\n"))
     )
@@ -90,7 +178,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
     if df.height > 0:
         anno_data = {
             v[0]: (offsets[int(v[1])], v[2])
-            for v in df.select(["query_no", "index", "labels"])
+            for v in df.select("query_number", "index", "labels")
             .transpose()
             .to_dict(as_series=False)
             .values()
@@ -123,103 +211,6 @@ def write_plot_image(fig: Any) -> None:
         file_name = "plot_without_io.html"
 
     fig.write_html(path / file_name)
-
-
-def plot(
-    df: pl.DataFrame,
-    x: str = "query_no",
-    y: str = "duration[s]",
-    group: str = "solution",
-    limit: int = 120,
-) -> Figure:
-    """Generate a Plotly Figure of a grouped bar chart displaying benchmark results.
-
-    Parameters
-    ----------
-    df
-        DataFrame containing `x`, `y`, and `group`.
-    x
-        Column for X Axis. Defaults to "query_no".
-    y
-        Column for Y Axis. Defaults to "duration[s]".
-    group
-        Column for group. Defaults to "solution".
-    limit
-        height limit in seconds
-
-    Returns
-    -------
-    px.Figure: Plotly Figure (histogram)
-    """
-    # build plotly figure object
-    fig = px.histogram(
-        x=df[x],
-        y=df[y],
-        color=df[group],
-        barmode=BAR_TYPE,
-        template=DEFAULT_THEME,
-        color_discrete_map=COLORS,
-        pattern_shape=df[group],
-        labels=LABEL_UPDATES,
-    )
-
-    fig.update_layout(
-        bargroupgap=0.1,
-        paper_bgcolor="rgba(41,52,65,1)",
-        yaxis_range=[0, limit],
-        plot_bgcolor="rgba(41,52,65,1)",
-        margin={"t": 100},
-        legend={
-            "orientation": "h",
-            "xanchor": "left",
-            "yanchor": "top",
-            "x": 0.37,
-            "y": -0.1,
-        },
-    )
-
-    add_annotations(fig, limit, df)
-
-    write_plot_image(fig)
-
-    # display the object using available environment context
-    if settings.plot.show:
-        fig.show()
-
-
-def main() -> None:
-    e = pl.lit(True)
-
-    if settings.run.include_io:
-        e = e & pl.col("include_io")
-    else:
-        e = e & ~pl.col("include_io")
-
-    df = (
-        pl.scan_csv(settings.paths.timings)
-        .filter(e)
-        # filter the max query to plot
-        .filter(
-            pl.col("query_no").str.extract(r"q(\d+)", 1).cast(int)
-            <= settings.plot.n_queries
-        )
-        # create a version no
-        .with_columns(
-            pl.when(pl.col("success")).then(pl.col("duration[s]")).otherwise(0),
-            pl.format("{}-{}", "solution", "version").alias("solution-version"),
-        )
-        # ensure we get the latest version
-        .sort("solution", "version")
-        .group_by("solution", "query_no", maintain_order=True)
-        .last()
-        .collect()
-    )
-    order = pl.DataFrame(
-        {"solution": ["polars", "duckdb", "pandas", "dask", "pyspark"]}
-    )
-    df = order.join(df, on="solution", how="left")
-
-    plot(df, limit=LIMIT, group="solution-version")
 
 
 if __name__ == "__main__":
