@@ -54,6 +54,10 @@ run-pandas: .venv  ## Run pandas benchmarks
 run-dask: .venv  ## Run dask benchmarks
 	$(VENV_BIN)/python -m queries.dask.executor
 
+.PHONY: run-modin
+run-modin: .venv  ## Run pandas benchmarks
+	$(VENV_BIN)/python -m queries.modin.executor
+
 .PHONY: run-pyspark
 run-pyspark: .venv  ## Run pyspark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark.executor
