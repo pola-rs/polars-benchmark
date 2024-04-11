@@ -33,7 +33,8 @@ def q() -> None:
         jn1 = fcustomer.merge(orders_ds, left_on="c_custkey", right_on="o_custkey")
         jn2 = jn1.merge(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
 
-        jn2 = jn2[(jn2["o_orderdate"] < var2) & (jn2["l_shipdate"] > var2)]
+        jn2 = jn2[jn2["o_orderdate"] < var2]
+        jn2 = jn2[jn2["l_shipdate"] > var2]
         jn2["revenue"] = jn2.l_extendedprice * (1 - jn2.l_discount)
 
         gb = jn2.groupby(

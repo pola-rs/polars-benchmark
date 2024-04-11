@@ -26,11 +26,8 @@ def q() -> None:
 
         jn = line_item_ds.merge(orders_ds, left_on="l_orderkey", right_on="o_orderkey")
 
-        jn = jn[
-            (jn["o_orderdate"] < var2)
-            & (jn["o_orderdate"] >= var1)
-            & (jn["l_commitdate"] < jn["l_receiptdate"])
-        ]
+        jn = jn[(jn["o_orderdate"] >= var1) & (jn["o_orderdate"] < var2)]
+        jn = jn[jn["l_commitdate"] < jn["l_receiptdate"]]
 
         jn = jn.drop_duplicates(subset=["o_orderpriority", "l_orderkey"])
 

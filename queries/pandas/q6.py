@@ -24,13 +24,12 @@ def q() -> None:
         var5 = 24
 
         flineitem = line_item_ds[
-            (line_item_ds["l_shipdate"] >= var1)
-            & (line_item_ds["l_shipdate"] < var2)
-            & (line_item_ds["l_discount"] >= var3)
-            & (line_item_ds["l_discount"] <= var4)
-            & (line_item_ds["l_quantity"] < var5)
+            (line_item_ds["l_shipdate"] >= var1) & (line_item_ds["l_shipdate"] < var2)
         ]
-
+        flineitem = line_item_ds[
+            (line_item_ds["l_discount"] >= var3) & (line_item_ds["l_discount"] <= var4)
+        ]
+        flineitem = line_item_ds[line_item_ds["l_quantity"] < var5]
         result_value = (flineitem["l_extendedprice"] * flineitem["l_discount"]).sum()
         result_df = pd.DataFrame({"revenue": [result_value]})
 

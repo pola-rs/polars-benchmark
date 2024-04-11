@@ -51,11 +51,8 @@ def q() -> None:
             right_on=["s_suppkey", "s_nationkey"],
         )
 
-        jn5 = jn5[
-            (jn5["r_name"] == var1)
-            & (jn5["o_orderdate"] >= var2)
-            & (jn5["o_orderdate"] < var3)
-        ]
+        jn5 = jn5[jn5["r_name"] == var1]
+        jn5 = jn5[(jn5["o_orderdate"] >= var2) & (jn5["o_orderdate"] < var3)]
         jn5["revenue"] = jn5.l_extendedprice * (1.0 - jn5.l_discount)
 
         gb = jn5.groupby("n_name", as_index=False)["revenue"].sum()
