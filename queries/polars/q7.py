@@ -8,17 +8,19 @@ Q_NUM = 7
 
 
 def q() -> None:
-    var_1 = date(1995, 1, 1)
-    var_2 = date(1996, 12, 31)
-
     nation_ds = utils.get_nation_ds()
     customer_ds = utils.get_customer_ds()
     line_item_ds = utils.get_line_item_ds()
     orders_ds = utils.get_orders_ds()
     supplier_ds = utils.get_supplier_ds()
 
-    n1 = nation_ds.filter(pl.col("n_name") == "FRANCE")
-    n2 = nation_ds.filter(pl.col("n_name") == "GERMANY")
+    var1 = "FRANCE"
+    var2 = "GERMANY"
+    var3 = date(1995, 1, 1)
+    var4 = date(1996, 12, 31)
+
+    n1 = nation_ds.filter(pl.col("n_name") == var1)
+    n2 = nation_ds.filter(pl.col("n_name") == var2)
 
     df1 = (
         customer_ds.join(n1, left_on="c_nationkey", right_on="n_nationkey")
@@ -42,11 +44,11 @@ def q() -> None:
 
     q_final = (
         pl.concat([df1, df2])
-        .filter(pl.col("l_shipdate").is_between(var_1, var_2))
+        .filter(pl.col("l_shipdate").is_between(var3, var4))
         .with_columns(
-            (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume")
+            (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume"),
+            pl.col("l_shipdate").dt.year().alias("l_year"),
         )
-        .with_columns(pl.col("l_shipdate").dt.year().alias("l_year"))
         .group_by("supp_nation", "cust_nation", "l_year")
         .agg(pl.sum("volume").alias("revenue"))
         .sort(by=["supp_nation", "cust_nation", "l_year"])
