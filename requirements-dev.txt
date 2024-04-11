@@ -9,5 +9,5 @@ pandas-stubs==2.2.1.240316
 ruff==0.3.5
 types-pytz==2024.1.0.20240203
     # via pandas-stubs
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via mypy
