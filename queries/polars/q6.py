@@ -8,18 +8,18 @@ Q_NUM = 6
 
 
 def q() -> None:
-    var_1 = date(1994, 1, 1)
-    var_2 = date(1995, 1, 1)
-    var_3 = 24
-
     line_item_ds = utils.get_line_item_ds()
 
+    var1 = date(1994, 1, 1)
+    var2 = date(1995, 1, 1)
+    var3 = 0.05
+    var4 = 0.07
+    var5 = 24
+
     q_final = (
-        line_item_ds.filter(
-            pl.col("l_shipdate").is_between(var_1, var_2, closed="left")
-        )
-        .filter(pl.col("l_discount").is_between(0.05, 0.07))
-        .filter(pl.col("l_quantity") < var_3)
+        line_item_ds.filter(pl.col("l_shipdate").is_between(var1, var2, closed="left"))
+        .filter(pl.col("l_discount").is_between(var3, var4))
+        .filter(pl.col("l_quantity") < var5)
         .with_columns(
             (pl.col("l_extendedprice") * pl.col("l_discount")).alias("revenue")
         )
