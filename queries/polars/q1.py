@@ -8,17 +8,17 @@ Q_NUM = 1
 
 
 def q() -> None:
-    var_1 = date(1998, 9, 2)
+    line_item_ds = utils.get_line_item_ds()
 
-    q = utils.get_line_item_ds()
+    var1 = date(1998, 9, 2)
 
     q_final = (
-        q.filter(pl.col("l_shipdate") <= var_1)
+        line_item_ds.filter(pl.col("l_shipdate") <= var1)
         .group_by("l_returnflag", "l_linestatus")
         .agg(
             pl.sum("l_quantity").alias("sum_qty"),
             pl.sum("l_extendedprice").alias("sum_base_price"),
-            (pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
+            (pl.col("l_extendedprice") * (1.0 - pl.col("l_discount")))
             .sum()
             .alias("sum_disc_price"),
             (
