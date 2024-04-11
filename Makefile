@@ -12,8 +12,8 @@ VENV_BIN=$(VENV)/bin
 .PHONY: install-deps
 install-deps: .venv  ## Install Python project dependencies
 	$(VENV_BIN)/python -m pip install --upgrade uv
-	$(VENV_BIN)/uv pip install -r requirements.txt
-	$(VENV_BIN)/uv pip install -r requirements-dev.txt
+	$(VENV_BIN)/uv pip install --compile -r requirements.txt
+	$(VENV_BIN)/uv pip install --compile -r requirements-dev.txt
 
 .PHONY: bump-deps
 bump-deps: .venv  ## Bump Python project dependencies

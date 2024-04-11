@@ -14,11 +14,11 @@ cycler==0.12.1
     # via matplotlib
 dask==2024.4.1
     # via dask-expr
-dask-expr==1.0.10
+dask-expr==1.0.11
     # via dask
 duckdb==0.10.1
 fastparquet==2024.2.0
-fonttools==4.50.0
+fonttools==4.51.0
     # via matplotlib
 fsspec==2024.3.1
     # via
@@ -53,7 +53,7 @@ packaging==24.0
     #   matplotlib
     #   plotly
     #   statsmodels
-pandas==2.2.1
+pandas==2.2.2
     # via
     #   dask
     #   dask-expr
@@ -69,7 +69,7 @@ pillow==10.3.0
     # via matplotlib
 plotly==5.20.0
 plotnine==0.13.4
-polars==0.20.18
+polars==0.20.19
 py4j==0.10.9.7
     # via pyspark
 pyarrow==15.0.2
@@ -110,7 +110,7 @@ toolz==0.12.1
     # via
     #   dask
     #   partd
-typing-extensions==4.10.0
+typing-extensions==4.11.0
     # via
     #   pydantic
     #   pydantic-core
