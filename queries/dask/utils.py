@@ -24,59 +24,66 @@ dask.config.set(scheduler="threads")
 
 
 def read_ds(path: Path) -> DataFrame:
-    if settings.run.file_type != "parquet":
-        msg = f"unsupported file type: {settings.run.file_type!r}"
-        raise ValueError(msg)
-
-    if settings.run.include_io:
-        return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
-
     # TODO: Load into memory before returning the Dask DataFrame.
     # Code below is tripped up by date types
     # df = pd.read_parquet(path, dtype_backend="pyarrow")
     # return dd.from_pandas(df, npartitions=os.cpu_count())
-    msg = "cannot run Dask starting from an in-memory representation"
-    raise RuntimeError(msg)
+    if not settings.run.include_io:
+        msg = "cannot run Dask starting from an in-memory representation"
+        raise RuntimeError(msg)
+
+    path_str = f"{path}.{settings.run.file_type}"
+    if settings.run.file_type == "parquet":
+        return dd.read_parquet(path_str, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
+    elif settings.run.file_type == "csv":
+        df = dd.read_csv(path_str, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
+        for c in df.columns:
+            if c.endswith("date"):
+                df[c] = df[c].astype("date32[day][pyarrow]")
+        return df
+    else:
+        msg = f"unsupported file type: {settings.run.file_type!r}"
+        raise ValueError(msg)
 
 
 @on_second_call
 def get_line_item_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "lineitem.parquet")
+    return read_ds(settings.dataset_base_dir / "lineitem")
 
 
 @on_second_call
 def get_orders_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "orders.parquet")
+    return read_ds(settings.dataset_base_dir / "orders")
 
 
 @on_second_call
 def get_customer_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "customer.parquet")
+    return read_ds(settings.dataset_base_dir / "customer")
 
 
 @on_second_call
 def get_region_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "region.parquet")
+    return read_ds(settings.dataset_base_dir / "region")
 
 
 @on_second_call
 def get_nation_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "nation.parquet")
+    return read_ds(settings.dataset_base_dir / "nation")
 
 
 @on_second_call
 def get_supplier_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "supplier.parquet")
+    return read_ds(settings.dataset_base_dir / "supplier")
 
 
 @on_second_call
 def get_part_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "part.parquet")
+    return read_ds(settings.dataset_base_dir / "part")
 
 
 @on_second_call
 def get_part_supp_ds() -> DataFrame:
-    return read_ds(settings.dataset_base_dir / "partsupp.parquet")
+    return read_ds(settings.dataset_base_dir / "partsupp")
 
 
 def run_query(query_number: int, query: Callable[..., Any]) -> None:

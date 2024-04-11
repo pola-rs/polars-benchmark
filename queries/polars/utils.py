@@ -16,16 +16,21 @@ os.environ["POLARS_NO_STREAMING_GROUPBY"] = str(
 
 def _scan_ds(path: Path) -> pl.LazyFrame:
     path_str = f"{path}.{settings.run.file_type}"
+
     if settings.run.file_type == "parquet":
         scan = pl.scan_parquet(path_str)
     elif settings.run.file_type == "feather":
         scan = pl.scan_ipc(path_str)
+    elif settings.run.file_type == "csv":
+        scan = pl.scan_csv(path_str, try_parse_dates=True)
     else:
         msg = f"unsupported file type: {settings.run.file_type!r}"
         raise ValueError(msg)
+
     if settings.run.include_io:
         return scan
-    return scan.collect().rechunk().lazy()
+    else:
+        return scan.collect().rechunk().lazy()
 
 
 def get_line_item_ds() -> pl.LazyFrame:

@@ -21,6 +21,16 @@ def _scan_ds(path: Path) -> str:
                 f"create temp table if not exists {name} as select * from read_parquet('{path_str}');"
             )
             return name
+    if settings.run.file_type == "csv":
+        if settings.run.include_io:
+            duckdb.read_csv(path_str)
+            return f"'{path_str}'"
+        else:
+            name = path_str.replace("/", "_").replace(".", "_").replace("-", "_")
+            duckdb.sql(
+                f"create temp table if not exists {name} as select * from read_csv('{path_str}');"
+            )
+            return name
     elif settings.run.file_type == "feather":
         msg = "duckdb does not support feather for now"
         raise ValueError(msg)
