@@ -8,9 +8,9 @@ Q_NUM = 5
 
 
 def q() -> None:
-    var_1 = "ASIA"
-    var_2 = date(1994, 1, 1)
-    var_3 = date(1995, 1, 1)
+    var1 = "ASIA"
+    var2 = date(1994, 1, 1)
+    var3 = date(1995, 1, 1)
 
     region_ds = utils.get_region_ds()
     nation_ds = utils.get_nation_ds()
@@ -29,8 +29,8 @@ def q() -> None:
             left_on=["l_suppkey", "n_nationkey"],
             right_on=["s_suppkey", "s_nationkey"],
         )
-        .filter(pl.col("r_name") == var_1)
-        .filter(pl.col("o_orderdate").is_between(var_2, var_3, closed="left"))
+        .filter(pl.col("r_name") == var1)
+        .filter(pl.col("o_orderdate").is_between(var2, var3, closed="left"))
         .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("revenue")
         )
