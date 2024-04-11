@@ -1,5 +1,6 @@
 dask[dataframe]
 duckdb
+modin[ray]
 pandas>=2.0
 polars
 pyspark
