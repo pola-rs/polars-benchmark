@@ -8,9 +8,6 @@ Q_NUM = 4
 
 
 def q() -> None:
-    date1 = date(1993, 10, 1)
-    date2 = date(1993, 7, 1)
-
     line_item_ds = utils.get_line_item_ds
     orders_ds = utils.get_orders_ds
 
@@ -24,17 +21,24 @@ def q() -> None:
         line_item_ds = line_item_ds()
         orders_ds = orders_ds()
 
-        lsel = line_item_ds.l_commitdate < line_item_ds.l_receiptdate
-        osel = (orders_ds.o_orderdate < date1) & (orders_ds.o_orderdate >= date2)
-        flineitem = line_item_ds[lsel]
-        forders = orders_ds[osel]
-        jn = forders[forders["o_orderkey"].isin(flineitem["l_orderkey"])]
-        result_df = (
-            jn.groupby("o_orderpriority", as_index=False)["o_orderkey"]
-            .count()
-            .sort_values(["o_orderpriority"])
-            .rename(columns={"o_orderkey": "order_count"})
-        )
+        var1 = date(1993, 7, 1)
+        var2 = date(1993, 10, 1)
+
+        jn = line_item_ds.merge(orders_ds, left_on="l_orderkey", right_on="o_orderkey")
+
+        jn = jn[
+            (jn["o_orderdate"] < var2)
+            & (jn["o_orderdate"] >= var1)
+            & (jn["l_commitdate"] < jn["l_receiptdate"])
+        ]
+
+        jn = jn.drop_duplicates(subset=["o_orderpriority", "l_orderkey"])
+
+        gb = jn.groupby("o_orderpriority", as_index=False)
+        agg = gb.agg(order_count=pd.NamedAgg(column="o_orderkey", aggfunc="count"))
+
+        result_df = agg.sort_values(["o_orderpriority"])
+
         return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
