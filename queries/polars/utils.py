@@ -1,6 +1,5 @@
 import os
 from functools import partial
-from pathlib import Path
 
 import polars as pl
 
@@ -14,15 +13,15 @@ os.environ["POLARS_NO_STREAMING_GROUPBY"] = str(
 )
 
 
-def _scan_ds(path: Path) -> pl.LazyFrame:
-    path_str = f"{path}.{settings.run.file_type}"
+def _scan_ds(table_name: str) -> pl.LazyFrame:
+    path = settings.dataset_base_dir / f"{table_name}.{settings.run.file_type}"
 
     if settings.run.file_type == "parquet":
-        scan = pl.scan_parquet(path_str)
+        scan = pl.scan_parquet(path)
     elif settings.run.file_type == "feather":
-        scan = pl.scan_ipc(path_str)
+        scan = pl.scan_ipc(path)
     elif settings.run.file_type == "csv":
-        scan = pl.scan_csv(path_str, try_parse_dates=True)
+        scan = pl.scan_csv(path, try_parse_dates=True)
     else:
         msg = f"unsupported file type: {settings.run.file_type!r}"
         raise ValueError(msg)
@@ -34,35 +33,35 @@ def _scan_ds(path: Path) -> pl.LazyFrame:
 
 
 def get_line_item_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "lineitem")
+    return _scan_ds("lineitem")
 
 
 def get_orders_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "orders")
+    return _scan_ds("orders")
 
 
 def get_customer_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "customer")
+    return _scan_ds("customer")
 
 
 def get_region_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "region")
+    return _scan_ds("region")
 
 
 def get_nation_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "nation")
+    return _scan_ds("nation")
 
 
 def get_supplier_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "supplier")
+    return _scan_ds("supplier")
 
 
 def get_part_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "part")
+    return _scan_ds("part")
 
 
 def get_part_supp_ds() -> pl.LazyFrame:
-    return _scan_ds(settings.dataset_base_dir / "partsupp")
+    return _scan_ds("partsupp")
 
 
 def run_query(query_number: int, lf: pl.LazyFrame) -> None:
