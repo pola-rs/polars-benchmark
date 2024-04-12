@@ -1,6 +1,11 @@
-import pandas as pd
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from queries.pandas import utils
+
+if TYPE_CHECKING:
+    import pandas as pd
 
 Q_NUM = 2
 
