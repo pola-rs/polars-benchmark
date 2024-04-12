@@ -11,10 +11,6 @@ Q_NUM = 2
 
 
 def q() -> None:
-    var1 = 15
-    var2 = "BRASS"
-    var3 = "EUROPE"
-
     region_ds = utils.get_region_ds
     nation_ds = utils.get_nation_ds
     supplier_ds = utils.get_supplier_ds
@@ -40,99 +36,26 @@ def q() -> None:
         part_ds = part_ds()
         part_supp_ds = part_supp_ds()
 
-        nation_filtered = nation_ds.loc[:, ["n_nationkey", "n_name", "n_regionkey"]]
-        region_filtered = region_ds[(region_ds["r_name"] == var3)]
-        region_filtered = region_filtered.loc[:, ["r_regionkey"]]
-        r_n_merged = nation_filtered.merge(
-            region_filtered, left_on="n_regionkey", right_on="r_regionkey", how="inner"
-        )
-        r_n_merged = r_n_merged.loc[:, ["n_nationkey", "n_name"]]
-        supplier_filtered = supplier_ds.loc[
-            :,
-            [
-                "s_suppkey",
-                "s_name",
-                "s_address",
-                "s_nationkey",
-                "s_phone",
-                "s_acctbal",
-                "s_comment",
-            ],
-        ]
-        s_r_n_merged = r_n_merged.merge(
-            supplier_filtered,
-            left_on="n_nationkey",
-            right_on="s_nationkey",
-            how="inner",
-        )
-        s_r_n_merged = s_r_n_merged.loc[
-            :,
-            [
-                "n_name",
-                "s_suppkey",
-                "s_name",
-                "s_address",
-                "s_phone",
-                "s_acctbal",
-                "s_comment",
-            ],
-        ]
-        partsupp_filtered = part_supp_ds.loc[
-            :, ["ps_partkey", "ps_suppkey", "ps_supplycost"]
-        ]
-        ps_s_r_n_merged = s_r_n_merged.merge(
-            partsupp_filtered, left_on="s_suppkey", right_on="ps_suppkey", how="inner"
-        )
-        ps_s_r_n_merged = ps_s_r_n_merged.loc[
-            :,
-            [
-                "n_name",
-                "s_name",
-                "s_address",
-                "s_phone",
-                "s_acctbal",
-                "s_comment",
-                "ps_partkey",
-                "ps_supplycost",
-            ],
-        ]
-        part_filtered = part_ds.loc[:, ["p_partkey", "p_mfgr", "p_size", "p_type"]]
-        part_filtered = part_filtered[
-            (part_filtered["p_size"] == var1)
-            # & (part_filtered["p_type"].astype(str).str.endswith(var2))
-            & (part_filtered["p_type"].str.endswith(var2))
-        ]
-        part_filtered = part_filtered.loc[:, ["p_partkey", "p_mfgr"]]
-        merged_df = part_filtered.merge(
-            ps_s_r_n_merged, left_on="p_partkey", right_on="ps_partkey", how="inner"
-        )
-        merged_df = merged_df.loc[
-            :,
-            [
-                "n_name",
-                "s_name",
-                "s_address",
-                "s_phone",
-                "s_acctbal",
-                "s_comment",
-                "ps_supplycost",
-                "p_partkey",
-                "p_mfgr",
-            ],
-        ]
+        var1 = 15
+        var2 = "BRASS"
+        var3 = "EUROPE"
 
-        # `groupby(as_index=False)` is not yet implemented by Dask:
-        # https://github.com/dask/dask/issues/5834
-        min_values = merged_df.groupby("p_partkey")["ps_supplycost"].min().reset_index()
-
-        min_values.columns = ["P_PARTKEY_CPY", "MIN_SUPPLYCOST"]
-        merged_df = merged_df.merge(
-            min_values,
-            left_on=["p_partkey", "ps_supplycost"],
-            right_on=["P_PARTKEY_CPY", "MIN_SUPPLYCOST"],
-            how="inner",
+        jn = (
+            part_ds.merge(part_supp_ds, left_on="p_partkey", right_on="ps_partkey")
+            .merge(supplier_ds, left_on="ps_suppkey", right_on="s_suppkey")
+            .merge(nation_ds, left_on="s_nationkey", right_on="n_nationkey")
+            .merge(region_ds, left_on="n_regionkey", right_on="r_regionkey")
         )
-        result_df = merged_df.loc[
+
+        jn = jn[jn["p_size"] == var1]
+        jn = jn[jn["p_type"].str.endswith(var2)]
+        jn = jn[jn["r_name"] == var3]
+
+        gb = jn.groupby("p_partkey")
+        agg = gb["ps_supplycost"].min().reset_index()
+        jn2 = agg.merge(jn, on=["p_partkey", "ps_supplycost"])
+
+        sel = jn2.loc[
             :,
             [
                 "s_acctbal",
@@ -145,22 +68,14 @@ def q() -> None:
                 "s_comment",
             ],
         ]
-        result_df = result_df.sort_values(
-            by=[
-                "s_acctbal",
-                "n_name",
-                "s_name",
-                "p_partkey",
-            ],
-            ascending=[
-                False,
-                True,
-                True,
-                True,
-            ],
-        ).head(100, compute=False)
 
-        return result_df.compute()  # type: ignore[no-any-return]
+        sort = sel.sort_values(
+            by=["s_acctbal", "n_name", "s_name", "p_partkey"],
+            ascending=[False, True, True, True],
+        )
+        result_df = sort.head(100)
+
+        return result_df  # type: ignore[no-any-return]
 
     utils.run_query(Q_NUM, query)
 
