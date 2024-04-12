@@ -29,9 +29,8 @@ def q() -> None:
     """
 
     utils.get_line_item_ds()
-    print("SCHEMA!!!")
+
     q_final = utils.get_or_create_spark().sql(query_str)
-    print("SCHEMA333")
 
     utils.run_query(Q_NUM, q_final)
 
