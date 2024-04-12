@@ -12,9 +12,6 @@ Q_NUM = 3
 
 
 def q() -> None:
-    var1 = var2 = date(1995, 3, 15)
-    var3 = "BUILDING"
-
     customer_ds = utils.get_customer_ds
     line_item_ds = utils.get_line_item_ds
     orders_ds = utils.get_orders_ds
@@ -32,33 +29,29 @@ def q() -> None:
         line_item_ds = line_item_ds()
         orders_ds = orders_ds()
 
-        lineitem_filtered = line_item_ds.loc[
-            :, ["l_orderkey", "l_extendedprice", "l_discount", "l_shipdate"]
-        ]
-        orders_filtered = orders_ds.loc[
-            :, ["o_orderkey", "o_custkey", "o_orderdate", "o_shippriority"]
-        ]
-        customer_filtered = customer_ds.loc[:, ["c_mktsegment", "c_custkey"]]
-        lsel = lineitem_filtered.l_shipdate > var1
-        osel = orders_filtered.o_orderdate < var2
-        csel = customer_filtered.c_mktsegment == var3
-        flineitem = lineitem_filtered[lsel]
-        forders = orders_filtered[osel]
-        fcustomer = customer_filtered[csel]
-        jn1 = fcustomer.merge(forders, left_on="c_custkey", right_on="o_custkey")
-        jn2 = jn1.merge(flineitem, left_on="o_orderkey", right_on="l_orderkey")
+        var1 = "BUILDING"
+        var2 = date(1995, 3, 15)
+
+        fcustomer = customer_ds[customer_ds["c_mktsegment"] == var1]
+
+        jn1 = fcustomer.merge(orders_ds, left_on="c_custkey", right_on="o_custkey")
+        jn2 = jn1.merge(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
+
+        jn2 = jn2[jn2["o_orderdate"] < var2]
+        jn2 = jn2[jn2["l_shipdate"] > var2]
         jn2["revenue"] = jn2.l_extendedprice * (1 - jn2.l_discount)
 
-        total = (
-            jn2.groupby(
-                ["l_orderkey", "o_orderdate", "o_shippriority"], as_index=False
-            )["revenue"]
-            .sum()
-            .sort_values(["revenue"], ascending=False)
+        gb = jn2.groupby(
+            ["o_orderkey", "o_orderdate", "o_shippriority"], as_index=False
         )
-        result_df = total.head(10).loc[
-            :, ["l_orderkey", "revenue", "o_orderdate", "o_shippriority"]
-        ]
+        agg = gb["revenue"].sum()
+
+        sel = agg.loc[:, ["o_orderkey", "revenue", "o_orderdate", "o_shippriority"]]
+        sel = sel.rename(columns={"o_orderkey": "l_orderkey"})
+
+        sorted = sel.sort_values(by=["revenue", "o_orderdate"], ascending=[False, True])
+        result_df = sorted.head(10)
+
         return result_df
 
     utils.run_query(Q_NUM, query)

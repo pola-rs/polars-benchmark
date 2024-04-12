@@ -10,33 +10,28 @@ Q_NUM = 1
 
 
 def q() -> None:
-    VAR1 = date(1998, 9, 2)
-
-    lineitem = utils.get_line_item_ds
+    line_item_ds = utils.get_line_item_ds
     # first call one time to cache in case we don't include the IO times
-    lineitem()
+    line_item_ds()
 
     def query() -> pd.DataFrame:
-        nonlocal lineitem
-        lineitem = lineitem()
+        nonlocal line_item_ds
+        line_item_ds = line_item_ds()
 
-        sel = lineitem.l_shipdate <= VAR1
-        lineitem_filtered = lineitem[sel]
+        var1 = date(1998, 9, 2)
+
+        filt = line_item_ds[line_item_ds["l_shipdate"] <= var1]
 
         # This is lenient towards pandas as normally an optimizer should decide
         # that this could be computed before the groupby aggregation.
         # Other implementations don't enjoy this benefit.
-        lineitem_filtered["disc_price"] = lineitem_filtered.l_extendedprice * (
-            1 - lineitem_filtered.l_discount
+        filt["disc_price"] = filt.l_extendedprice * (1.0 - filt.l_discount)
+        filt["charge"] = (
+            filt.l_extendedprice * (1.0 - filt.l_discount) * (1.0 + filt.l_tax)
         )
-        lineitem_filtered["charge"] = (
-            lineitem_filtered.l_extendedprice
-            * (1 - lineitem_filtered.l_discount)
-            * (1 + lineitem_filtered.l_tax)
-        )
-        gb = lineitem_filtered.groupby(["l_returnflag", "l_linestatus"], as_index=False)
 
-        total = gb.agg(
+        gb = filt.groupby(["l_returnflag", "l_linestatus"], as_index=False)
+        agg = gb.agg(
             sum_qty=pd.NamedAgg(column="l_quantity", aggfunc="sum"),
             sum_base_price=pd.NamedAgg(column="l_extendedprice", aggfunc="sum"),
             sum_disc_price=pd.NamedAgg(column="disc_price", aggfunc="sum"),
@@ -47,7 +42,7 @@ def q() -> None:
             count_order=pd.NamedAgg(column="l_orderkey", aggfunc="size"),
         )
 
-        result_df = total.sort_values(["l_returnflag", "l_linestatus"])
+        result_df = agg.sort_values(["l_returnflag", "l_linestatus"])
 
         return result_df
 
