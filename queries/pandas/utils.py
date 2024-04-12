@@ -24,6 +24,12 @@ def _read_ds(path: Path) -> pd.DataFrame:
     path_str = f"{path}.{settings.run.file_type}"
     if settings.run.file_type == "parquet":
         return pd.read_parquet(path_str, dtype_backend="pyarrow")
+    elif settings.run.file_type == "csv":
+        df = pd.read_csv(path_str, dtype_backend="pyarrow")
+        for c in df.columns:
+            if c.endswith("date"):
+                df[c] = df[c].astype("date32[day][pyarrow]")  # type: ignore[call-overload]
+        return df
     elif settings.run.file_type == "feather":
         return pd.read_feather(path_str, dtype_backend="pyarrow")
     else:

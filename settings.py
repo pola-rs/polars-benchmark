@@ -1,7 +1,10 @@
 from pathlib import Path
+from typing import Literal, TypeAlias
 
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+FileType: TypeAlias = Literal["parquet", "feather", "csv"]
 
 
 class Paths(BaseSettings):
@@ -20,7 +23,7 @@ class Paths(BaseSettings):
 
 class Run(BaseSettings):
     include_io: bool = False
-    file_type: str = "parquet"
+    file_type: FileType = "parquet"
 
     log_timings: bool = False
     show_results: bool = False

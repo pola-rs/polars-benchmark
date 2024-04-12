@@ -101,6 +101,7 @@ for table_name, columns in table_columns.items():
     lf = lf.select(columns)
 
     lf.sink_parquet(settings.dataset_base_dir / f"{table_name}.parquet")
+    lf.sink_csv(settings.dataset_base_dir / f"{table_name}.csv")
 
     # IPC currently not relevant
-    # lf.sink_ipc(base_path / f"{table_name}.ipc")
+    # lf.sink_ipc(base_path / f"{table_name}.feather")
