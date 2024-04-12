@@ -66,11 +66,12 @@ def get_part_supp_ds() -> pl.LazyFrame:
 
 def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     streaming = settings.run.polars_streaming
+    eager = settings.run.polars_eager
 
     if settings.run.polars_show_plan:
-        print(lf.explain(streaming=streaming))
+        print(lf.explain(streaming=streaming, optimized=eager))
 
-    query = partial(lf.collect, streaming=streaming)
+    query = partial(lf.collect, streaming=streaming, no_optimization=eager)
     run_query_generic(
         query, query_number, "polars", query_checker=check_query_result_pl
     )
