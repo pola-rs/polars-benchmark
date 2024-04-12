@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import duckdb
 from duckdb import DuckDBPyRelation
 
@@ -9,8 +7,10 @@ from settings import Settings
 settings = Settings()
 
 
-def _scan_ds(path: Path) -> str:
-    path_str = f"{path}.{settings.run.file_type}"
+def _scan_ds(table_name: str) -> str:
+    path = settings.dataset_base_dir / f"{table_name}.{settings.run.file_type}"
+    path_str = str(path)
+
     if settings.run.file_type == "parquet":
         if settings.run.include_io:
             duckdb.read_parquet(path_str)
@@ -41,35 +41,35 @@ def _scan_ds(path: Path) -> str:
 
 
 def get_line_item_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "lineitem")
+    return _scan_ds("lineitem")
 
 
 def get_orders_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "orders")
+    return _scan_ds("orders")
 
 
 def get_customer_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "customer")
+    return _scan_ds("customer")
 
 
 def get_region_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "region")
+    return _scan_ds("region")
 
 
 def get_nation_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "nation")
+    return _scan_ds("nation")
 
 
 def get_supplier_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "supplier")
+    return _scan_ds("supplier")
 
 
 def get_part_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "part")
+    return _scan_ds("part")
 
 
 def get_part_supp_ds() -> str:
-    return _scan_ds(settings.dataset_base_dir / "partsupp")
+    return _scan_ds("partsupp")
 
 
 def run_query(query_number: int, context: DuckDBPyRelation) -> None:
