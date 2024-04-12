@@ -30,6 +30,7 @@ class Run(BaseSettings):
     check_results: bool = False  # Only available for SCALE_FACTOR=1
 
     polars_show_plan: bool = False
+    polars_eager: bool = False
     polars_streaming: bool = False
     polars_streaming_groupby: bool = False
 
