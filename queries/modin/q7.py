@@ -46,20 +46,20 @@ def q() -> None:
         # Part 1
         jn1 = customer_ds.merge(n1, left_on="c_nationkey", right_on="n_nationkey")
         jn2 = jn1.merge(orders_ds, left_on="c_custkey", right_on="o_custkey")
-        jn2 = jn2.rename({"n_name": "cust_nation"}, axis="columns")
+        jn2 = jn2.rename(columns={"n_name": "cust_nation"})
         jn3 = jn2.merge(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
         jn4 = jn3.merge(supplier_ds, left_on="l_suppkey", right_on="s_suppkey")
         jn5 = jn4.merge(n2, left_on="s_nationkey", right_on="n_nationkey")
-        df1 = jn5.rename({"n_name": "supp_nation"}, axis="columns")
+        df1 = jn5.rename(columns={"n_name": "supp_nation"})
 
         # Part 2
         jn1 = customer_ds.merge(n2, left_on="c_nationkey", right_on="n_nationkey")
         jn2 = jn1.merge(orders_ds, left_on="c_custkey", right_on="o_custkey")
-        jn2 = jn2.rename({"n_name": "cust_nation"}, axis="columns")
+        jn2 = jn2.rename(columns={"n_name": "cust_nation"})
         jn3 = jn2.merge(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
         jn4 = jn3.merge(supplier_ds, left_on="l_suppkey", right_on="s_suppkey")
         jn5 = jn4.merge(n1, left_on="s_nationkey", right_on="n_nationkey")
-        df2 = jn5.rename({"n_name": "supp_nation"}, axis="columns")
+        df2 = jn5.rename(columns={"n_name": "supp_nation"})
 
         # Combine
         total = pd.concat([df1, df2])

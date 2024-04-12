@@ -47,7 +47,7 @@ def q() -> None:
         agg = gb["revenue"].sum()
 
         sel = agg.loc[:, ["o_orderkey", "revenue", "o_orderdate", "o_shippriority"]]
-        sel = sel.rename({"o_orderkey": "l_orderkey"}, axis="columns")
+        sel = sel.rename(columns={"o_orderkey": "l_orderkey"})
 
         sorted = sel.sort_values(by=["revenue", "o_orderdate"], ascending=[False, True])
         result_df = sorted.head(10)

@@ -70,7 +70,7 @@ def q() -> None:
 
         jn7["o_year"] = jn7["o_orderdate"].dt.year
         jn7["volume"] = jn7["l_extendedprice"] * (1.0 - jn7["l_discount"])
-        jn7 = jn7.rename({"n_name": "nation"}, axis="columns")
+        jn7 = jn7.rename(columns={"n_name": "nation"})
 
         def udf(df: pd.DataFrame) -> float:
             demonimator: float = df["volume"].sum()
