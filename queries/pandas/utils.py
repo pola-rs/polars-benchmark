@@ -28,7 +28,7 @@ def _read_ds(path: Path) -> pd.DataFrame:
         df = pd.read_csv(path_str, dtype_backend="pyarrow")
         for c in df.columns:
             if c.endswith("date"):
-                df[c] = df[c].astype("date32[day][pyarrow]")
+                df[c] = df[c].astype("date32[day][pyarrow]")  # type: ignore[call-overload]
         return df
     elif settings.run.file_type == "feather":
         return pd.read_feather(path_str, dtype_backend="pyarrow")

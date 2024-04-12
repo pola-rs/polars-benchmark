@@ -36,11 +36,11 @@ def read_ds(path: Path) -> DataFrame:
     if settings.run.file_type == "parquet":
         return dd.read_parquet(path_str, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
     elif settings.run.file_type == "csv":
-        df = dd.read_csv(path_str, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
+        df = dd.read_csv(path_str, dtype_backend="pyarrow")  # type: ignore[attr-defined]
         for c in df.columns:
             if c.endswith("date"):
                 df[c] = df[c].astype("date32[day][pyarrow]")
-        return df
+        return df  # type: ignore[no-any-return]
     else:
         msg = f"unsupported file type: {settings.run.file_type!r}"
         raise ValueError(msg)
