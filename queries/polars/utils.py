@@ -1,4 +1,3 @@
-import os
 from functools import partial
 
 import polars as pl
@@ -7,10 +6,6 @@ from queries.common_utils import check_query_result_pl, run_query_generic
 from settings import Settings
 
 settings = Settings()
-
-os.environ["POLARS_NO_STREAMING_GROUPBY"] = str(
-    int(not settings.run.polars_streaming_groupby)
-)
 
 
 def _scan_ds(table_name: str) -> pl.LazyFrame:

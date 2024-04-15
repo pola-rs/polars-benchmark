@@ -32,7 +32,6 @@ class Run(BaseSettings):
     polars_show_plan: bool = False
     polars_eager: bool = False
     polars_streaming: bool = False
-    polars_streaming_groupby: bool = False
 
     modin_memory: int = 8_000_000_000  # Tune as needed for optimal performance
 
