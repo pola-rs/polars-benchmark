@@ -100,6 +100,7 @@ def run_query_generic(
     query: Callable[..., Any],
     query_number: int,
     library_name: str,
+    library_version: str | None = None,
     query_checker: Callable[..., None] | None = None,
 ) -> None:
     """Execute a query."""
@@ -109,7 +110,7 @@ def run_query_generic(
     if settings.run.log_timings:
         log_query_timing(
             solution=library_name,
-            version=version(library_name),
+            version=library_version or version(library_name),
             query_number=query_number,
             time=timer.took,
         )

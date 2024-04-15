@@ -70,5 +70,9 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
 
     library_name = "polars" if not eager else "polars-eager"
     run_query_generic(
-        query, query_number, library_name, query_checker=check_query_result_pl
+        query,
+        query_number,
+        library_name,
+        library_version=pl.__version__,
+        query_checker=check_query_result_pl,
     )
