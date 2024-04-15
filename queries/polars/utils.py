@@ -67,6 +67,8 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         print(lf.explain(streaming=streaming, optimized=eager))
 
     query = partial(lf.collect, streaming=streaming, no_optimization=eager)
+
+    library_name = "polars" if not eager else "polars-eager"
     run_query_generic(
-        query, query_number, "polars", query_checker=check_query_result_pl
+        query, query_number, library_name, query_checker=check_query_result_pl
     )
