@@ -21,7 +21,7 @@ def q() -> None:
             line_item_ds.filter(pl.col("l_receiptdate") > pl.col("l_commitdate")),
             on="l_orderkey",
         )
-    ).cache()
+    )
 
     q_final = (
         res_1.group_by("l_orderkey")
