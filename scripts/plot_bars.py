@@ -166,11 +166,6 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
         .with_row_index()
     )
 
-    # every bar in the plot has a different offset for the text
-    # start_offset = 22
-    # offsets = [start_offset + 12 * i for i in range(bar_order.height)]
-    offsets = [0 for _ in range(bar_order.height)]
-
     # we look for the solutions that surpassed the limit
     # and create a text label for them
     df = (
@@ -188,13 +183,13 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
 
     # then we create a dictionary similar to something like this:
     #     anno_data = {
-    #         "q1": (offset, "label"),
-    #         "q3": (offset, "label"),
+    #         "q1": "label",
+    #         "q3": "label",
     #     }
     if df.height > 0:
         anno_data = {
-            v[0]: (offsets[int(v[1])], v[2])
-            for v in df.select("query", "index", "labels")
+            v[0]: v[1]
+            for v in df.select("query", "labels")
             .transpose()
             .to_dict(as_series=False)
             .values()
@@ -203,12 +198,12 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
         # a dummy with no text
         anno_data = {"q1": (0, "")}
 
-    for q_name, (x_shift, anno_text) in anno_data.items():
+    for q_name, anno_text in anno_data.items():
         fig.add_annotation(
             align="right",
             x=q_name,
             y=LIMIT,
-            xshift=x_shift,
+            xshift=0,
             yshift=30,
             # font={"color": "white"},
             showarrow=False,
