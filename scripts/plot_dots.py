@@ -47,7 +47,7 @@ def parse_queries(s: str) -> list[str]:
 
 def read_csv(filename: str) -> pl.DataFrame:
     if filename == "-":
-        df = pl.read_csv(settings.paths.timings)
+        df = pl.read_csv(settings.paths.timings / settings.paths.timings_filename)
     else:
         df = pl.read_csv(filename)
     return df
