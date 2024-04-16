@@ -19,6 +19,8 @@ from settings import Settings
 if TYPE_CHECKING:
     from plotly.graph_objects import Figure
 
+    from settings import FileType
+
 settings = Settings()
 
 if settings.run.include_io:
@@ -26,32 +28,31 @@ if settings.run.include_io:
 else:
     LIMIT = settings.plot.limit_without_io
 
-SOLUTION_ORDER = ["polars", "duckdb", "pandas", "dask", "pyspark"]
-# COLOR_ORDER = ["#0075FF", "#73BFB8", "#73BFB8", "#26413C", "#EFA9AE"]
 
-# colors for each bar
 COLORS = {
     "polars": "#0075FF",
-    "duckdb": "#73BFB8",
-    "pandas": "#2b8c5d",
-    "dask": "#F9CFF2",
-    "pyspark": "#EFA9AE",
+    "polars-eager": "#00B4D8",
+    "duckdb": "#80B9C8",
+    "pyspark": "#C29470",
+    "dask": "#77D487",
+    "pandas": "#2B8C5D",
+    "modin": "#50B05F",
 }
 
 SOLUTION_NAME_MAP = {
     "polars": "Polars",
+    "polars-eager": "Polars - eager",
     "duckdb": "DuckDB",
     "pandas": "pandas",
     "dask": "Dask",
+    "modin": "Modin",
     "pyspark": "PySpark",
 }
 
 
 def main() -> None:
-    pl.Config.set_tbl_rows(40)
-
+    pl.Config.set_tbl_rows(100)
     df = prep_data()
-    print(df)
     plot(df)
 
 
@@ -82,18 +83,21 @@ def prep_data() -> pl.DataFrame:
     lf = lf.with_columns(pl.col("duration[s]").fill_null(0))
 
     # Order the groups
-    solution = pl.LazyFrame({"solution": SOLUTION_ORDER})
+    solutions_in_data = lf.select("solution").collect().to_series().unique()
+    solution = pl.LazyFrame({"solution": [s for s in COLORS if s in solutions_in_data]})
     lf = solution.join(lf, on=["solution"], how="left")
 
     # Make query number a string
-    lf = lf.with_columns(pl.format("Q{}", "query_number").alias("query_number"))
+    lf = lf.with_columns(pl.format("Q{}", "query_number").alias("query")).drop(
+        "query_number"
+    )
 
-    return lf.collect()
+    return lf.select("solution", "version", "query", "duration[s]").collect()
 
 
 def plot(df: pl.DataFrame) -> Figure:
     """Generate a Plotly Figure of a grouped bar chart displaying benchmark results."""
-    x = df.get_column("query_number")
+    x = df.get_column("query")
     y = df.get_column("duration[s]")
 
     group = df.select(
@@ -101,13 +105,16 @@ def plot(df: pl.DataFrame) -> Figure:
     ).to_series()
 
     # build plotly figure object
+    color_seq = [c for (s, c) in COLORS.items() if s in df["solution"].unique()]
+
     fig = px.histogram(
         x=x,
         y=y,
         color=group,
         barmode="group",
         template="plotly_white",
-        color_discrete_sequence=list(COLORS.values()),
+        color_discrete_sequence=color_seq,
+        title=get_title(settings.run.include_io, settings.run.file_type),
     )
 
     fig.update_layout(
@@ -136,6 +143,19 @@ def plot(df: pl.DataFrame) -> Figure:
         fig.show()
 
 
+def get_title(include_io: bool, file_type: FileType) -> str:
+    if not include_io:
+        title = "Runtime excluding data read from disk"
+    else:
+        file_type_map = {"parquet": "Parquet", "csv": "CSV", "feather": "Feather"}
+        file_type_formatted = file_type_map[file_type]
+        title = f"Runtime including data read from disk ({file_type_formatted})"
+
+    subtitle = "(lower is better)"
+
+    return f"{title}<br><i>{subtitle}<i>"
+
+
 def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
     # order of solutions in the file
     # e.g. ['polar', 'pandas']
@@ -161,7 +181,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
             ).alias("labels")
         )
         .join(bar_order, on="solution")
-        .group_by("query_number")
+        .group_by("query")
         .agg(pl.col("labels"), pl.col("index").min())
         .with_columns(pl.col("labels").list.join(",\n"))
     )
@@ -171,11 +191,10 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
     #         "q1": (offset, "label"),
     #         "q3": (offset, "label"),
     #     }
-
     if df.height > 0:
         anno_data = {
             v[0]: (offsets[int(v[1])], v[2])
-            for v in df.select("query_number", "index", "labels")
+            for v in df.select("query", "index", "labels")
             .transpose()
             .to_dict(as_series=False)
             .values()
@@ -206,6 +225,8 @@ def write_plot_image(fig: Any) -> None:
         file_name = "plot_with_io.html"
     else:
         file_name = "plot_without_io.html"
+
+    print(path / file_name)
 
     fig.write_html(path / file_name)
 
