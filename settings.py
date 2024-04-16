@@ -22,7 +22,7 @@ class Paths(BaseSettings):
 
 
 class Run(BaseSettings):
-    include_io: bool = False
+    include_io: bool = True
     file_type: FileType = "parquet"
 
     log_timings: bool = False
@@ -46,8 +46,8 @@ class Run(BaseSettings):
 
 class Plot(BaseSettings):
     show: bool = False
-    n_queries: int = 8
-    limit_with_io: int = 15
+    n_queries: int = 7
+    limit_with_io: int = 20
     limit_without_io: int = 15
 
     model_config = SettingsConfigDict(
