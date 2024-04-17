@@ -114,17 +114,21 @@ def plot(df: pl.DataFrame) -> Figure:
         barmode="group",
         template="plotly_white",
         color_discrete_sequence=color_seq,
-        title=get_title(settings.run.include_io, settings.run.file_type),
     )
 
     fig.update_layout(
+        title={
+            "text": get_title(settings.run.include_io, settings.run.file_type),
+            "y": 0.95,
+            "yanchor": "top",
+        },
         bargroupgap=0.1,
         # paper_bgcolor="rgba(41,52,65,1)",
         xaxis_title="Query",
         yaxis_title="Seconds",
         yaxis_range=[0, LIMIT],
         # plot_bgcolor="rgba(41,52,65,1)",
-        margin={"t": 100},
+        margin={"t": 150},
         legend={
             "title": "",
             "orientation": "h",
@@ -156,7 +160,7 @@ def get_title(include_io: bool, file_type: FileType) -> str:
     return f"{title}<br><i>{subtitle}<i>"
 
 
-def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
+def add_annotations(fig: Any, limit: float, df: pl.DataFrame) -> None:
     # order of solutions in the file
     # e.g. ['polar', 'pandas']
     bar_order = (
@@ -196,7 +200,7 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
         }
     else:
         # a dummy with no text
-        anno_data = {"q1": (0, "")}
+        anno_data = {"q1": ""}
 
     for q_name, anno_text in anno_data.items():
         fig.add_annotation(
@@ -205,7 +209,6 @@ def add_annotations(fig: Any, limit: int, df: pl.DataFrame) -> None:
             y=LIMIT,
             xshift=0,
             yshift=30,
-            # font={"color": "white"},
             showarrow=False,
             text=anno_text,
         )
@@ -217,9 +220,9 @@ def write_plot_image(fig: Any) -> None:
         path.mkdir()
 
     if settings.run.include_io:
-        file_name = "plot_with_io.html"
+        file_name = f"plot-io-{settings.run.file_type}.html"
     else:
-        file_name = "plot_without_io.html"
+        file_name = "plot-no-io.html"
 
     print(path / file_name)
 
