@@ -51,8 +51,7 @@ class Run(BaseSettings):
 class Plot(BaseSettings):
     show: bool = False
     n_queries: int = 7
-    limit_with_io: float = 20.0
-    limit_without_io: float = 15.0
+    y_limit: float | None = None
 
     model_config = SettingsConfigDict(
         env_prefix="plot_", env_file=".env", extra="ignore"
