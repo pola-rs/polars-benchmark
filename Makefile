@@ -37,9 +37,10 @@ tables: .venv  ## Generate data tables
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
 	$(VENV_BIN)/python -m scripts.prepare_data
+	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 
 .PHONY: run-polars
-run-polars: .venv  ## Run polars benchmarks
+run-polars: .venv  ## Run Polars benchmarks
 	$(VENV_BIN)/python -m queries.polars
 
 .PHONY: run-duckdb
@@ -51,15 +52,15 @@ run-pandas: .venv  ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
 .PHONY: run-pyspark
-run-pyspark: .venv  ## Run pyspark benchmarks
+run-pyspark: .venv  ## Run PySpark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark
 
 .PHONY: run-dask
-run-dask: .venv  ## Run dask benchmarks
+run-dask: .venv  ## Run Dask benchmarks
 	$(VENV_BIN)/python -m queries.dask
 
 .PHONY: run-modin
-run-modin: .venv  ## Run pandas benchmarks
+run-modin: .venv  ## Run Modin benchmarks
 	$(VENV_BIN)/python -m queries.modin
 
 .PHONY: run-all
@@ -84,9 +85,7 @@ clean-tpch-dbgen:  ## Clean up TPC-H folder
 clean-tables:  ## Clean up data tables
 	@rm -rf data/tables/
 
-
 .PHONY: help
 help:  ## Display this help screen
 	@echo -e "\033[1mAvailable commands:\033[0m"
 	@grep -E '^[a-z.A-Z_0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}' | sort
-
