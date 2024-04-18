@@ -37,6 +37,7 @@ tables: .venv  ## Generate data tables
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
 	$(VENV_BIN)/python -m scripts.prepare_data
+	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 
 .PHONY: run-polars
 run-polars: .venv  ## Run polars benchmarks
@@ -84,9 +85,7 @@ clean-tpch-dbgen:  ## Clean up TPC-H folder
 clean-tables:  ## Clean up data tables
 	@rm -rf data/tables/
 
-
 .PHONY: help
 help:  ## Display this help screen
 	@echo -e "\033[1mAvailable commands:\033[0m"
 	@grep -E '^[a-z.A-Z_0-9-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-22s\033[0m %s\n", $$1, $$2}' | sort
-
