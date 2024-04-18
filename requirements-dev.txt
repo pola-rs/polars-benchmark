@@ -7,7 +7,7 @@ numpy==1.26.4
     # via pandas-stubs
 pandas-stubs==2.2.1.240316
 ruff==0.3.7
-types-pytz==2024.1.0.20240203
+types-pytz==2024.1.0.20240417
     # via pandas-stubs
 typing-extensions==4.11.0
     # via mypy
