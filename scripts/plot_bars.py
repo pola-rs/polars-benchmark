@@ -50,7 +50,7 @@ Y_LIMIT_MAP = {
     "csv": 25.0,
     "feather": 20.0,
 }
-LIMIT = Y_LIMIT_MAP[settings.run.io_type]
+LIMIT = settings.plot.y_limit or Y_LIMIT_MAP[settings.run.io_type]
 
 
 def main() -> None:
