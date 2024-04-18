@@ -4,7 +4,11 @@ from typing import TYPE_CHECKING
 
 from pyspark.sql import SparkSession
 
-from queries.common_utils import check_query_result_pd, run_query_generic
+from queries.common_utils import (
+    check_query_result_pd,
+    get_table_path,
+    run_query_generic,
+)
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -26,19 +30,19 @@ def get_or_create_spark() -> SparkSession:
 
 
 def _read_ds(table_name: str) -> DataFrame:
-    # TODO: Persist data in memory before query
-    if not settings.run.include_io:
+    if settings.run.io_type == "skip":
+        # TODO: Persist data in memory before query
         msg = "cannot run PySpark starting from an in-memory representation"
         raise RuntimeError(msg)
 
-    path = settings.dataset_base_dir / f"{table_name}.{settings.run.file_type}"
+    path = get_table_path(table_name)
 
-    if settings.run.file_type == "parquet":
+    if settings.run.io_type == "parquet":
         df = get_or_create_spark().read.parquet(str(path))
-    elif settings.run.file_type == "csv":
+    elif settings.run.io_type == "csv":
         df = get_or_create_spark().read.csv(str(path), header=True, inferSchema=True)
     else:
-        msg = f"unsupported file type: {settings.run.file_type!r}"
+        msg = f"unsupported file type: {settings.run.io_type!r}"
         raise ValueError(msg)
 
     df.createOrReplaceTempView(table_name)

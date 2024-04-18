@@ -4,7 +4,7 @@ from typing import Literal, TypeAlias
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-FileType: TypeAlias = Literal["parquet", "feather", "csv"]
+IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv"]
 
 
 class Paths(BaseSettings):
@@ -22,8 +22,7 @@ class Paths(BaseSettings):
 
 
 class Run(BaseSettings):
-    include_io: bool = True
-    file_type: FileType = "parquet"
+    io_type: IoType = "parquet"
 
     log_timings: bool = False
     show_results: bool = False
@@ -38,6 +37,11 @@ class Run(BaseSettings):
     spark_driver_memory: str = "2g"  # Tune as needed for optimal performance
     spark_executor_memory: str = "1g"  # Tune as needed for optimal performance
     spark_log_level: str = "ERROR"
+
+    @computed_field  # type: ignore[misc]
+    @property
+    def include_io(self) -> bool:
+        return self.io_type != "skip"
 
     model_config = SettingsConfigDict(
         env_prefix="run_", env_file=".env", extra="ignore"

@@ -19,14 +19,9 @@ from settings import Settings
 if TYPE_CHECKING:
     from plotly.graph_objects import Figure
 
-    from settings import FileType
+    from settings import IoType
 
 settings = Settings()
-
-if settings.run.include_io:
-    LIMIT = settings.plot.limit_with_io
-else:
-    LIMIT = settings.plot.limit_without_io
 
 
 COLORS = {
@@ -49,6 +44,14 @@ SOLUTION_NAME_MAP = {
     "pyspark": "PySpark",
 }
 
+Y_LIMIT_MAP = {
+    "skip": 15.0,
+    "parquet": 20.0,
+    "csv": 25.0,
+    "feather": 20.0,
+}
+LIMIT = Y_LIMIT_MAP[settings.run.io_type]
+
 
 def main() -> None:
     pl.Config.set_tbl_rows(100)
@@ -62,12 +65,8 @@ def prep_data() -> pl.DataFrame:
     # Scale factor not used at the moment
     lf = lf.drop("scale_factor")
 
-    # Select timings either with or without IO
-    if settings.run.include_io:
-        io = pl.col("include_io")
-    else:
-        io = ~pl.col("include_io")
-    lf = lf.filter(io).drop("include_io")
+    # Select timings with the right IO type
+    lf = lf.filter(pl.col("io_type") == settings.run.io_type).drop("io_type")
 
     # Select relevant queries
     lf = lf.filter(pl.col("query_number") <= settings.plot.n_queries)
@@ -118,7 +117,7 @@ def plot(df: pl.DataFrame) -> Figure:
 
     fig.update_layout(
         title={
-            "text": get_title(settings.run.include_io, settings.run.file_type),
+            "text": get_title(settings.run.io_type),
             "y": 0.95,
             "yanchor": "top",
         },
@@ -147,12 +146,12 @@ def plot(df: pl.DataFrame) -> Figure:
         fig.show()
 
 
-def get_title(include_io: bool, file_type: FileType) -> str:
-    if not include_io:
+def get_title(io_type: IoType) -> str:
+    if io_type == "skip":
         title = "Runtime excluding data read from disk"
     else:
         file_type_map = {"parquet": "Parquet", "csv": "CSV", "feather": "Feather"}
-        file_type_formatted = file_type_map[file_type]
+        file_type_formatted = file_type_map[io_type]
         title = f"Runtime including data read from disk ({file_type_formatted})"
 
     subtitle = "(lower is better)"
@@ -219,11 +218,7 @@ def write_plot_image(fig: Any) -> None:
     if not path.exists():
         path.mkdir()
 
-    if settings.run.include_io:
-        file_name = f"plot-io-{settings.run.file_type}.html"
-    else:
-        file_name = "plot-no-io.html"
-
+    file_name = f"plot-io-{settings.run.io_type}.html"
     print(path / file_name)
 
     fig.write_html(path / file_name)

@@ -7,6 +7,7 @@ import dask.dataframe as dd
 
 from queries.common_utils import (
     check_query_result_pd,
+    get_table_path,
     on_second_call,
     run_query_generic,
 )
@@ -23,26 +24,26 @@ dask.config.set(scheduler="threads")
 
 
 def read_ds(table_name: str) -> DataFrame:
-    # TODO: Load into memory before returning the Dask DataFrame.
-    # Code below is tripped up by date types
-    # df = pd.read_parquet(path, dtype_backend="pyarrow")
-    # return dd.from_pandas(df, npartitions=os.cpu_count())
-    if not settings.run.include_io:
+    if settings.run.io_type == "skip":
+        # TODO: Load into memory before returning the Dask DataFrame.
+        # Code below is tripped up by date types
+        # df = pd.read_parquet(path, dtype_backend="pyarrow")
+        # return dd.from_pandas(df, npartitions=os.cpu_count())
         msg = "cannot run Dask starting from an in-memory representation"
         raise RuntimeError(msg)
 
-    path = settings.dataset_base_dir / f"{table_name}.{settings.run.file_type}"
+    path = get_table_path(table_name)
 
-    if settings.run.file_type == "parquet":
+    if settings.run.io_type == "parquet":
         return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
-    elif settings.run.file_type == "csv":
+    elif settings.run.io_type == "csv":
         df = dd.read_csv(path, dtype_backend="pyarrow")  # type: ignore[attr-defined]
         for c in df.columns:
             if c.endswith("date"):
                 df[c] = df[c].astype("date32[day][pyarrow]")
         return df  # type: ignore[no-any-return]
     else:
-        msg = f"unsupported file type: {settings.run.file_type!r}"
+        msg = f"unsupported file type: {settings.run.io_type!r}"
         raise ValueError(msg)
 
 
