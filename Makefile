@@ -50,6 +50,10 @@ run-duckdb: .venv  ## Run DuckDB benchmarks
 run-pandas: .venv  ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
+.PHONY: run-pyspark
+run-pyspark: .venv  ## Run pyspark benchmarks
+	$(VENV_BIN)/python -m queries.pyspark
+
 .PHONY: run-dask
 run-dask: .venv  ## Run dask benchmarks
 	$(VENV_BIN)/python -m queries.dask
@@ -58,12 +62,8 @@ run-dask: .venv  ## Run dask benchmarks
 run-modin: .venv  ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.modin
 
-.PHONY: run-pyspark
-run-pyspark: .venv  ## Run pyspark benchmarks
-	$(VENV_BIN)/python -m queries.pyspark
-
 .PHONY: run-all
-run-all: run-polars run-duckdb run-pandas run-dask run-pyspark  ## Run all benchmarks
+run-all: run-polars run-duckdb run-pandas run-pyspark run-dask run-modin  ## Run all benchmarks
 
 .PHONY: plot
 plot: .venv  ## Plot results
