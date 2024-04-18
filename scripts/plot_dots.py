@@ -24,17 +24,18 @@ def get_styles(exclude_solutions: list[str]) -> pl.DataFrame:
     all_styles = pl.DataFrame(
         data=[
             ["polars", "Polars", "#0075FF", "d", 6.0],
-            ["duckdb", "DuckDB", "#73BFB8", "d", 5.5],
-            ["pandas", "pandas", "#26413C", "d", 5.0],
-            ["dask", "Dask", "#EFA9AE", "d", 4.5],
-            ["pyspark", "PySpark", "#87F7CF", "d", 4.5],
+            ["duckdb", "DuckDB", "#80B9C8", "d", 5.5],
+            ["pandas", "pandas", "#2B8C5D", "d", 5.5],
+            ["pyspark", "PySpark", "#C29470", "d", 5.5],
+            ["dask", "Dask", "#EFA9AE", "d", 5.5],
+            ["modin", "Modin", "#50B05F", "d", 5.5],
         ],
         schema=["solution", "name", "color", "shape", "size"],
     )
     return all_styles.filter(~pl.col("solution").is_in(exclude_solutions))
 
 
-def parse_queries(s: str) -> list[str]:
+def parse_queries(s: str) -> list[int]:
     query_numbers: set[int] = set()
     for part in s.split(","):
         if "-" in part:
@@ -42,7 +43,7 @@ def parse_queries(s: str) -> list[str]:
             query_numbers.update(range(start, end + 1))
         else:
             query_numbers.add(int(part))
-    return [f"q{x}" for x in sorted(query_numbers)]
+    return sorted(query_numbers)
 
 
 def read_csv(filename: str) -> pl.DataFrame:
@@ -57,22 +58,23 @@ def prepare_timings(
     timings: pl.DataFrame,
     styles: pl.DataFrame,
     exclude_solutions: list[str],
-    queries: list[str],
-    include_io: bool,
+    queries: list[int],
+    io_type: str,
 ) -> pl.DataFrame:
     return (
         timings.join(styles, on="solution", how="left")
         .filter(
-            pl.col("success")
-            & pl.col("query_no").is_in(queries)
-            & (pl.col("include_io") == include_io)
+            pl.col("query_number").is_in(queries)
+            & (pl.col("io_type") == io_type)
             & ~pl.col("solution").is_in(exclude_solutions)
         )
         .select(
             pl.col("solution"),
             pl.col("name"),
-            (pl.col("name") + " (" + pl.col("version") + ")").alias("name_version"),
-            pl.col("query_no").alias("query"),
+            pl.format("{} ({})", pl.col("name"), pl.col("version")).alias(
+                "name_version"
+            ),
+            pl.col("query_number").alias("query"),
             pl.col("duration[s]").alias("duration"),
         )
     )
@@ -81,7 +83,7 @@ def prepare_timings(
 def formulate_caption(
     timings: pl.DataFrame,
     styles: pl.DataFrame,
-    queries: list[str],
+    queries: list[int],
     no_notes: bool,
     max_duration: float,
     width: float,
@@ -92,11 +94,8 @@ def formulate_caption(
         exceeded_timings = timings.filter(pl.col("duration") > max_duration).select(
             pl.col("name"),
             pl.col("query"),
-            (
-                pl.lit("took ")
-                + pl.col("duration").round(1).cast(pl.Utf8)
-                + "s on "
-                + pl.col("query")
+            pl.format(
+                "took {}s on q{}", pl.col("duration").round(1), pl.col("query")
             ).alias("text"),
         )
 
@@ -106,10 +105,10 @@ def formulate_caption(
 
         missing_timings = all_combinations_df.join(
             timings, how="anti", on=["name", "query"]
-        ).with_columns((pl.lit("failed on ") + pl.col("query")).alias("text"))
+        ).with_columns(pl.format("failed on {}", pl.col("query")).alias("text"))
 
         notes_df = pl.concat([exceeded_timings, missing_timings]).sort(
-            pl.col("name"), pl.col("query").str.slice(1).cast(pl.Int8)
+            pl.col("name"), pl.col("query")
         )
 
         notes = []
@@ -131,14 +130,14 @@ def formulate_caption(
 def create_plot(
     timings: pl.DataFrame,
     styles: pl.DataFrame,
-    queries: list[str],
+    queries: list[int],
     caption: str,
     args: argparse.Namespace,
 ) -> p9.ggplot:
-    if args.include_io:
-        subtitle = "Results including reading parquet (lower is better)"
-    else:
+    if args.io_type == "skip":
         subtitle = "Results starting from in-memory data (lower is better)"
+    else:
+        subtitle = f"Results including reading {args.io_type} (lower is better)"
 
     theme = {
         "dark": {
@@ -164,6 +163,10 @@ def create_plot(
     ).to_series()
     timings = timings.with_columns(pl.col("name_version").cast(pl.Enum(name_versions)))
 
+    pl.Config.set_tbl_rows(100)
+    print(timings)
+    timings = timings.with_columns(pl.col("query").cast(pl.String))
+
     plot = (
         p9.ggplot(
             timings,
@@ -177,7 +180,7 @@ def create_plot(
         )
         + p9.geom_point(alpha=1, color="black")
         + p9.scale_x_continuous(limits=(0, args.max_duration))
-        + p9.scale_y_discrete(limits=queries[::-1])
+        + p9.scale_y_discrete(limits=[str(q) for q in queries[::-1]])
         + p9.scale_fill_manual(values=styles.get_column("color"))
         + p9.scale_shape_manual(values=styles.get_column("shape"))
         + p9.scale_size_manual(values=styles.get_column("size"))
@@ -185,7 +188,8 @@ def create_plot(
             title="TPC-H Benchmark",
             subtitle=subtitle,
             caption=caption,
-            x="duration (s)",
+            x="Duration (s)",
+            y="Query",
         )
         + p9.theme_tufte(ticks=False)
         + p9.theme(
@@ -229,7 +233,7 @@ def main() -> None:
         "-d",
         "--max-duration",
         type=float,
-        default=4.0,
+        default=15.0,
         help="Maximum duration",
         metavar="<seconds>",
     )
@@ -237,7 +241,7 @@ def main() -> None:
         "-q",
         "--queries",
         type=str,
-        default="1-8",
+        default="1-7",
         help="Queries to include",
         metavar="<integers and ranges>",
     )
@@ -251,9 +255,11 @@ def main() -> None:
     )
     parser.add_argument(
         "-i",
-        "--include-io",
-        action="store_true",
-        help="Include I/O time",
+        "--io-type",
+        type=str,
+        choices=["skip", "parquet", "csv", "feather"],
+        default="parquet",
+        help="I/O type - either a file format (e.g. 'parquet') or 'skip'",
     )
     parser.add_argument(
         "-n",
@@ -265,8 +271,8 @@ def main() -> None:
         "-m",
         "--mode",
         type=str,
-        choices=["dark", "light"],
-        default="dark",
+        choices=["light", "dark"],
+        default="light",
         help="Theme mode",
     )
     parser.add_argument(
@@ -315,8 +321,9 @@ def main() -> None:
         styles,
         exclude_solutions,
         queries,
-        args.include_io,
+        args.io_type,
     )
+
     caption = formulate_caption(
         timings, styles, queries, args.no_notes, args.max_duration, args.width
     )
