@@ -40,7 +40,7 @@ tables: .venv  ## Generate data tables
 	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 
 .PHONY: run-polars
-run-polars: .venv  ## Run polars benchmarks
+run-polars: .venv  ## Run Polars benchmarks
 	$(VENV_BIN)/python -m queries.polars
 
 .PHONY: run-duckdb
@@ -52,15 +52,15 @@ run-pandas: .venv  ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
 .PHONY: run-pyspark
-run-pyspark: .venv  ## Run pyspark benchmarks
+run-pyspark: .venv  ## Run PySpark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark
 
 .PHONY: run-dask
-run-dask: .venv  ## Run dask benchmarks
+run-dask: .venv  ## Run Dask benchmarks
 	$(VENV_BIN)/python -m queries.dask
 
 .PHONY: run-modin
-run-modin: .venv  ## Run pandas benchmarks
+run-modin: .venv  ## Run Modin benchmarks
 	$(VENV_BIN)/python -m queries.modin
 
 .PHONY: run-all
