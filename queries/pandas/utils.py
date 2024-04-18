@@ -6,6 +6,7 @@ import pandas as pd
 
 from queries.common_utils import (
     check_query_result_pd,
+    get_table_path,
     on_second_call,
     run_query_generic,
 )
@@ -20,20 +21,21 @@ pd.options.mode.copy_on_write = True
 
 
 def _read_ds(table_name: str) -> pd.DataFrame:
-    path = settings.dataset_base_dir / f"{table_name}.{settings.run.file_type}"
+    path = get_table_path(table_name)
 
-    if settings.run.file_type == "parquet":
+    if settings.run.io_type in ("parquet", "skip"):
         return pd.read_parquet(path, dtype_backend="pyarrow")
-    elif settings.run.file_type == "csv":
+    elif settings.run.io_type == "csv":
         df = pd.read_csv(path, dtype_backend="pyarrow")
+        # TODO: This is slow - we should use the known schema to read dates directly
         for c in df.columns:
             if c.endswith("date"):
                 df[c] = df[c].astype("date32[day][pyarrow]")  # type: ignore[call-overload]
         return df
-    elif settings.run.file_type == "feather":
+    elif settings.run.io_type == "feather":
         return pd.read_feather(path, dtype_backend="pyarrow")
     else:
-        msg = f"unsupported file type: {settings.run.file_type!r}"
+        msg = f"unsupported file type: {settings.run.io_type!r}"
         raise ValueError(msg)
 
 

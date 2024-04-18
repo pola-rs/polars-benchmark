@@ -2,29 +2,30 @@ from functools import partial
 
 import polars as pl
 
-from queries.common_utils import check_query_result_pl, run_query_generic
+from queries.common_utils import (
+    check_query_result_pl,
+    get_table_path,
+    run_query_generic,
+)
 from settings import Settings
 
 settings = Settings()
 
 
 def _scan_ds(table_name: str) -> pl.LazyFrame:
-    path = settings.dataset_base_dir / f"{table_name}.{settings.run.file_type}"
+    path = get_table_path(table_name)
 
-    if settings.run.file_type == "parquet":
-        scan = pl.scan_parquet(path)
-    elif settings.run.file_type == "feather":
-        scan = pl.scan_ipc(path)
-    elif settings.run.file_type == "csv":
-        scan = pl.scan_csv(path, try_parse_dates=True)
+    if settings.run.io_type == "skip":
+        return pl.read_parquet(path, rechunk=True).lazy()
+    if settings.run.io_type == "parquet":
+        return pl.scan_parquet(path)
+    elif settings.run.io_type == "feather":
+        return pl.scan_ipc(path)
+    elif settings.run.io_type == "csv":
+        return pl.scan_csv(path, try_parse_dates=True)
     else:
-        msg = f"unsupported file type: {settings.run.file_type!r}"
+        msg = f"unsupported file type: {settings.run.io_type!r}"
         raise ValueError(msg)
-
-    if settings.run.include_io:
-        return scan
-    else:
-        return scan.collect().rechunk().lazy()
 
 
 def get_line_item_ds() -> pl.LazyFrame:

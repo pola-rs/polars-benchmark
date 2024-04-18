@@ -20,6 +20,12 @@ if TYPE_CHECKING:
 settings = Settings()
 
 
+def get_table_path(table_name: str) -> Path:
+    """Return the path to the given table."""
+    ext = settings.run.io_type if settings.run.include_io else "parquet"
+    return settings.dataset_base_dir / f"{table_name}.{ext}"
+
+
 def log_query_timing(
     solution: str, version: str, query_number: int, time: float
 ) -> None:
@@ -27,9 +33,7 @@ def log_query_timing(
 
     with (settings.paths.timings / settings.paths.timings_filename).open("a") as f:
         if f.tell() == 0:
-            f.write(
-                "solution,version,query_number,duration[s],include_io,scale_factor\n"
-            )
+            f.write("solution,version,query_number,duration[s],io_type,scale_factor\n")
 
         line = (
             ",".join(
@@ -38,7 +42,7 @@ def log_query_timing(
                     version,
                     str(query_number),
                     str(time),
-                    str(settings.run.include_io),
+                    settings.run.io_type,
                     str(settings.scale_factor),
                 ]
             )
