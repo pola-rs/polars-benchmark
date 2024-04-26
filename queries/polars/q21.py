@@ -7,9 +7,9 @@ Q_NUM = 21
 
 def q() -> None:
     lineitem = utils.get_line_item_ds()
-    supplier = utils.get_supplier_ds()
     nation = utils.get_nation_ds()
     orders = utils.get_orders_ds()
+    supplier = utils.get_supplier_ds()
 
     var1 = "SAUDI ARABIA"
 

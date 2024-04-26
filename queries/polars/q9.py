@@ -6,12 +6,12 @@ Q_NUM = 9
 
 
 def q() -> None:
-    part = utils.get_part_ds()
-    supplier = utils.get_supplier_ds()
     lineitem = utils.get_line_item_ds()
-    partsupp = utils.get_part_supp_ds()
-    orders = utils.get_orders_ds()
     nation = utils.get_nation_ds()
+    orders = utils.get_orders_ds()
+    part = utils.get_part_ds()
+    partsupp = utils.get_part_supp_ds()
+    supplier = utils.get_supplier_ds()
 
     q_final = (
         lineitem.join(supplier, left_on="l_suppkey", right_on="s_suppkey")

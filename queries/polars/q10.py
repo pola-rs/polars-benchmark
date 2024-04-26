@@ -9,9 +9,9 @@ Q_NUM = 10
 
 def q() -> None:
     customer = utils.get_customer_ds()
-    orders = utils.get_orders_ds()
     lineitem = utils.get_line_item_ds()
     nation = utils.get_nation_ds()
+    orders = utils.get_orders_ds()
 
     var1 = date(1993, 10, 1)
     var2 = date(1994, 1, 1)

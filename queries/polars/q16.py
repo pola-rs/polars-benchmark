@@ -6,8 +6,8 @@ Q_NUM = 16
 
 
 def q() -> None:
-    partsupp = utils.get_part_supp_ds()
     part = utils.get_part_ds()
+    partsupp = utils.get_part_supp_ds()
     supplier = utils.get_supplier_ds()
 
     var1 = "Brand#45"

@@ -6,8 +6,8 @@ Q_NUM = 22
 
 
 def q() -> None:
-    orders = utils.get_orders_ds()
     customer = utils.get_customer_ds()
+    orders = utils.get_orders_ds()
 
     q1 = (
         customer.with_columns(pl.col("c_phone").str.slice(0, 2).alias("cntrycode"))

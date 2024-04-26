@@ -10,9 +10,9 @@ Q_NUM = 20
 def q() -> None:
     lineitem = utils.get_line_item_ds()
     nation = utils.get_nation_ds()
-    supplier = utils.get_supplier_ds()
     part = utils.get_part_ds()
     partsupp = utils.get_part_supp_ds()
+    supplier = utils.get_supplier_ds()
 
     var1 = date(1994, 1, 1)
     var2 = date(1995, 1, 1)

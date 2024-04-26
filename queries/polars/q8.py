@@ -8,13 +8,13 @@ Q_NUM = 8
 
 
 def q() -> None:
-    part = utils.get_part_ds()
-    supplier = utils.get_supplier_ds()
-    lineitem = utils.get_line_item_ds()
-    orders = utils.get_orders_ds()
     customer = utils.get_customer_ds()
+    lineitem = utils.get_line_item_ds()
     nation = utils.get_nation_ds()
+    orders = utils.get_orders_ds()
+    part = utils.get_part_ds()
     region = utils.get_region_ds()
+    supplier = utils.get_supplier_ds()
 
     var1 = "BRAZIL"
     var2 = "AMERICA"
