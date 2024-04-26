@@ -6,11 +6,11 @@ Q_NUM = 2
 
 
 def q() -> None:
-    region = utils.get_region_ds()
     nation = utils.get_nation_ds()
-    supplier = utils.get_supplier_ds()
     part = utils.get_part_ds()
     partsupp = utils.get_part_supp_ds()
+    region = utils.get_region_ds()
+    supplier = utils.get_supplier_ds()
 
     var1 = 15
     var2 = "BRASS"

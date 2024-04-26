@@ -8,11 +8,11 @@ Q_NUM = 5
 
 
 def q() -> None:
-    region = utils.get_region_ds()
-    nation = utils.get_nation_ds()
     customer = utils.get_customer_ds()
     lineitem = utils.get_line_item_ds()
+    nation = utils.get_nation_ds()
     orders = utils.get_orders_ds()
+    region = utils.get_region_ds()
     supplier = utils.get_supplier_ds()
 
     var1 = "ASIA"

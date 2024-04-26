@@ -6,9 +6,9 @@ Q_NUM = 11
 
 
 def q() -> None:
-    supplier = utils.get_supplier_ds()
-    partsupp = utils.get_part_supp_ds()
     nation = utils.get_nation_ds()
+    partsupp = utils.get_part_supp_ds()
+    supplier = utils.get_supplier_ds()
 
     var1 = "GERMANY"
     var2 = 0.0001
