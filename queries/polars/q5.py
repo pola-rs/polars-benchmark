@@ -8,24 +8,24 @@ Q_NUM = 5
 
 
 def q() -> None:
+    region = utils.get_region_ds()
+    nation = utils.get_nation_ds()
+    customer = utils.get_customer_ds()
+    lineitem = utils.get_line_item_ds()
+    orders = utils.get_orders_ds()
+    supplier = utils.get_supplier_ds()
+
     var1 = "ASIA"
     var2 = date(1994, 1, 1)
     var3 = date(1995, 1, 1)
 
-    region_ds = utils.get_region_ds()
-    nation_ds = utils.get_nation_ds()
-    customer_ds = utils.get_customer_ds()
-    line_item_ds = utils.get_line_item_ds()
-    orders_ds = utils.get_orders_ds()
-    supplier_ds = utils.get_supplier_ds()
-
     q_final = (
-        region_ds.join(nation_ds, left_on="r_regionkey", right_on="n_regionkey")
-        .join(customer_ds, left_on="n_nationkey", right_on="c_nationkey")
-        .join(orders_ds, left_on="c_custkey", right_on="o_custkey")
-        .join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
+        region.join(nation, left_on="r_regionkey", right_on="n_regionkey")
+        .join(customer, left_on="n_nationkey", right_on="c_nationkey")
+        .join(orders, left_on="c_custkey", right_on="o_custkey")
+        .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
         .join(
-            supplier_ds,
+            supplier,
             left_on=["l_suppkey", "n_nationkey"],
             right_on=["s_suppkey", "s_nationkey"],
         )

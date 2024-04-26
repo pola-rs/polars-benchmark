@@ -8,17 +8,17 @@ Q_NUM = 3
 
 
 def q() -> None:
-    customer_ds = utils.get_customer_ds()
-    line_item_ds = utils.get_line_item_ds()
-    orders_ds = utils.get_orders_ds()
+    customer = utils.get_customer_ds()
+    lineitem = utils.get_line_item_ds()
+    orders = utils.get_orders_ds()
 
     var1 = "BUILDING"
     var2 = date(1995, 3, 15)
 
     q_final = (
-        customer_ds.filter(pl.col("c_mktsegment") == var1)
-        .join(orders_ds, left_on="c_custkey", right_on="o_custkey")
-        .join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
+        customer.filter(pl.col("c_mktsegment") == var1)
+        .join(orders, left_on="c_custkey", right_on="o_custkey")
+        .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
         .filter(pl.col("o_orderdate") < var2)
         .filter(pl.col("l_shipdate") > var2)
         .with_columns(

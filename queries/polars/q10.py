@@ -8,19 +8,19 @@ Q_NUM = 10
 
 
 def q() -> None:
-    var_1 = date(1993, 10, 1)
-    var_2 = date(1994, 1, 1)
+    customer = utils.get_customer_ds()
+    orders = utils.get_orders_ds()
+    lineitem = utils.get_line_item_ds()
+    nation = utils.get_nation_ds()
 
-    customer_ds = utils.get_customer_ds()
-    orders_ds = utils.get_orders_ds()
-    line_item_ds = utils.get_line_item_ds()
-    nation_ds = utils.get_nation_ds()
+    var1 = date(1993, 10, 1)
+    var2 = date(1994, 1, 1)
 
     q_final = (
-        customer_ds.join(orders_ds, left_on="c_custkey", right_on="o_custkey")
-        .join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
-        .join(nation_ds, left_on="c_nationkey", right_on="n_nationkey")
-        .filter(pl.col("o_orderdate").is_between(var_1, var_2, closed="left"))
+        customer.join(orders, left_on="c_custkey", right_on="o_custkey")
+        .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
+        .join(nation, left_on="c_nationkey", right_on="n_nationkey")
+        .filter(pl.col("o_orderdate").is_between(var1, var2, closed="left"))
         .filter(pl.col("l_returnflag") == "R")
         .group_by(
             "c_custkey",
@@ -48,7 +48,7 @@ def q() -> None:
             "c_comment",
         )
         .sort(by="revenue", descending=True)
-        .limit(20)
+        .head(20)
     )
 
     utils.run_query(Q_NUM, q_final)

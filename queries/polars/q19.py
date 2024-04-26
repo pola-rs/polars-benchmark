@@ -6,11 +6,11 @@ Q_NUM = 19
 
 
 def q() -> None:
-    line_item_ds = utils.get_line_item_ds()
-    part_ds = utils.get_part_ds()
+    lineitem = utils.get_line_item_ds()
+    part = utils.get_part_ds()
 
     q_final = (
-        part_ds.join(line_item_ds, left_on="p_partkey", right_on="l_partkey")
+        part.join(lineitem, left_on="p_partkey", right_on="l_partkey")
         .filter(pl.col("l_shipmode").is_in(["AIR", "AIR REG"]))
         .filter(pl.col("l_shipinstruct") == "DELIVER IN PERSON")
         .filter(

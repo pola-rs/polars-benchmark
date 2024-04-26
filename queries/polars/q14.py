@@ -8,15 +8,15 @@ Q_NUM = 14
 
 
 def q() -> None:
-    var_1 = date(1995, 9, 1)
-    var_2 = date(1995, 10, 1)
+    lineitem = utils.get_line_item_ds()
+    part = utils.get_part_ds()
 
-    line_item_ds = utils.get_line_item_ds()
-    part_ds = utils.get_part_ds()
+    var1 = date(1995, 9, 1)
+    var2 = date(1995, 10, 1)
 
     q_final = (
-        line_item_ds.join(part_ds, left_on="l_partkey", right_on="p_partkey")
-        .filter(pl.col("l_shipdate").is_between(var_1, var_2, closed="left"))
+        lineitem.join(part, left_on="l_partkey", right_on="p_partkey")
+        .filter(pl.col("l_shipdate").is_between(var1, var2, closed="left"))
         .select(
             (
                 100.00

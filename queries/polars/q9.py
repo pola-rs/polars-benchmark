@@ -6,23 +6,23 @@ Q_NUM = 9
 
 
 def q() -> None:
-    part_ds = utils.get_part_ds()
-    supplier_ds = utils.get_supplier_ds()
-    line_item_ds = utils.get_line_item_ds()
-    part_supp_ds = utils.get_part_supp_ds()
-    orders_ds = utils.get_orders_ds()
-    nation_ds = utils.get_nation_ds()
+    part = utils.get_part_ds()
+    supplier = utils.get_supplier_ds()
+    lineitem = utils.get_line_item_ds()
+    partsupp = utils.get_part_supp_ds()
+    orders = utils.get_orders_ds()
+    nation = utils.get_nation_ds()
 
     q_final = (
-        line_item_ds.join(supplier_ds, left_on="l_suppkey", right_on="s_suppkey")
+        lineitem.join(supplier, left_on="l_suppkey", right_on="s_suppkey")
         .join(
-            part_supp_ds,
+            partsupp,
             left_on=["l_suppkey", "l_partkey"],
             right_on=["ps_suppkey", "ps_partkey"],
         )
-        .join(part_ds, left_on="l_partkey", right_on="p_partkey")
-        .join(orders_ds, left_on="l_orderkey", right_on="o_orderkey")
-        .join(nation_ds, left_on="s_nationkey", right_on="n_nationkey")
+        .join(part, left_on="l_partkey", right_on="p_partkey")
+        .join(orders, left_on="l_orderkey", right_on="o_orderkey")
+        .join(nation, left_on="s_nationkey", right_on="n_nationkey")
         .filter(pl.col("p_name").str.contains("green"))
         .select(
             pl.col("n_name").alias("nation"),
