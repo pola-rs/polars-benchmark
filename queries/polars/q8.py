@@ -8,7 +8,7 @@ Q_NUM = 8
 
 
 def q() -> None:
-    part_ds = utils.get_part_ds()
+    part = utils.get_part_ds()
     supplier = utils.get_supplier_ds()
     lineitem = utils.get_line_item_ds()
     orders = utils.get_orders_ds()
@@ -26,7 +26,7 @@ def q() -> None:
     n2 = nation.select("n_nationkey", "n_name")
 
     q_final = (
-        part_ds.join(lineitem, left_on="p_partkey", right_on="l_partkey")
+        part.join(lineitem, left_on="p_partkey", right_on="l_partkey")
         .join(supplier, left_on="l_suppkey", right_on="s_suppkey")
         .join(orders, left_on="l_orderkey", right_on="o_orderkey")
         .join(customer, left_on="o_custkey", right_on="c_custkey")
