@@ -14,10 +14,8 @@ def q() -> None:
     var1 = date(1996, 1, 1)
     var2 = date(1996, 4, 1)
 
-    revenue_ds = (
-        lineitem.filter(
-            pl.col("l_shipdate").is_between(var1, var2, closed="left")
-        )
+    revenue = (
+        lineitem.filter(pl.col("l_shipdate").is_between(var1, var2, closed="left"))
         .group_by("l_suppkey")
         .agg(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
@@ -28,7 +26,7 @@ def q() -> None:
     )
 
     q_final = (
-        supplier.join(revenue_ds, left_on="s_suppkey", right_on="supplier_no")
+        supplier.join(revenue, left_on="s_suppkey", right_on="supplier_no")
         .filter(pl.col("total_revenue") == pl.col("total_revenue").max())
         .with_columns(pl.col("total_revenue").round(2))
         .select("s_suppkey", "s_name", "s_address", "s_phone", "total_revenue")

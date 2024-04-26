@@ -16,7 +16,7 @@ def q() -> None:
     var2 = "BRASS"
     var3 = "EUROPE"
 
-    result_q1 = (
+    q1 = (
         part.join(partsupp, left_on="p_partkey", right_on="ps_partkey")
         .join(supplier, left_on="ps_suppkey", right_on="s_suppkey")
         .join(nation, left_on="s_nationkey", right_on="n_nationkey")
@@ -27,9 +27,9 @@ def q() -> None:
     )
 
     q_final = (
-        result_q1.group_by("p_partkey")
+        q1.group_by("p_partkey")
         .agg(pl.min("ps_supplycost"))
-        .join(result_q1, on=["p_partkey", "ps_supplycost"])
+        .join(q1, on=["p_partkey", "ps_supplycost"])
         .select(
             "s_acctbal",
             "s_name",

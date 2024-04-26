@@ -22,7 +22,7 @@ def q() -> None:
     n1 = nation.filter(pl.col("n_name") == var1)
     n2 = nation.filter(pl.col("n_name") == var2)
 
-    df1 = (
+    q1 = (
         customer.join(n1, left_on="c_nationkey", right_on="n_nationkey")
         .join(orders, left_on="c_custkey", right_on="o_custkey")
         .rename({"n_name": "cust_nation"})
@@ -32,7 +32,7 @@ def q() -> None:
         .rename({"n_name": "supp_nation"})
     )
 
-    df2 = (
+    q2 = (
         customer.join(n2, left_on="c_nationkey", right_on="n_nationkey")
         .join(orders, left_on="c_custkey", right_on="o_custkey")
         .rename({"n_name": "cust_nation"})
@@ -43,7 +43,7 @@ def q() -> None:
     )
 
     q_final = (
-        pl.concat([df1, df2])
+        pl.concat([q1, q2])
         .filter(pl.col("l_shipdate").is_between(var3, var4))
         .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume"),

@@ -6,11 +6,11 @@ Q_NUM = 18
 
 
 def q() -> None:
-    var1 = 300
-
     customer = utils.get_customer_ds()
     lineitem = utils.get_line_item_ds()
     orders = utils.get_orders_ds()
+
+    var1 = 300
 
     q_final = (
         lineitem.group_by("l_orderkey")
@@ -31,7 +31,7 @@ def q() -> None:
             pl.col("col6"),
         )
         .sort(by=["o_totalprice", "o_orderdat"], descending=[True, False])
-        .limit(100)
+        .head(100)
     )
 
     utils.run_query(Q_NUM, q_final)

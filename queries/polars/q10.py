@@ -48,7 +48,7 @@ def q() -> None:
             "c_comment",
         )
         .sort(by="revenue", descending=True)
-        .limit(20)
+        .head(20)
     )
 
     utils.run_query(Q_NUM, q_final)

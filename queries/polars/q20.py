@@ -19,28 +19,26 @@ def q() -> None:
     var3 = "CANADA"
     var4 = "forest"
 
-    res_1 = (
-        lineitem.filter(
-            pl.col("l_shipdate").is_between(var1, var2, closed="left")
-        )
+    q1 = (
+        lineitem.filter(pl.col("l_shipdate").is_between(var1, var2, closed="left"))
         .group_by("l_partkey", "l_suppkey")
         .agg((pl.col("l_quantity").sum() * 0.5).alias("sum_quantity"))
     )
-    res_2 = nation.filter(pl.col("n_name") == var3)
-    res_3 = supplier.join(res_2, left_on="s_nationkey", right_on="n_nationkey")
+    q2 = nation.filter(pl.col("n_name") == var3)
+    q3 = supplier.join(q2, left_on="s_nationkey", right_on="n_nationkey")
 
     q_final = (
         part.filter(pl.col("p_name").str.starts_with(var4))
         .select(pl.col("p_partkey").unique())
         .join(partsupp, left_on="p_partkey", right_on="ps_partkey")
         .join(
-            res_1,
+            q1,
             left_on=["ps_suppkey", "p_partkey"],
             right_on=["l_suppkey", "l_partkey"],
         )
         .filter(pl.col("ps_availqty") > pl.col("sum_quantity"))
         .select(pl.col("ps_suppkey").unique())
-        .join(res_3, left_on="ps_suppkey", right_on="s_suppkey")
+        .join(q3, left_on="ps_suppkey", right_on="s_suppkey")
         .select("s_name", "s_address")
         .sort("s_name")
     )

@@ -13,18 +13,18 @@ def q() -> None:
     var1 = "GERMANY"
     var2 = 0.0001
 
-    res_1 = (
+    q1 = (
         partsupp.join(supplier, left_on="ps_suppkey", right_on="s_suppkey")
         .join(nation, left_on="s_nationkey", right_on="n_nationkey")
         .filter(pl.col("n_name") == var1)
     )
-    res_2 = res_1.select(
+    q2 = q1.select(
         (pl.col("ps_supplycost") * pl.col("ps_availqty")).sum().round(2).alias("tmp")
         * var2
     ).with_columns(pl.lit(1).alias("lit"))
 
     q_final = (
-        res_1.group_by("ps_partkey")
+        q1.group_by("ps_partkey")
         .agg(
             (pl.col("ps_supplycost") * pl.col("ps_availqty"))
             .sum()
@@ -32,7 +32,7 @@ def q() -> None:
             .alias("value")
         )
         .with_columns(pl.lit(1).alias("lit"))
-        .join(res_2, on="lit")
+        .join(q2, on="lit")
         .filter(pl.col("value") > pl.col("tmp"))
         .select("ps_partkey", "value")
         .sort("value", descending=True)
