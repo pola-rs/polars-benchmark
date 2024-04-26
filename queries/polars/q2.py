@@ -6,21 +6,21 @@ Q_NUM = 2
 
 
 def q() -> None:
-    region_ds = utils.get_region_ds()
-    nation_ds = utils.get_nation_ds()
-    supplier_ds = utils.get_supplier_ds()
-    part_ds = utils.get_part_ds()
-    part_supp_ds = utils.get_part_supp_ds()
+    region = utils.get_region_ds()
+    nation = utils.get_nation_ds()
+    supplier = utils.get_supplier_ds()
+    part = utils.get_part_ds()
+    partsupp = utils.get_part_supp_ds()
 
     var1 = 15
     var2 = "BRASS"
     var3 = "EUROPE"
 
     result_q1 = (
-        part_ds.join(part_supp_ds, left_on="p_partkey", right_on="ps_partkey")
-        .join(supplier_ds, left_on="ps_suppkey", right_on="s_suppkey")
-        .join(nation_ds, left_on="s_nationkey", right_on="n_nationkey")
-        .join(region_ds, left_on="n_regionkey", right_on="r_regionkey")
+        part.join(partsupp, left_on="p_partkey", right_on="ps_partkey")
+        .join(supplier, left_on="ps_suppkey", right_on="s_suppkey")
+        .join(nation, left_on="s_nationkey", right_on="n_nationkey")
+        .join(region, left_on="n_regionkey", right_on="r_regionkey")
         .filter(pl.col("p_size") == var1)
         .filter(pl.col("p_type").str.ends_with(var2))
         .filter(pl.col("r_name") == var3)

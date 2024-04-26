@@ -8,12 +8,12 @@ Q_NUM = 1
 
 
 def q() -> None:
-    line_item_ds = utils.get_line_item_ds()
+    lineitem = utils.get_line_item_ds()
 
     var1 = date(1998, 9, 2)
 
     q_final = (
-        line_item_ds.filter(pl.col("l_shipdate") <= var1)
+        lineitem.filter(pl.col("l_shipdate") <= var1)
         .group_by("l_returnflag", "l_linestatus")
         .agg(
             pl.sum("l_quantity").alias("sum_qty"),

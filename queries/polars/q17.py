@@ -6,16 +6,16 @@ Q_NUM = 17
 
 
 def q() -> None:
-    var_1 = "Brand#23"
-    var_2 = "MED BOX"
+    var1 = "Brand#23"
+    var2 = "MED BOX"
 
-    line_item_ds = utils.get_line_item_ds()
-    part_ds = utils.get_part_ds()
+    lineitem = utils.get_line_item_ds()
+    part = utils.get_part_ds()
 
     res_1 = (
-        part_ds.filter(pl.col("p_brand") == var_1)
-        .filter(pl.col("p_container") == var_2)
-        .join(line_item_ds, how="left", left_on="p_partkey", right_on="l_partkey")
+        part.filter(pl.col("p_brand") == var1)
+        .filter(pl.col("p_container") == var2)
+        .join(lineitem, how="left", left_on="p_partkey", right_on="l_partkey")
     )
 
     q_final = (

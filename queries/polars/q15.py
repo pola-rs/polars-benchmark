@@ -8,15 +8,15 @@ Q_NUM = 15
 
 
 def q() -> None:
-    var_1 = date(1996, 1, 1)
-    var_2 = date(1996, 4, 1)
+    lineitem = utils.get_line_item_ds()
+    supplier = utils.get_supplier_ds()
 
-    line_item_ds = utils.get_line_item_ds()
-    supplier_ds = utils.get_supplier_ds()
+    var1 = date(1996, 1, 1)
+    var2 = date(1996, 4, 1)
 
     revenue_ds = (
-        line_item_ds.filter(
-            pl.col("l_shipdate").is_between(var_1, var_2, closed="left")
+        lineitem.filter(
+            pl.col("l_shipdate").is_between(var1, var2, closed="left")
         )
         .group_by("l_suppkey")
         .agg(
@@ -28,7 +28,7 @@ def q() -> None:
     )
 
     q_final = (
-        supplier_ds.join(revenue_ds, left_on="s_suppkey", right_on="supplier_no")
+        supplier.join(revenue_ds, left_on="s_suppkey", right_on="supplier_no")
         .filter(pl.col("total_revenue") == pl.col("total_revenue").max())
         .with_columns(pl.col("total_revenue").round(2))
         .select("s_suppkey", "s_name", "s_address", "s_phone", "total_revenue")

@@ -6,20 +6,20 @@ Q_NUM = 18
 
 
 def q() -> None:
-    var_1 = 300
+    var1 = 300
 
-    customer_ds = utils.get_customer_ds()
-    line_item_ds = utils.get_line_item_ds()
-    orders_ds = utils.get_orders_ds()
+    customer = utils.get_customer_ds()
+    lineitem = utils.get_line_item_ds()
+    orders = utils.get_orders_ds()
 
     q_final = (
-        line_item_ds.group_by("l_orderkey")
+        lineitem.group_by("l_orderkey")
         .agg(pl.col("l_quantity").sum().alias("sum_quantity"))
-        .filter(pl.col("sum_quantity") > var_1)
+        .filter(pl.col("sum_quantity") > var1)
         .select(pl.col("l_orderkey").alias("key"), pl.col("sum_quantity"))
-        .join(orders_ds, left_on="key", right_on="o_orderkey")
-        .join(line_item_ds, left_on="key", right_on="l_orderkey")
-        .join(customer_ds, left_on="o_custkey", right_on="c_custkey")
+        .join(orders, left_on="key", right_on="o_orderkey")
+        .join(lineitem, left_on="key", right_on="l_orderkey")
+        .join(customer, left_on="o_custkey", right_on="c_custkey")
         .group_by("c_name", "o_custkey", "key", "o_orderdate", "o_totalprice")
         .agg(pl.col("l_quantity").sum().alias("col6"))
         .select(

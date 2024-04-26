@@ -6,11 +6,11 @@ Q_NUM = 22
 
 
 def q() -> None:
-    orders_ds = utils.get_orders_ds()
-    customer_ds = utils.get_customer_ds()
+    orders = utils.get_orders_ds()
+    customer = utils.get_customer_ds()
 
     res_1 = (
-        customer_ds.with_columns(pl.col("c_phone").str.slice(0, 2).alias("cntrycode"))
+        customer.with_columns(pl.col("c_phone").str.slice(0, 2).alias("cntrycode"))
         .filter(pl.col("cntrycode").str.contains("13|31|23|29|30|18|17"))
         .select("c_acctbal", "c_custkey", "cntrycode")
     )
@@ -21,7 +21,7 @@ def q() -> None:
         .with_columns(pl.lit(1).alias("lit"))
     )
 
-    res_3 = orders_ds.select(pl.col("o_custkey").unique()).with_columns(
+    res_3 = orders.select(pl.col("o_custkey").unique()).with_columns(
         pl.col("o_custkey").alias("c_custkey")
     )
 

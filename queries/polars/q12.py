@@ -8,20 +8,20 @@ Q_NUM = 12
 
 
 def q() -> None:
-    var_1 = "MAIL"
-    var_2 = "SHIP"
-    var_3 = date(1994, 1, 1)
-    var_4 = date(1995, 1, 1)
+    lineitem = utils.get_line_item_ds()
+    orders = utils.get_orders_ds()
 
-    line_item_ds = utils.get_line_item_ds()
-    orders_ds = utils.get_orders_ds()
+    var1 = "MAIL"
+    var2 = "SHIP"
+    var3 = date(1994, 1, 1)
+    var4 = date(1995, 1, 1)
 
     q_final = (
-        orders_ds.join(line_item_ds, left_on="o_orderkey", right_on="l_orderkey")
-        .filter(pl.col("l_shipmode").is_in([var_1, var_2]))
+        orders.join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
+        .filter(pl.col("l_shipmode").is_in([var1, var2]))
         .filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))
         .filter(pl.col("l_shipdate") < pl.col("l_commitdate"))
-        .filter(pl.col("l_receiptdate").is_between(var_3, var_4, closed="left"))
+        .filter(pl.col("l_receiptdate").is_between(var3, var4, closed="left"))
         .with_columns(
             pl.when(pl.col("o_orderpriority").is_in(["1-URGENT", "2-HIGH"]))
             .then(1)
