@@ -32,7 +32,7 @@ pre-commit: fmt  ## Run all code quality checks
 
 .PHONY: tables
 tables: .venv  ## Generate data tables
-	$(MAKE) -C tpch-dbgen all
+	$(MAKE) -C tpch-dbgen dbgen
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
