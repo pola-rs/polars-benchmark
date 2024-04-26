@@ -72,14 +72,16 @@ plot: .venv  ## Plot results
 
 .PHONY: clean
 clean:  clean-tpch-dbgen clean-tables  ## Clean up everything
+	$(VENV_BIN)/ruff clean
 	@rm -rf .mypy_cache/
-	@rm -rf .ruff_cache/
 	@rm -rf .venv/
 	@rm -rf output/
+	@rm -rf spark-warehouse/
 
 .PHONY: clean-tpch-dbgen
 clean-tpch-dbgen:  ## Clean up TPC-H folder
 	@$(MAKE) -C tpch-dbgen clean
+	@rm -rf tpch-dbgen/*.tbl
 
 .PHONY: clean-tables
 clean-tables:  ## Clean up data tables

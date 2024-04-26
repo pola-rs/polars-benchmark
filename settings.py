@@ -59,7 +59,7 @@ class Plot(BaseSettings):
 
 
 class Settings(BaseSettings):
-    scale_factor: int = 1
+    scale_factor: float = 1.0
 
     paths: Paths = Paths()
     plot: Plot = Plot()
