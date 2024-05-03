@@ -1,4 +1,5 @@
-import polars as pl
+import pyarrow.csv as pacsv
+import pyarrow.parquet as papq
 
 from settings import Settings
 
@@ -89,19 +90,20 @@ for table_name, columns in table_columns.items():
     print(f"Processing table: {table_name}")
 
     path = settings.dataset_base_dir / f"{table_name}.tbl"
-    lf = pl.scan_csv(
+
+    ##
+    # Polars Parquet writes are currently writing extremely fragmented Parquet files
+    # Thus we use PyArrow to process the data instead.
+    # See: https://github.com/pola-rs/tpch/issues/123
+    ##
+    data = pacsv.read_csv(
         path,
-        has_header=False,
-        separator="|",
-        try_parse_dates=True,
-        new_columns=columns,
+        read_options=pacsv.ReadOptions(column_names=columns + [""]),
+        parse_options=pacsv.ParseOptions(delimiter="|"),
     )
-
-    # Drop empty last column because CSV ends with a separator
-    lf = lf.select(columns)
-
-    lf.sink_parquet(settings.dataset_base_dir / f"{table_name}.parquet")
-    lf.sink_csv(settings.dataset_base_dir / f"{table_name}.csv")
+    data = data.select(columns)
+    papq.write_table(data, settings.dataset_base_dir / f"{table_name}.parquet")
+    pacsv.write_csv(data, settings.dataset_base_dir / f"{table_name}.csv")
 
     # IPC currently not relevant
     # lf.sink_ipc(base_path / f"{table_name}.feather")
