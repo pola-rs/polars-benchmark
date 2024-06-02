@@ -16,11 +16,12 @@ def q() -> None:
 
     q_final = (
         # SQL exists translates to semi join in Polars API
-        orders.join((
-            lineitem.filter(
-                pl.col("l_commitdate") < pl.col("l_receiptdate")
-            )
-        ), left_on="o_orderkey", right_on="l_orderkey", how="semi")
+        orders.join(
+            (lineitem.filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))),
+            left_on="o_orderkey",
+            right_on="l_orderkey",
+            how="semi",
+        )
         .filter(pl.col("o_orderdate").is_between(var1, var2, closed="left"))
         .group_by("o_orderpriority")
         .agg(pl.len().alias("order_count"))
