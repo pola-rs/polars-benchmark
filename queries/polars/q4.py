@@ -15,10 +15,14 @@ def q() -> None:
     var2 = date(1993, 10, 1)
 
     q_final = (
-        lineitem.join(orders, left_on="l_orderkey", right_on="o_orderkey")
+        # SQL exists translates to semi join in Polars API
+        orders.join(
+            (lineitem.filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))),
+            left_on="o_orderkey",
+            right_on="l_orderkey",
+            how="semi",
+        )
         .filter(pl.col("o_orderdate").is_between(var1, var2, closed="left"))
-        .filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))
-        .unique(subset=["o_orderpriority", "l_orderkey"])
         .group_by("o_orderpriority")
         .agg(pl.len().alias("order_count"))
         .sort("o_orderpriority")

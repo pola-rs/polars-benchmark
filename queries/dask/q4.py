@@ -26,12 +26,14 @@ def q() -> None:
         var1 = date(1993, 7, 1)
         var2 = date(1993, 10, 1)
 
-        jn = line_item_ds.merge(orders_ds, left_on="l_orderkey", right_on="o_orderkey")
+        exists = line_item_ds[
+            line_item_ds["l_commitdate"] < line_item_ds["l_receiptdate"]
+        ]
 
+        jn = orders_ds.merge(
+            exists, left_on="o_orderkey", right_on="l_orderkey", how="leftsemi"
+        )
         jn = jn[(jn["o_orderdate"] >= var1) & (jn["o_orderdate"] < var2)]
-        jn = jn[jn["l_commitdate"] < jn["l_receiptdate"]]
-
-        jn = jn.drop_duplicates(subset=["o_orderpriority", "l_orderkey"])
 
         gb = jn.groupby("o_orderpriority")
         agg = gb.agg(
