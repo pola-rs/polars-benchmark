@@ -15,10 +15,8 @@ def q() -> None:
         .select("c_acctbal", "c_custkey", "cntrycode")
     )
 
-    q2 = (
-        q1.filter(pl.col("c_acctbal") > 0.0)
-        .select(pl.col("c_acctbal").mean().alias("avg_acctbal"))
-        .with_columns(pl.lit(1).alias("lit"))
+    q2 = q1.filter(pl.col("c_acctbal") > 0.0).select(
+        pl.col("c_acctbal").mean().alias("avg_acctbal")
     )
 
     q3 = orders.select(pl.col("o_custkey").unique()).with_columns(
@@ -28,8 +26,7 @@ def q() -> None:
     q_final = (
         q1.join(q3, on="c_custkey", how="left")
         .filter(pl.col("o_custkey").is_null())
-        .with_columns(pl.lit(1).alias("lit"))
-        .join(q2, on="lit")
+        .join(q2, how="cross")
         .filter(pl.col("c_acctbal") > pl.col("avg_acctbal"))
         .group_by("cntrycode")
         .agg(
