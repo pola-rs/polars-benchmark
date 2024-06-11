@@ -14,13 +14,13 @@ def q() -> None:
     supplier = utils.get_supplier_ds()
 
     q_final = (
-        lineitem.join(supplier, left_on="l_suppkey", right_on="s_suppkey")
+        part.join(partsupp, left_on="p_partkey", right_on="ps_partkey")
+        .join(supplier, left_on="ps_suppkey", right_on="s_suppkey")
         .join(
-            partsupp,
-            left_on=["l_suppkey", "l_partkey"],
-            right_on=["ps_suppkey", "ps_partkey"],
+            lineitem,
+            left_on=["p_partkey", "ps_suppkey"],
+            right_on=["l_partkey", "l_suppkey"],
         )
-        .join(part, left_on="l_partkey", right_on="p_partkey")
         .join(orders, left_on="l_orderkey", right_on="o_orderkey")
         .join(nation, left_on="s_nationkey", right_on="n_nationkey")
         .filter(pl.col("p_name").str.contains("green"))
