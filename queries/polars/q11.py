@@ -21,7 +21,7 @@ def q() -> None:
     q2 = q1.select(
         (pl.col("ps_supplycost") * pl.col("ps_availqty")).sum().round(2).alias("tmp")
         * var2
-    ).with_columns(pl.lit(1).alias("lit"))
+    )
 
     q_final = (
         q1.group_by("ps_partkey")
@@ -31,8 +31,7 @@ def q() -> None:
             .round(2)
             .alias("value")
         )
-        .with_columns(pl.lit(1).alias("lit"))
-        .join(q2, on="lit")
+        .join(q2, how="cross")
         .filter(pl.col("value") > pl.col("tmp"))
         .select("ps_partkey", "value")
         .sort("value", descending=True)
