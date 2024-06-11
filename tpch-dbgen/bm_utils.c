@@ -68,7 +68,11 @@
 #include <ctype.h>
 #include <math.h>
 #ifndef _POSIX_SOURCE
-#include <malloc.h>
+#ifdef __APPLE__
+    #include <sys/malloc.h>
+#else
+    #include <malloc.h>
+#endif
 #endif /* POSIX_SOURCE */
 #include <fcntl.h>
 #include <sys/types.h>
