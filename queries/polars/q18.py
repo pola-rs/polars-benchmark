@@ -12,20 +12,22 @@ def q() -> None:
 
     var1 = 300
 
-    q_final = (
+    q1 = (
         lineitem.group_by("l_orderkey")
         .agg(pl.col("l_quantity").sum().alias("sum_quantity"))
         .filter(pl.col("sum_quantity") > var1)
-        .select(pl.col("l_orderkey").alias("key"), pl.col("sum_quantity"))
-        .join(orders, left_on="key", right_on="o_orderkey")
-        .join(lineitem, left_on="key", right_on="l_orderkey")
+    )
+
+    q_final = (
+        orders.join(q1, left_on="o_orderkey", right_on="l_orderkey", how="semi")
+        .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
         .join(customer, left_on="o_custkey", right_on="c_custkey")
-        .group_by("c_name", "o_custkey", "key", "o_orderdate", "o_totalprice")
+        .group_by("c_name", "o_custkey", "o_orderkey", "o_orderdate", "o_totalprice")
         .agg(pl.col("l_quantity").sum().alias("col6"))
         .select(
             pl.col("c_name"),
             pl.col("o_custkey").alias("c_custkey"),
-            pl.col("key").alias("o_orderkey"),
+            pl.col("o_orderkey"),
             pl.col("o_orderdate").alias("o_orderdat"),
             pl.col("o_totalprice"),
             pl.col("col6"),
