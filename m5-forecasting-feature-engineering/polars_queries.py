@@ -1,5 +1,5 @@
-import os
 import time
+from pathlib import Path
 
 import polars as pl
 
@@ -10,19 +10,21 @@ PROCESSED_DATA_DIR = "data"
 TARGET = "sales"
 SHIFT_DAY = 28
 
+
 # Set this to True if you just want to test that everything runs
 SMALL = True
 if SMALL:
-    PATH = os.path.join(PROCESSED_DATA_DIR, "grid_part_1_small.parquet")
+    PATH = Path(PROCESSED_DATA_DIR) / "grid_part_1_small.parquet"
 else:
-    PATH = os.path.join(PROCESSED_DATA_DIR, "grid_part_1.parquet")
+    PATH = Path(PROCESSED_DATA_DIR) / "grid_part_1.parquet"
 
-LAG_DAYS = [col for col in range(SHIFT_DAY, SHIFT_DAY + 15)]
+LAG_DAYS = list(range(SHIFT_DAY, SHIFT_DAY + 15))
 
 
 def q1_polars(df):
     return df.with_columns(
-        pl.col(TARGET).shift(l).over("id").alias(f"{TARGET}_lag_{l}") for l in LAG_DAYS
+        pl.col(TARGET).shift(lag).over("id").alias(f"{TARGET}_lag_{lag}")
+        for lag in LAG_DAYS
     )
 
 
