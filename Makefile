@@ -11,9 +11,10 @@ VENV_BIN=$(VENV)/bin
 
 .PHONY: install-deps
 install-deps: .venv  ## Install Python project dependencies
-	$(VENV_BIN)/python -m pip install --upgrade uv
-	$(VENV_BIN)/uv pip install --compile -r requirements.txt
-	$(VENV_BIN)/uv pip install --compile -r requirements-dev.txt
+	@unset CONDA_PREFIX \
+	&& $(VENV_BIN)/python -m pip install --upgrade uv \
+	&& $(VENV_BIN)/uv pip install --compile -r requirements.txt \
+	&& $(VENV_BIN)/uv pip install --compile -r requirements-dev.txt
 
 .PHONY: bump-deps
 bump-deps: .venv  ## Bump Python project dependencies
@@ -30,8 +31,7 @@ fmt:  ## Run autoformatting and linting
 .PHONY: pre-commit
 pre-commit: fmt  ## Run all code quality checks
 
-.PHONY: tables
-tables: .venv  ## Generate data tables
+data/tables/: .venv  ## Generate data tables
 	$(MAKE) -C tpch-dbgen dbgen
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
@@ -40,26 +40,36 @@ tables: .venv  ## Generate data tables
 	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 
 .PHONY: run-polars
-run-polars: .venv  ## Run Polars benchmarks
+run-polars: .venv data/tables/  ## Run Polars benchmarks
 	$(VENV_BIN)/python -m queries.polars
 
-.PHONY: run-duckdb
+.PHONY: run-polars-no-env
+run-polars-no-env:  ## Run Polars benchmarks
+	$(MAKE) -C tpch-dbgen dbgen
+	cd tpch-dbgen && ./dbgen -f -s $(SCALE_FACTOR) && cd ..
+	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
+	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
+	python -m scripts.prepare_data
+	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
+	python -m queries.polars
+
+.PHONY: run-duckdb data/tables/
 run-duckdb: .venv  ## Run DuckDB benchmarks
 	$(VENV_BIN)/python -m queries.duckdb
 
-.PHONY: run-pandas
+.PHONY: run-pandas data/tables/
 run-pandas: .venv  ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
-.PHONY: run-pyspark
+.PHONY: run-pyspark data/tables/
 run-pyspark: .venv  ## Run PySpark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark
 
-.PHONY: run-dask
+.PHONY: run-dask data/tables/
 run-dask: .venv  ## Run Dask benchmarks
 	$(VENV_BIN)/python -m queries.dask
 
-.PHONY: run-modin
+.PHONY: run-modin data/tables/
 run-modin: .venv  ## Run Modin benchmarks
 	$(VENV_BIN)/python -m queries.modin
 
