@@ -1,0 +1,6 @@
+# 1.8.2 introduces plan optimisations that produce inequality joins
+# that are not yet implemented in cudf-polars
+polars[gpu]<1.8.2
+packaging
+
+-r requirements-polars-only.txt
