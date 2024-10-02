@@ -53,6 +53,10 @@ run-polars-no-env:  ## Run Polars benchmarks
 	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 	python -m queries.polars
 
+.PHONY: run-polars-gpu-no-env
+run-polars-gpu-no-env: run-polars-no-env ## Run Polars CPU and GPU benchmarks
+	RUN_POLARS_GPU=true CUDA_MODULE_LOADING=EAGER python -m queries.polars
+
 .PHONY: run-duckdb data/tables/
 run-duckdb: .venv  ## Run DuckDB benchmarks
 	$(VENV_BIN)/python -m queries.duckdb
