@@ -70,4 +70,4 @@ print(f"q2 took: {time.perf_counter() - start_time}")
 
 start_time = time.perf_counter()
 q3_pandas(pd.read_parquet(PATH, engine="pyarrow"))
-print(f"q2 took: {time.perf_counter() - start_time}")
+print(f"q3 took: {time.perf_counter() - start_time}")
