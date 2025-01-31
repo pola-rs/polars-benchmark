@@ -24,6 +24,7 @@ class Paths(BaseSettings):
 class Run(BaseSettings):
     io_type: IoType = "parquet"
 
+    iterations: int = 1
     log_timings: bool = False
     show_results: bool = False
     check_results: bool = False  # Only available for SCALE_FACTOR=1
