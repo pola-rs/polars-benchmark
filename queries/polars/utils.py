@@ -130,24 +130,64 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     new_streaming = settings.run.polars_new_streaming
     eager = settings.run.polars_eager
     gpu = settings.run.polars_gpu
+    cloud = settings.run.polars_cloud
 
-    if sum([eager, streaming, new_streaming, gpu]) > 1:
-        msg = "Please specify at most one of eager, streaming, new_streaming or gpu"
+    if sum([eager, streaming, new_streaming, gpu, cloud]) > 1:
+        msg = "Please specify at most one of eager, streaming, new_streaming, cloud or gpu"
         raise ValueError(msg)
     if settings.run.polars_show_plan:
-        print(lf.explain(streaming=streaming, new_streaming=new_streaming, optimized=eager))
+        print(
+            lf.explain(
+                streaming=streaming, new_streaming=new_streaming, optimized=eager
+            )
+        )
 
     engine = obtain_engine_config()
     # Eager load engine backend, so we don't time that.
     _preload_engine(engine)
-    query = partial(
-        lf.collect, streaming=streaming, new_streaming=new_streaming, no_optimization=eager, engine=engine
-    )
+
+    if cloud:
+        import os
+
+        import polars_cloud as pc
+
+        os.environ["POLARS_SKIP_CLIENT_CHECK"] = "1"
+
+        class PatchedComputeContext(pc.ComputeContext):
+            def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
+                self._interactive = True
+                self._compute_address = "localhost:5051"
+                self._compute_public_key = b""
+
+            def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:
+                """Get the status of the compute cluster."""
+                return pc.ComputeContextStatus.RUNNING
+
+        pc.ComputeContext.__init__ = PatchedComputeContext.__init__
+        pc.ComputeContext.get_status = PatchedComputeContext.get_status
+
+        def query():
+            return (
+                pc.spawn(lf, dst="file:///tmp/dst/", distributed=True)
+                .await_result()
+                .lazy()
+                .collect()
+            )
+    else:
+        query = partial(
+            lf.collect,
+            streaming=streaming,
+            new_streaming=new_streaming,
+            no_optimization=eager,
+            engine=engine,
+        )
 
     if gpu:
         library_name = f"polars-gpu-{settings.run.use_rmm_mr}"
     elif eager:
         library_name = "polars-eager"
+    elif cloud:
+        library_name = "polars-cloud"
     else:
         library_name = "polars"
 

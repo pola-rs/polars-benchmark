@@ -7,6 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv"]
 
 
+# Set via PATH_<NAME>
 class Paths(BaseSettings):
     answers: Path = Path("data/answers")
     tables: Path = Path("data/tables")
@@ -21,6 +22,7 @@ class Paths(BaseSettings):
     )
 
 
+# Set via RUN_<NAME>
 class Run(BaseSettings):
     io_type: IoType = "parquet"
 
@@ -32,6 +34,7 @@ class Run(BaseSettings):
     polars_eager: bool = False
     polars_streaming: bool = False
     polars_new_streaming: bool = False
+    polars_cloud: bool = False
     polars_gpu: bool = False  # Use GPU engine?
     polars_gpu_device: int = 0  # The GPU device to run on for polars GPU
     # Which style of GPU memory resource to use
