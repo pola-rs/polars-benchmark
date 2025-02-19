@@ -167,9 +167,12 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         pc.ComputeContext.get_status = PatchedComputeContext.get_status
 
         def query():
+            result = pc.spawn(lf, dst="file:///tmp/dst/", distributed=True).await_result()
+
+            if settings.run.show_results:
+                print(result.plan())
             return (
-                pc.spawn(lf, dst="file:///tmp/dst/", distributed=True)
-                .await_result()
+                result
                 .lazy()
                 .collect()
             )
