@@ -80,7 +80,7 @@ def obtain_engine_config() -> (
         return "old-streaming"
     if settings.run.polars_new_streaming:
         return "streaming"
-    if not settings.polars_gpu:
+    if not settings.run.polars_gpu:
         return "in-memory"
 
     import cudf_polars
