@@ -73,9 +73,16 @@ def _preload_engine(engine):
         pl.scan_parquet(f).collect(engine=engine)
 
 
-def obtain_engine_config() -> pl.GPUEngine | Literal["cpu"]:
-    if not settings.run.polars_gpu:
-        return "cpu"
+def obtain_engine_config() -> (
+    pl.GPUEngine | Literal["in-memory", "streaming", "old-streaming"]
+):
+    if settings.run.polars_streaming:
+        return "old-streaming"
+    if settings.run.polars_new_streaming:
+        return "streaming"
+    if not settings.polars_gpu:
+        return "in-memory"
+
     import cudf_polars
     import rmm
     from cudf_polars.callback import set_device
@@ -134,14 +141,21 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     if sum([eager, streaming, new_streaming, gpu]) > 1:
         msg = "Please specify at most one of eager, streaming, new_streaming or gpu"
         raise ValueError(msg)
-    if settings.run.polars_show_plan:
-        print(lf.explain(streaming=streaming, new_streaming=new_streaming, optimized=eager))
 
     engine = obtain_engine_config()
+    if settings.run.polars_show_plan:
+        print(
+            lf.explain(
+                engine=engine, optimized=eager
+            )
+        )
+
     # Eager load engine backend, so we don't time that.
     _preload_engine(engine)
     query = partial(
-        lf.collect, streaming=streaming, new_streaming=new_streaming, no_optimization=eager, engine=engine
+        lf.collect,
+        no_optimization=eager,
+        engine=engine,
     )
 
     if gpu:
