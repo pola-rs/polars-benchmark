@@ -61,22 +61,20 @@ def pipelined_data_generation(
 ):
     assert num_parts > 1, "script should only be used if num_parts > 1"
 
-    cachedir = pathlib.Path(scratch_dir) / (f"{scale_factor:.1f}").replace(".", "_") / str(num_parts)
-    cachedir.mkdir(parents=True, exist_ok=True)
-    # shutil.copytree(tpch_dbgen, cachedir, dirs_exist_ok=True)
+    base_path = pathlib.Path(scratch_dir) / (f"{scale_factor:.1f}").replace(".", "_") / str(num_parts)
+    base_path.mkdir(parents=True, exist_ok=True)
 
     for i, part_indices in enumerate(batch(range(1, num_parts + 1), n=parallelism)):
         logger.info("Partition %s: Generating CSV files", part_indices)
         with Pool(parallelism) as process_pool:
-            process_pool.starmap(gen_csv, [(part_idx, cachedir, scale_factor, num_parts) for part_idx in part_indices])
+            process_pool.starmap(gen_csv, [(part_idx, base_path, scale_factor, num_parts) for part_idx in part_indices])
 
         csv_files = glob.glob(f"{tpch_dbgen}/*.tbl*")
         for f in csv_files:
-            shutil.move(f, cachedir / pathlib.Path(f).name)
+            shutil.move(f, base_path / pathlib.Path(f).name)
 
-
-        gen_parquet(cachedir, rows_per_file)
-        parquet_files = glob.glob(f"{cachedir}/*.parquet")
+        gen_parquet(base_path, rows_per_file)
+        parquet_files = glob.glob(f"{base_path}/*.parquet")
 
         # # Exclude static tables except for first iteration
         exclude_static_tables = "" if i == 0 else " ".join([f'--exclude "*/{tbl}/*"' for tbl in STATIC_TABLES])
@@ -87,15 +85,12 @@ def pipelined_data_generation(
         )
         for parquet_file in parquet_files:
             os.remove(parquet_file)
-        for table_file in glob.glob(f"{cachedir}/*.tbl*"):
+        for table_file in glob.glob(f"{base_path}/*.tbl*"):
             os.remove(table_file)
-
-
 
 
 # Source tables contained in the schema for TPC-H. For more information, check -
 # https://www.tpc.org/TPC_Documents_Current_Versions/pdf/TPC-H_v3.0.1.pdf
-
 table_columns = {
     "customer": [
         "c_custkey",
@@ -176,8 +171,9 @@ table_columns = {
     ],
 }
 
+
 def gen_parquet(base_path: pathlib.Path,
-    rows_per_file: int = 500_000
+                rows_per_file: int = 500_000
                 ):
     for table_name, columns in table_columns.items():
         path = base_path / f"{table_name}.tbl*"
@@ -199,17 +195,17 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
         "--tpch_gen_folder",
-        default="data/tables2",
-        help="Path to the folder containing the TPCH dbgen tool and generated data",
+        default="data/tables",
+        help="Path to generated data folder",
     )
-    parser.add_argument("--scale-factor", default=0.1, help="Scale factor to run on in GB", type=float)
+    parser.add_argument("--scale-factor", default=0.1, help="Scale factor to run on", type=float)
     parser.add_argument("--rows-per-file", default=500_000, help="Number of rows per parquet file", type=int)
     parser.add_argument(
         "--num-parts", default=32, help="Number of parts to generate", type=int
     )
     parser.add_argument(
         "--aws-s3-sync-location",
-        default="s3://<>uncompressed/tpch-dbgen/",
+        default="s3://<>/tpch-dbgen/",
         help="Where to sync files to in AWS S3",
     )
     parser.add_argument(
@@ -219,6 +215,12 @@ if __name__ == "__main__":
         help="How many processes to use to generate the data",
     )
     args = parser.parse_args()
-    pipelined_data_generation(
-        args.tpch_gen_folder, args.scale_factor, args.num_parts, args.aws_s3_sync_location, parallelism=args.parallelism
-    )
+
+    if args.num_parts == 1:
+        gen_parquet(
+            pathlib.Path(args.tpch_gen_folder),
+            args.rows_per_file)
+    else:
+        pipelined_data_generation(
+            args.tpch_gen_folder, args.scale_factor, args.num_parts, args.aws_s3_sync_location, parallelism=args.parallelism
+        )
