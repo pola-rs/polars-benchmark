@@ -14,12 +14,11 @@ such any result obtained using this file are not comparable to published TPC-H
 Benchmark results, as the results obtained from using this file do not comply with
 the TPC-H Benchmark.
 """
+
 from __future__ import annotations
 
 import argparse
-import glob
 import logging
-import os
 import pathlib
 import shlex
 import shutil
@@ -44,7 +43,7 @@ STATIC_TABLES = ["nation", "region"]
 def batch(iterable, n=1):
     length = len(iterable)
     for ndx in range(0, length, n):
-        yield iterable[ndx: min(ndx + n, length)]
+        yield iterable[ndx : min(ndx + n, length)]
 
 
 def gen_csv(part_idx: int, cachedir: str, scale_factor: float, num_parts: int):
@@ -55,38 +54,53 @@ def gen_csv(part_idx: int, cachedir: str, scale_factor: float, num_parts: int):
 
 
 def pipelined_data_generation(
-    scratch_dir: str, scale_factor: float, num_parts: int, aws_s3_sync_location: str,
+    scratch_dir: str,
+    scale_factor: float,
+    num_parts: int,
+    aws_s3_sync_location: str,
     parallelism: int = 4,
-    rows_per_file: int = 500_000
+    rows_per_file: int = 500_000,
 ):
     assert num_parts > 1, "script should only be used if num_parts > 1"
 
-    base_path = pathlib.Path(scratch_dir) / (f"{scale_factor:.1f}").replace(".", "_") / str(num_parts)
+    base_path = pathlib.Path(scratch_dir) / str(num_parts)
     base_path.mkdir(parents=True, exist_ok=True)
 
     for i, part_indices in enumerate(batch(range(1, num_parts + 1), n=parallelism)):
         logger.info("Partition %s: Generating CSV files", part_indices)
         with Pool(parallelism) as process_pool:
-            process_pool.starmap(gen_csv, [(part_idx, base_path, scale_factor, num_parts) for part_idx in part_indices])
+            process_pool.starmap(
+                gen_csv,
+                [
+                    (part_idx, base_path, scale_factor, num_parts)
+                    for part_idx in part_indices
+                ],
+            )
 
-        csv_files = glob.glob(f"{tpch_dbgen}/*.tbl*")
+        csv_files = pathlib.Path.rglob(f"{tpch_dbgen}/*.tbl*")
         for f in csv_files:
             shutil.move(f, base_path / pathlib.Path(f).name)
 
-        gen_parquet(base_path, rows_per_file)
-        parquet_files = glob.glob(f"{base_path}/*.parquet")
+        gen_parquet(base_path, rows_per_file, partitioned=True)
+        parquet_files = pathlib.Path.rglob(f"{base_path}/*.parquet")
 
         # # Exclude static tables except for first iteration
-        exclude_static_tables = "" if i == 0 else " ".join([f'--exclude "*/{tbl}/*"' for tbl in STATIC_TABLES])
-        subprocess.check_output(
-            shlex.split(
-                f'aws s3 sync {scratch_dir} {aws_s3_sync_location} --exclude "*" --include "*.parquet" {exclude_static_tables}'
-            )
+        exclude_static_tables = (
+            ""
+            if i == 0
+            else " ".join([f'--exclude "*/{tbl}/*"' for tbl in STATIC_TABLES])
         )
-        for parquet_file in parquet_files:
-            os.remove(parquet_file)
-        for table_file in glob.glob(f"{base_path}/*.tbl*"):
-            os.remove(table_file)
+
+        if len(aws_s3_sync_location):
+            subprocess.check_output(
+                shlex.split(
+                    f'aws s3 sync {scratch_dir} {aws_s3_sync_location} --exclude "*" --include "*.parquet" {exclude_static_tables}'
+                )
+            )
+            for parquet_file in parquet_files:
+                pathlib.Path.unlink(parquet_file)
+        for table_file in pathlib.Path.rglob(f"{base_path}/*.tbl*"):
+            pathlib.Path.unlink(table_file)
 
 
 # Source tables contained in the schema for TPC-H. For more information, check -
@@ -172,9 +186,9 @@ table_columns = {
 }
 
 
-def gen_parquet(base_path: pathlib.Path,
-                rows_per_file: int = 500_000
-                ):
+def gen_parquet(
+    base_path: pathlib.Path, rows_per_file: int = 500_000, partitioned: bool = False
+):
     for table_name, columns in table_columns.items():
         path = base_path / f"{table_name}.tbl*"
 
@@ -188,7 +202,14 @@ def gen_parquet(base_path: pathlib.Path,
 
         # Drop empty last column because CSV ends with a separator
         lf = lf.select(columns)
-        lf.sink_parquet(pl.PartitionMaxSize(base_path / f"{table_name}{{part}}.parquet", max_size=rows_per_file))
+
+        if partitioned:
+            (base_path / table_name).mkdir(parents=True, exist_ok=True)
+            path = base_path / table_name / "{part}.parquet"
+            lf.sink_parquet(pl.PartitionMaxSize(path, max_size=rows_per_file))
+        else:
+            path = base_path / f"{table_name}.parquet"
+            lf.sink_parquet(path)
 
 
 if __name__ == "__main__":
@@ -198,15 +219,25 @@ if __name__ == "__main__":
         default="data/tables",
         help="Path to generated data folder",
     )
-    parser.add_argument("--scale-factor", default=0.1, help="Scale factor to run on", type=float)
-    parser.add_argument("--rows-per-file", default=500_000, help="Number of rows per parquet file", type=int)
+    parser.add_argument(
+        "--scale-factor",
+        default=settings.scale_factor,
+        help="Scale factor to run on",
+        type=float,
+    )
+    parser.add_argument(
+        "--rows-per-file",
+        default=500_000,
+        help="Number of rows per parquet file",
+        type=int,
+    )
     parser.add_argument(
         "--num-parts", default=32, help="Number of parts to generate", type=int
     )
     parser.add_argument(
         "--aws-s3-sync-location",
-        default="s3://<>/tpch-dbgen/",
-        help="Where to sync files to in AWS S3",
+        default="",
+        help="Where (and if) to sync files to in AWS S3",
     )
     parser.add_argument(
         "--parallelism",
@@ -217,10 +248,15 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.num_parts == 1:
+        # Assumes the tables are already created by the Makefile
         gen_parquet(
-            pathlib.Path(args.tpch_gen_folder),
-            args.rows_per_file)
+            pathlib.Path(args.tpch_gen_folder), args.rows_per_file, partitioned=False
+        )
     else:
         pipelined_data_generation(
-            args.tpch_gen_folder, args.scale_factor, args.num_parts, args.aws_s3_sync_location, parallelism=args.parallelism
+            args.tpch_gen_folder,
+            args.scale_factor,
+            args.num_parts,
+            args.aws_s3_sync_location,
+            parallelism=args.parallelism,
         )

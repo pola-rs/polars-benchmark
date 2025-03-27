@@ -5,6 +5,16 @@ SHELL=/bin/bash
 VENV=.venv
 VENV_BIN=$(VENV)/bin
 
+ifndef SCALE_FACTOR
+data/tables/.generated:
+	@echo "SCALE_FACTOR not set, skipping data table generation"
+	@touch $@
+
+data/tables/:
+	@echo "SCALE_FACTOR not set, skipping data table generation"
+	@mkdir -p $@
+endif
+
 .venv:  ## Set up Python virtual environment and install dependencies
 	python3 -m venv $(VENV)
 	$(MAKE) install-deps
@@ -31,13 +41,22 @@ fmt:  ## Run autoformatting and linting
 .PHONY: pre-commit
 pre-commit: fmt  ## Run all code quality checks
 
-data/tables/: .venv  ## Generate data tables
+data/tables/.generated: .venv  ## Generate data tables
 	$(MAKE) -C tpch-dbgen dbgen
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
 	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=1 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
+	touch $@
+
+data/tables/: data/tables/.generated
+	@true
+
+data/tables/partitioned/: .venv  ## Generate partitioned data tables (these are not yet runnable with current repo)
+	$(MAKE) -C tpch-dbgen dbgen
+	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=10 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
+
 
 .PHONY: run-polars
 run-polars: .venv data/tables/  ## Run Polars benchmarks
