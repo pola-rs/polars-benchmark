@@ -120,7 +120,7 @@ def formulate_caption(
             if len(texts) >= 2:
                 texts[-1] = "and " + texts[-1]
 
-            notes.append(f"{name[0]} {join_char.join(texts)}.")  # type: ignore[index]
+            notes.append(f"{name[0]} {join_char.join(texts)}.")
 
         if notes:
             caption += f"Note: {' '.join(notes)} "

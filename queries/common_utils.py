@@ -109,7 +109,9 @@ def run_query_generic(
 ) -> None:
     """Execute a query."""
     for _ in range(settings.run.iterations):
-        with CodeTimer(name=f"Run {library_name} query {query_number}", unit="s") as timer:
+        with CodeTimer(
+            name=f"Run {library_name} query {query_number}", unit="s"
+        ) as timer:
             result = query()
 
         if settings.run.log_timings:
@@ -138,7 +140,7 @@ def check_query_result_pl(result: pl.DataFrame, query_number: int) -> None:
     from polars.testing import assert_frame_equal
 
     expected = _get_query_answer_pl(query_number)
-    assert_frame_equal(result, expected, check_dtype=False)
+    assert_frame_equal(result, expected, check_dtypes=False)
 
 
 def check_query_result_pd(result: pd.DataFrame, query_number: int) -> None:

@@ -63,7 +63,7 @@ def get_part_supp_ds() -> pl.LazyFrame:
     return _scan_ds("partsupp")
 
 
-def _preload_engine(engine):
+def _preload_engine(engine) -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
         # GPU engine has one-time lazy-loaded cost in IO, which we
         # remove from timings here.
@@ -144,14 +144,14 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         raise ValueError(msg)
     if settings.run.polars_show_plan:
         print(
-            lf.explain(
+            lf.explain(  # type: ignore[call-arg]
                 streaming=streaming, new_streaming=new_streaming, optimized=eager
             )
         )
 
     engine = obtain_engine_config()
     if settings.run.polars_show_plan:
-        print(lf.explain(engine=engine, optimized=not eager))
+        print(lf.explain(engine=engine, optimized=not eager))  # type: ignore[arg-type]
 
     # Eager load engine backend, so we don't time that.
     _preload_engine(engine)
@@ -163,7 +163,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
 
         os.environ["POLARS_SKIP_CLIENT_CHECK"] = "1"
 
-        class PatchedComputeContext(pc.ComputeContext):
+        class PatchedComputeContext(pc.ComputeContext):  # type: ignore[misc]
             def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
                 self._interactive = True
                 self._compute_address = "localhost:5051"
@@ -177,7 +177,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         pc.ComputeContext.__init__ = PatchedComputeContext.__init__
         pc.ComputeContext.get_status = PatchedComputeContext.get_status
 
-        def query():
+        def query():  # type: ignore[no-untyped-def]
             result = pc.spawn(
                 lf, dst="file:///tmp/dst/", distributed=True
             ).await_result()
