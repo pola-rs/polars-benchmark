@@ -158,6 +158,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
                 self._interactive = True
                 self._compute_address = "localhost:5051"
                 self._compute_public_key = b""
+                self._compute_id = "1"
 
             def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:
                 """Get the status of the compute cluster."""
@@ -167,15 +168,13 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         pc.ComputeContext.get_status = PatchedComputeContext.get_status
 
         def query():
-            result = pc.spawn(lf, dst="file:///tmp/dst/", distributed=True).await_result()
+            result = pc.spawn(
+                lf, dst="file:///tmp/dst/", distributed=True
+            ).await_result()
 
             if settings.run.show_results:
                 print(result.plan())
-            return (
-                result
-                .lazy()
-                .collect()
-            )
+            return result.lazy().collect()
     else:
         query = partial(
             lf.collect,
