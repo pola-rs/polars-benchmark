@@ -73,9 +73,16 @@ def _preload_engine(engine):
         pl.scan_parquet(f).collect(engine=engine)
 
 
-def obtain_engine_config() -> pl.GPUEngine | Literal["cpu"]:
+def obtain_engine_config() -> (
+    pl.GPUEngine | Literal["in-memory", "streaming", "old-streaming"]
+):
+    if settings.run.polars_streaming:
+        return "old-streaming"
+    if settings.run.polars_new_streaming:
+        return "streaming"
     if not settings.run.polars_gpu:
-        return "cpu"
+        return "in-memory"
+
     import cudf_polars
     import rmm
     from cudf_polars.callback import set_device
@@ -143,6 +150,9 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         )
 
     engine = obtain_engine_config()
+    if settings.run.polars_show_plan:
+        print(lf.explain(engine=engine, optimized=not eager))
+
     # Eager load engine backend, so we don't time that.
     _preload_engine(engine)
 
