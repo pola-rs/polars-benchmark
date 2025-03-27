@@ -79,7 +79,9 @@ module = [
   "modin.*",
   "plotly.*",
   "cudf_polars.*",
-  "cudf.*"
+  "cudf.*",
+  "rmm.*",
+  "pylibcudf.*",
 ]
 ignore_missing_imports = true
 

@@ -18,12 +18,15 @@ the TPC-H Benchmark.
 from __future__ import annotations
 
 import argparse
+import glob
 import logging
+import os
 import pathlib
 import shlex
 import shutil
 import subprocess
 from multiprocessing import Pool
+from typing import no_type_check
 
 import polars as pl
 
@@ -40,13 +43,14 @@ logger = logging.getLogger(__name__)
 STATIC_TABLES = ["nation", "region"]
 
 
+@no_type_check
 def batch(iterable, n=1):
     length = len(iterable)
     for ndx in range(0, length, n):
         yield iterable[ndx : min(ndx + n, length)]
 
 
-def gen_csv(part_idx: int, cachedir: str, scale_factor: float, num_parts: int):
+def gen_csv(part_idx: int, cachedir: str, scale_factor: float, num_parts: int) -> None:
     subprocess.check_output(
         shlex.split(f"./dbgen -v -f -s {scale_factor} -S {part_idx} -C {num_parts}"),
         cwd=str(tpch_dbgen),
@@ -60,7 +64,7 @@ def pipelined_data_generation(
     aws_s3_sync_location: str,
     parallelism: int = 4,
     rows_per_file: int = 500_000,
-):
+) -> None:
     assert num_parts > 1, "script should only be used if num_parts > 1"
 
     base_path = pathlib.Path(scratch_dir) / str(num_parts)
@@ -77,14 +81,14 @@ def pipelined_data_generation(
                 ],
             )
 
-        csv_files = pathlib.Path.rglob(f"{tpch_dbgen}/*.tbl*")
+        csv_files = glob.glob(f"{tpch_dbgen}/*.tbl*")  # noqa: PTH207
         for f in csv_files:
             shutil.move(f, base_path / pathlib.Path(f).name)
 
         gen_parquet(base_path, rows_per_file, partitioned=True)
-        parquet_files = pathlib.Path.rglob(f"{base_path}/*.parquet")
+        parquet_files = glob.glob(f"{base_path}/*.parquet")  # noqa: PTH207
 
-        # # Exclude static tables except for first iteration
+        # Exclude static tables except for first iteration
         exclude_static_tables = (
             ""
             if i == 0
@@ -98,9 +102,9 @@ def pipelined_data_generation(
                 )
             )
             for parquet_file in parquet_files:
-                pathlib.Path.unlink(parquet_file)
-        for table_file in pathlib.Path.rglob(f"{base_path}/*.tbl*"):
-            pathlib.Path.unlink(table_file)
+                os.remove(parquet_file)  # noqa: PTH107
+        for table_file in glob.glob(f"{base_path}/*.tbl*"):  # noqa: PTH207
+            os.remove(table_file)  # noqa: PTH107
 
 
 # Source tables contained in the schema for TPC-H. For more information, check -
