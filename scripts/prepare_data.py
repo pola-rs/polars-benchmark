@@ -192,7 +192,7 @@ table_columns = {
 
 def gen_parquet(
     base_path: pathlib.Path, rows_per_file: int = 500_000, partitioned: bool = False
-):
+) -> None:
     for table_name, columns in table_columns.items():
         path = base_path / f"{table_name}.tbl*"
 
@@ -210,7 +210,7 @@ def gen_parquet(
         if partitioned:
             (base_path / table_name).mkdir(parents=True, exist_ok=True)
             path = base_path / table_name / "{part}.parquet"
-            lf.sink_parquet(pl.PartitionMaxSize(path, max_size=rows_per_file))
+            lf.sink_parquet(pl.PartitionMaxSize(path, max_size=rows_per_file))  # type: ignore[call-overload]
         else:
             path = base_path / f"{table_name}.parquet"
             lf.sink_parquet(path)

@@ -63,14 +63,16 @@ def get_part_supp_ds() -> pl.LazyFrame:
     return _scan_ds("partsupp")
 
 
-def _preload_engine(engine) -> None:
+def _preload_engine(
+    engine: pl.GPUEngine | Literal["in-memory", "streaming", "old-streaming"],
+) -> None:
     with tempfile.TemporaryDirectory() as tmpdir:
         # GPU engine has one-time lazy-loaded cost in IO, which we
         # remove from timings here.
         f = pathlib.Path(tmpdir) / "test.pq"
         df = pl.DataFrame({"a": [1]})
         df.write_parquet(f)
-        pl.scan_parquet(f).collect(engine=engine)
+        pl.scan_parquet(f).collect(engine=engine)  # type: ignore[arg-type]
 
 
 def obtain_engine_config() -> (
@@ -159,7 +161,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     if cloud:
         import os
 
-        import polars_cloud as pc
+        import polars_cloud as pc  # type: ignore[import-not-found]
 
         os.environ["POLARS_SKIP_CLIENT_CHECK"] = "1"
 
