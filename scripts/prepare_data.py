@@ -67,6 +67,9 @@ def pipelined_data_generation(
 ) -> None:
     assert num_parts > 1, "script should only be used if num_parts > 1"
 
+    if aws_s3_sync_location.endswith("/"):
+        aws_s3_sync_location = aws_s3_sync_location[:-1]
+
     base_path = pathlib.Path(scratch_dir) / str(num_parts)
     base_path.mkdir(parents=True, exist_ok=True)
 
@@ -85,7 +88,7 @@ def pipelined_data_generation(
         for f in csv_files:
             shutil.move(f, base_path / pathlib.Path(f).name)
 
-        gen_parquet(base_path, rows_per_file, partitioned=True)
+        gen_parquet(base_path, rows_per_file, partitioned=True, iteration_offset=i)
         parquet_files = glob.glob(f"{base_path}/*.parquet")  # noqa: PTH207
 
         # Exclude static tables except for first iteration
@@ -98,7 +101,7 @@ def pipelined_data_generation(
         if len(aws_s3_sync_location):
             subprocess.check_output(
                 shlex.split(
-                    f'aws s3 sync {scratch_dir} {aws_s3_sync_location} --exclude "*" --include "*.parquet" {exclude_static_tables}'
+                    f'aws s3 sync {scratch_dir} {aws_s3_sync_location}/scale-factor-{scale_factor} --exclude "*" --include "*.parquet" {exclude_static_tables}'
                 )
             )
             for parquet_file in parquet_files:
@@ -191,7 +194,10 @@ table_columns = {
 
 
 def gen_parquet(
-    base_path: pathlib.Path, rows_per_file: int = 500_000, partitioned: bool = False
+    base_path: pathlib.Path,
+    rows_per_file: int = 500_000,
+    partitioned: bool = False,
+    iteration_offset: int = 0,
 ) -> None:
     for table_name, columns in table_columns.items():
         path = base_path / f"{table_name}.tbl*"
@@ -209,7 +215,7 @@ def gen_parquet(
 
         if partitioned:
             (base_path / table_name).mkdir(parents=True, exist_ok=True)
-            path = base_path / table_name / "{part}.parquet"
+            path = base_path / table_name / f"{iteration_offset}_{{part}}.parquet"
             lf.sink_parquet(pl.PartitionMaxSize(path, max_size=rows_per_file))  # type: ignore[call-overload]
         else:
             path = base_path / f"{table_name}.parquet"
@@ -231,7 +237,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--rows-per-file",
-        default=500_000,
+        default=5_000_000,
         help="Number of rows per parquet file",
         type=int,
     )
@@ -254,7 +260,9 @@ if __name__ == "__main__":
     if args.num_parts == 1:
         # Assumes the tables are already created by the Makefile
         gen_parquet(
-            pathlib.Path(args.tpch_gen_folder), args.rows_per_file, partitioned=False
+            pathlib.Path(args.tpch_gen_folder),
+            rows_per_file=args.rows_per_file,
+            partitioned=False,
         )
     else:
         pipelined_data_generation(
@@ -263,4 +271,5 @@ if __name__ == "__main__":
             args.num_parts,
             args.aws_s3_sync_location,
             parallelism=args.parallelism,
+            rows_per_file=args.rows_per_file,
         )
