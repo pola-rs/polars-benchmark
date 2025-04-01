@@ -6,6 +6,7 @@ make run-all
 make plot
 
 echo run with IO
+# See settings.py for where this is used
 export RUN_INCLUDE_IO=1
 make run-all
 make plot
