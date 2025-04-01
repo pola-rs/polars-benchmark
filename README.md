@@ -23,8 +23,8 @@ You may not use PDS except in compliance with the Apache License, Version 2.0 an
 
 ```shell
 # clone this repository
-git clone https://github.com/pola-rs/pdsh.git
-cd tpch/tpch-dbgen
+git clone https://github.com/pola-rs/polars-benchmark.git
+cd polars-benchmark/tpch-dbgen
 
 # build tpch-dbgen
 make
