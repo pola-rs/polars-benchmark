@@ -3,6 +3,7 @@
 SHELL=/bin/bash
 VENV=.venv
 VENV_BIN=$(VENV)/bin
+PYTHON=$(VENV_BIN)/python
 
 ifndef SCALE_FACTOR
 data/tables/.generated:
@@ -21,13 +22,13 @@ endif
 .PHONY: install-deps
 install-deps: .venv  ## Install Python project dependencies
 	@unset CONDA_PREFIX \
-	&& $(VENV_BIN)/python -m pip install --upgrade uv \
+	&& $(PYTHON) -m pip install --upgrade uv \
 	&& $(VENV_BIN)/uv pip install --compile -r requirements.txt \
 	&& $(VENV_BIN)/uv pip install --compile -r requirements-dev.txt
 
 .PHONY: bump-deps
 bump-deps: .venv  ## Bump Python project dependencies
-	$(VENV_BIN)/python -m pip install --upgrade uv
+	$(PYTHON) -m pip install --upgrade uv
 	$(VENV_BIN)/uv pip compile requirements.in > requirements.txt
 	$(VENV_BIN)/uv pip compile requirements-dev.in > requirements-dev.txt
 
@@ -45,7 +46,7 @@ data/tables/.generated: .venv  ## Generate data tables
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
-	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=1 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
+	$(PYTHON) -m scripts.prepare_data --num-parts=1 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 	touch $@
 
@@ -54,12 +55,12 @@ data/tables/: data/tables/.generated
 
 data/tables/partitioned/: .venv  ## Generate partitioned data tables (these are not yet runnable with current repo)
 	$(MAKE) -C tpch-dbgen dbgen
-	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=10 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
+	$(PYTHON) -m scripts.prepare_data --num-parts=10 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 
 
 .PHONY: run-polars
 run-polars: .venv data/tables/  ## Run Polars benchmarks
-	$(VENV_BIN)/python -m queries.polars
+	$(PYTHON) -m queries.polars
 
 .PHONY: run-polars-no-env
 run-polars-no-env:  ## Run Polars benchmarks
@@ -77,30 +78,30 @@ run-polars-gpu-no-env: run-polars-no-env ## Run Polars CPU and GPU benchmarks
 
 .PHONY: run-duckdb data/tables/
 run-duckdb: .venv  ## Run DuckDB benchmarks
-	$(VENV_BIN)/python -m queries.duckdb
+	$(PYTHON) -m queries.duckdb
 
 .PHONY: run-pandas data/tables/
 run-pandas: .venv  ## Run pandas benchmarks
-	$(VENV_BIN)/python -m queries.pandas
+	$(PYTHON) -m queries.pandas
 
 .PHONY: run-pyspark data/tables/
 run-pyspark: .venv  ## Run PySpark benchmarks
-	$(VENV_BIN)/python -m queries.pyspark
+	$(PYTHON) -m queries.pyspark
 
 .PHONY: run-dask data/tables/
 run-dask: .venv  ## Run Dask benchmarks
-	$(VENV_BIN)/python -m queries.dask
+	$(PYTHON) -m queries.dask
 
 .PHONY: run-modin data/tables/
 run-modin: .venv  ## Run Modin benchmarks
-	$(VENV_BIN)/python -m queries.modin
+	$(PYTHON) -m queries.modin
 
 .PHONY: run-all
 run-all: run-polars run-duckdb run-pandas run-pyspark run-dask run-modin  ## Run all benchmarks
 
 .PHONY: plot
 plot: .venv  ## Plot results
-	$(VENV_BIN)/python -m scripts.plot_bars
+	$(PYTHON) -m scripts.plot_bars
 
 .PHONY: clean
 clean:  clean-tpch-dbgen clean-tables  ## Clean up everything
