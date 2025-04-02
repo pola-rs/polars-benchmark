@@ -71,24 +71,24 @@ run-polars-no-env:  ## Run Polars benchmarks
 run-polars-gpu-no-env: run-polars-no-env ## Run Polars CPU and GPU benchmarks
 	RUN_POLARS_GPU=true CUDA_MODULE_LOADING=EAGER python -m queries.polars
 
-.PHONY: run-duckdb data/tables/
-run-duckdb: .venv  ## Run DuckDB benchmarks
+.PHONY: run-duckdb
+run-duckdb: .venv data/tables/  ## Run DuckDB benchmarks
 	$(PYTHON) -m queries.duckdb
 
-.PHONY: run-pandas data/tables/
-run-pandas: .venv  ## Run pandas benchmarks
+.PHONY: run-pandas
+run-pandas: .venv data/tables/  ## Run pandas benchmarks
 	$(PYTHON) -m queries.pandas
 
-.PHONY: run-pyspark data/tables/
-run-pyspark: .venv  ## Run PySpark benchmarks
+.PHONY: run-pyspark
+run-pyspark: .venv data/tables/  ## Run PySpark benchmarks
 	$(PYTHON) -m queries.pyspark
 
-.PHONY: run-dask data/tables/
-run-dask: .venv  ## Run Dask benchmarks
+.PHONY: run-dask
+run-dask: .venv data/tables/  ## Run Dask benchmarks
 	$(PYTHON) -m queries.dask
 
-.PHONY: run-modin data/tables/
-run-modin: .venv  ## Run Modin benchmarks
+.PHONY: run-modin
+run-modin: .venv data/tables/  ## Run Modin benchmarks
 	$(PYTHON) -m queries.modin
 
 .PHONY: run-all
