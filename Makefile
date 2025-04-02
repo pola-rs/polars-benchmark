@@ -57,14 +57,14 @@ data/tables/partitioned/: .venv  ## Generate partitioned data tables (these are 
 	$(MAKE) -C tpch-dbgen dbgen
 	$(PYTHON) -m scripts.prepare_data --num-parts=10 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 
-
 .PHONY: run-polars
 run-polars: .venv data/tables/  ## Run Polars benchmarks
 	$(PYTHON) -m queries.polars
 
+# All the run-* targets other than run-polars assume that the data/tables have
+# already been generated.
 .PHONY: run-polars-no-env
 run-polars-no-env:  ## Run Polars benchmarks
-	$(MAKE) PYTHON=$(shell which python) data/tables/
 	python -m queries.polars
 
 .PHONY: run-polars-gpu-no-env
@@ -72,24 +72,44 @@ run-polars-gpu-no-env: run-polars-no-env ## Run Polars CPU and GPU benchmarks
 	RUN_POLARS_GPU=true CUDA_MODULE_LOADING=EAGER python -m queries.polars
 
 .PHONY: run-duckdb
-run-duckdb: .venv data/tables/  ## Run DuckDB benchmarks
+run-duckdb: .venv ## Run DuckDB benchmarks
 	$(PYTHON) -m queries.duckdb
 
+.PHONY: run-duckdb-no-env
+run-duckdb-no-env: ## Run DuckDB benchmarks
+	python -m queries.duckdb
+
 .PHONY: run-pandas
-run-pandas: .venv data/tables/  ## Run pandas benchmarks
+run-pandas: .venv ## Run pandas benchmarks
 	$(PYTHON) -m queries.pandas
 
+.PHONY: run-pandas-no-env
+run-pandas-no-env: ## Run pandas benchmarks
+	python -m queries.pandas
+
 .PHONY: run-pyspark
-run-pyspark: .venv data/tables/  ## Run PySpark benchmarks
+run-pyspark: .venv ## Run PySpark benchmarks
 	$(PYTHON) -m queries.pyspark
 
+.PHONY: run-pyspark-no-env
+run-pyspark-no-env: ## Run PySpark benchmarks
+	python -m queries.pyspark
+
 .PHONY: run-dask
-run-dask: .venv data/tables/  ## Run Dask benchmarks
+run-dask: .venv ## Run Dask benchmarks
 	$(PYTHON) -m queries.dask
 
+.PHONY: run-dask-no-env
+run-dask-no-env: ## Run Dask benchmarks
+	python -m queries.dask
+
 .PHONY: run-modin
-run-modin: .venv data/tables/  ## Run Modin benchmarks
+run-modin: .venv ## Run Modin benchmarks
 	$(PYTHON) -m queries.modin
+
+.PHONY: run-modin-no-env
+run-modin-no-env: ## Run Modin benchmarks
+	python -m queries.modin
 
 .PHONY: run-all
 run-all: run-polars run-duckdb run-pandas run-pyspark run-dask run-modin  ## Run all benchmarks
