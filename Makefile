@@ -3,7 +3,7 @@
 SHELL=/bin/bash
 VENV=.venv
 VENV_BIN=$(VENV)/bin
-PYTHON=$(VENV_BIN)/python
+PYTHON?=$(VENV_BIN)/python
 
 ifndef SCALE_FACTOR
 data/tables/.generated:
@@ -64,12 +64,7 @@ run-polars: .venv data/tables/  ## Run Polars benchmarks
 
 .PHONY: run-polars-no-env
 run-polars-no-env:  ## Run Polars benchmarks
-	$(MAKE) -C tpch-dbgen dbgen
-	cd tpch-dbgen && ./dbgen -f -s $(SCALE_FACTOR) && cd ..
-	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
-	mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
-	python -m scripts.prepare_data
-	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
+	$(MAKE) PYTHON=$(shell which python) data/tables/
 	python -m queries.polars
 
 .PHONY: run-polars-gpu-no-env
