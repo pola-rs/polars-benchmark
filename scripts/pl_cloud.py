@@ -85,6 +85,7 @@ print("started cluster")
 
 timings = []
 for (i, q) in enumerate(queries):
+    i += 1
     print(f"run q{i}")
     start_time = time.time()
     try:
