@@ -5,10 +5,20 @@ from queries.polars import utils
 Q_NUM = 11
 
 
-def q() -> None:
-    nation = utils.get_nation_ds()
-    partsupp = utils.get_part_supp_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    **kwargs
+) -> pl.LazyFrame:
+    if nation is None:
+        nation = utils.get_nation_ds()
+        partsupp = utils.get_part_supp_ds()
+        supplier = utils.get_supplier_ds()
 
     var1 = "GERMANY"
     var2 = 0.0001
@@ -23,7 +33,7 @@ def q() -> None:
         * var2
     )
 
-    q_final = (
+    return (
         q1.group_by("ps_partkey")
         .agg(
             (pl.col("ps_supplycost") * pl.col("ps_availqty"))
@@ -37,8 +47,6 @@ def q() -> None:
         .sort("value", descending=True)
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

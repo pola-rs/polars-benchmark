@@ -7,12 +7,24 @@ from queries.polars import utils
 Q_NUM = 7
 
 
-def q() -> None:
-    customer = utils.get_customer_ds()
-    lineitem = utils.get_line_item_ds()
-    nation = utils.get_nation_ds()
-    orders = utils.get_orders_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    part: None | pl.LazyFrame,
+    **kwargs
+
+) -> pl.LazyFrame:
+    if customer is None:
+        customer = utils.get_customer_ds()
+        lineitem = utils.get_line_item_ds()
+        nation = utils.get_nation_ds()
+        orders = utils.get_orders_ds()
+        supplier = utils.get_supplier_ds()
 
     var1 = "FRANCE"
     var2 = "GERMANY"
@@ -42,7 +54,7 @@ def q() -> None:
         .rename({"n_name": "supp_nation"})
     )
 
-    q_final = (
+    return (
         pl.concat([q1, q2])
         .filter(pl.col("l_shipdate").is_between(var3, var4))
         .with_columns(
@@ -54,8 +66,6 @@ def q() -> None:
         .sort(by=["supp_nation", "cust_nation", "l_year"])
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

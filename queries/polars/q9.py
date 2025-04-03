@@ -5,15 +5,27 @@ from queries.polars import utils
 Q_NUM = 9
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
-    nation = utils.get_nation_ds()
-    orders = utils.get_orders_ds()
-    part = utils.get_part_ds()
-    partsupp = utils.get_part_supp_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    part: None | pl.LazyFrame,
+    **kwargs
 
-    q_final = (
+) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
+        nation = utils.get_nation_ds()
+        orders = utils.get_orders_ds()
+        part = utils.get_part_ds()
+        partsupp = utils.get_part_supp_ds()
+        supplier = utils.get_supplier_ds()
+
+    return (
         part.join(partsupp, left_on="p_partkey", right_on="ps_partkey")
         .join(supplier, left_on="ps_suppkey", right_on="s_suppkey")
         .join(
@@ -37,8 +49,6 @@ def q() -> None:
         .sort(by=["nation", "o_year"], descending=[False, True])
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

@@ -5,10 +5,22 @@ from queries.polars import utils
 Q_NUM = 16
 
 
-def q() -> None:
-    part = utils.get_part_ds()
-    partsupp = utils.get_part_supp_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    part: None | pl.LazyFrame,
+    **kwargs
+
+) -> pl.LazyFrame:
+    if customer is None:
+        part = utils.get_part_ds()
+        partsupp = utils.get_part_supp_ds()
+        supplier = utils.get_supplier_ds()
 
     var1 = "Brand#45"
 
@@ -16,7 +28,7 @@ def q() -> None:
         pl.col("s_comment").str.contains(".*Customer.*Complaints.*")
     ).select(pl.col("s_suppkey"), pl.col("s_suppkey").alias("ps_suppkey"))
 
-    q_final = (
+    return (
         part.join(partsupp, left_on="p_partkey", right_on="ps_partkey")
         .filter(pl.col("p_brand") != var1)
         .filter(pl.col("p_type").str.contains("MEDIUM POLISHED*").not_())
@@ -31,8 +43,6 @@ def q() -> None:
         )
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

@@ -5,10 +5,22 @@ from queries.polars import utils
 Q_NUM = 18
 
 
-def q() -> None:
-    customer = utils.get_customer_ds()
-    lineitem = utils.get_line_item_ds()
-    orders = utils.get_orders_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    part: None | pl.LazyFrame,
+    **kwargs
+
+) -> pl.LazyFrame:
+    if customer is None:
+        customer = utils.get_customer_ds()
+        lineitem = utils.get_line_item_ds()
+        orders = utils.get_orders_ds()
 
     var1 = 300
 
@@ -18,7 +30,7 @@ def q() -> None:
         .filter(pl.col("sum_quantity") > var1)
     )
 
-    q_final = (
+    return (
         orders.join(q1, left_on="o_orderkey", right_on="l_orderkey", how="semi")
         .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
         .join(customer, left_on="o_custkey", right_on="c_custkey")
@@ -36,8 +48,6 @@ def q() -> None:
         .head(100)
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

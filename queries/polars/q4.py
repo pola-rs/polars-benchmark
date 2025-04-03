@@ -7,14 +7,26 @@ from queries.polars import utils
 Q_NUM = 4
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
-    orders = utils.get_orders_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    part: None | pl.LazyFrame,
+    **kwargs
+
+) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
+        orders = utils.get_orders_ds()
 
     var1 = date(1993, 7, 1)
     var2 = date(1993, 10, 1)
 
-    q_final = (
+    return (
         # SQL exists translates to semi join in Polars API
         orders.join(
             (lineitem.filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))),
@@ -28,8 +40,6 @@ def q() -> None:
         .sort("o_orderpriority")
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

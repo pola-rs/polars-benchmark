@@ -7,19 +7,31 @@ from queries.polars import utils
 Q_NUM = 5
 
 
-def q() -> None:
-    customer = utils.get_customer_ds()
-    lineitem = utils.get_line_item_ds()
-    nation = utils.get_nation_ds()
-    orders = utils.get_orders_ds()
-    region = utils.get_region_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    part: None | pl.LazyFrame,
+    **kwargs
+
+) -> pl.LazyFrame:
+    if customer is None:
+        customer = utils.get_customer_ds()
+        lineitem = utils.get_line_item_ds()
+        nation = utils.get_nation_ds()
+        orders = utils.get_orders_ds()
+        region = utils.get_region_ds()
+        supplier = utils.get_supplier_ds()
 
     var1 = "ASIA"
     var2 = date(1994, 1, 1)
     var3 = date(1995, 1, 1)
 
-    q_final = (
+    return (
         region.join(nation, left_on="r_regionkey", right_on="n_regionkey")
         .join(customer, left_on="n_nationkey", right_on="c_nationkey")
         .join(orders, left_on="c_custkey", right_on="o_custkey")
@@ -39,8 +51,6 @@ def q() -> None:
         .sort(by="revenue", descending=True)
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

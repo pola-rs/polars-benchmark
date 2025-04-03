@@ -7,16 +7,26 @@ from queries.polars import utils
 Q_NUM = 12
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
-    orders = utils.get_orders_ds()
+def q(
+    customer: None | pl.LazyFrame,
+    lineitem: None | pl.LazyFrame,
+    nation: None | pl.LazyFrame,
+    orders: None | pl.LazyFrame,
+    partsupp: None | pl.LazyFrame,
+    supplier: None | pl.LazyFrame,
+    region: None | pl.LazyFrame,
+    **kwargs
+) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
+        orders = utils.get_orders_ds()
 
     var1 = "MAIL"
     var2 = "SHIP"
     var3 = date(1994, 1, 1)
     var4 = date(1995, 1, 1)
 
-    q_final = (
+    return (
         orders.join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
         .filter(pl.col("l_shipmode").is_in([var1, var2]))
         .filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))
@@ -37,8 +47,6 @@ def q() -> None:
         .sort("l_shipmode")
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())
