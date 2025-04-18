@@ -50,6 +50,16 @@ data/tables/partitioned/:
 
 else
 
+# Round the scale factor
+SCALE_FACTOR_HAS_DECIMAL := $(shell echo $(SCALE_FACTOR) | grep -q '\.' && echo "yes" || echo "no")
+
+ifeq ($(SCALE_FACTOR_HAS_DECIMAL),yes)
+# Round to nearest integer
+override SCALE_FACTOR := $(shell printf "%.0f" $(SCALE_FACTOR))
+$(info SCALE_FACTOR rounded to $(SCALE_FACTOR))
+endif
+
+
 data/tables/.generated: .venv  ## Generate data tables
 	$(MAKE) -C tpch-dbgen dbgen
 	cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..

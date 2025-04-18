@@ -59,7 +59,7 @@ def gen_csv(part_idx: int, cachedir: str, scale_factor: float, num_parts: int) -
 
 def pipelined_data_generation(
     scratch_dir: str,
-    scale_factor: float,
+    scale_factor: int,
     num_parts: int,
     aws_s3_sync_location: str,
     parallelism: int = 4,
@@ -227,7 +227,7 @@ if __name__ == "__main__":
         "--scale-factor",
         default=settings.scale_factor,
         help="Scale factor to run on",
-        type=float,
+        type=int,
     )
     parser.add_argument(
         "--rows-per-file",
