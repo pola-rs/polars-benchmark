@@ -1,5 +1,8 @@
 .DEFAULT_GOAL := help
 
+# All the python -m commands in this Makefile assume that the current working
+# directory is on the PYTHONPATH. Since they run in subshells, we must export.
+export PYTHONPATH := $(PWD):$(PYTHONPATH)
 SHELL=/bin/bash
 VENV=.venv
 VENV_BIN=$(VENV)/bin
