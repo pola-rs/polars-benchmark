@@ -80,6 +80,13 @@ def get_part_supp_ds() -> pd.DataFrame:
 
 
 def run_query(query_number: int, query: Callable[..., Any]) -> None:
+    if settings.run.pandas_gpu:
+        # Note that this has a global effect. Using it in this way should be fine though
+        # given that execute_all launches a separate Python process for each query.
+        import cudf.pandas
+
+        cudf.pandas.install()
+
     run_query_generic(
         query, query_number, "pandas", query_checker=check_query_result_pd
     )

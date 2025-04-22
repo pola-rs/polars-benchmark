@@ -55,6 +55,8 @@ class Run(BaseSettings):
     spark_executor_memory: str = "1g"  # Tune as needed for optimal performance
     spark_log_level: str = "ERROR"
 
+    pandas_gpu: bool = False  # Use cudf.pandas to run pandas benchmarks
+
     @computed_field  # type: ignore[prop-decorator]
     @property
     def include_io(self) -> bool:
