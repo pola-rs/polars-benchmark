@@ -63,7 +63,7 @@ run-polars: .venv data/tables/  ## Run Polars benchmarks
 	$(VENV_BIN)/python -m queries.polars
 
 .PHONY: run-polars-no-env
-run-polars-no-env:  ## Run Polars benchmarks
+run-polars-no-env: data/tables/ ## Run Polars benchmarks
 	$(MAKE) -C tpch-dbgen dbgen
 	cd tpch-dbgen && ./dbgen -f -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
@@ -73,27 +73,27 @@ run-polars-no-env:  ## Run Polars benchmarks
 	python -m queries.polars
 
 .PHONY: run-polars-gpu-no-env
-run-polars-gpu-no-env: run-polars-no-env ## Run Polars CPU and GPU benchmarks
+run-polars-gpu-no-env: run-polars-no-env data/tables/ ## Run Polars CPU and GPU benchmarks
 	RUN_POLARS_GPU=true CUDA_MODULE_LOADING=EAGER python -m queries.polars
 
 .PHONY: run-duckdb
-run-duckdb: .venv  ## Run DuckDB benchmarks
+run-duckdb: .venv data/tables/ ## Run DuckDB benchmarks
 	$(VENV_BIN)/python -m queries.duckdb
 
 .PHONY: run-pandas
-run-pandas: .venv  ## Run pandas benchmarks
+run-pandas: .venv data/tables/ ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
 .PHONY: run-pyspark
-run-pyspark: .venv  ## Run PySpark benchmarks
+run-pyspark: .venv data/tables/ ## Run PySpark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark
 
 .PHONY: run-dask
-run-dask: .venv  ## Run Dask benchmarks
+run-dask: .venv data/tables/ ## Run Dask benchmarks
 	$(VENV_BIN)/python -m queries.dask
 
 .PHONY: run-modin
-run-modin: .venv  ## Run Modin benchmarks
+run-modin: .venv data/tables/ ## Run Modin benchmarks
 	$(VENV_BIN)/python -m queries.modin
 
 .PHONY: run-all
