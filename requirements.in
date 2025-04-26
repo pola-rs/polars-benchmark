@@ -4,6 +4,7 @@ duckdb
 modin[ray]
 pandas>=2.0
 polars
+polars_cloud
 pyspark
 
 pyarrow  # Required by duckdb/pandas

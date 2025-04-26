@@ -68,7 +68,7 @@ def q() -> None:
         df2 = jn5.rename(columns={"n_name": "supp_nation"})
 
         # Combine
-        total = dd.concat([df1, df2])  # type: ignore[attr-defined,no-untyped-call]
+        total = dd.concat([df1, df2])  # type: ignore[no-untyped-call]
 
         total = total[(total["l_shipdate"] >= var3) & (total["l_shipdate"] <= var4)]
         total["volume"] = total["l_extendedprice"] * (1.0 - total["l_discount"])

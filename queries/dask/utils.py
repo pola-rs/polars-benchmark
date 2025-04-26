@@ -16,7 +16,7 @@ from settings import Settings
 if TYPE_CHECKING:
     from collections.abc import Callable
 
-    from dask.dataframe.core import DataFrame
+    from dask.dataframe import DataFrame
 
 settings = Settings()
 
@@ -35,9 +35,9 @@ def read_ds(table_name: str) -> DataFrame:
     path = get_table_path(table_name)
 
     if settings.run.io_type == "parquet":
-        return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[attr-defined,no-any-return]
+        return dd.read_parquet(path, dtype_backend="pyarrow")  # type: ignore[no-any-return]
     elif settings.run.io_type == "csv":
-        df = dd.read_csv(path, dtype_backend="pyarrow")  # type: ignore[attr-defined]
+        df = dd.read_csv(path, dtype_backend="pyarrow")
         for c in df.columns:
             if c.endswith("date"):
                 df[c] = df[c].astype("date32[day][pyarrow]")

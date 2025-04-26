@@ -55,7 +55,7 @@ class Run(BaseSettings):
     spark_executor_memory: str = "1g"  # Tune as needed for optimal performance
     spark_log_level: str = "ERROR"
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def include_io(self) -> bool:
         return self.io_type != "skip"
@@ -82,7 +82,7 @@ class Settings(BaseSettings):
     plot: Plot = Plot()
     run: Run = Run()
 
-    @computed_field  # type: ignore[misc]
+    @computed_field  # type: ignore[prop-decorator]
     @property
     def dataset_base_dir(self) -> Path:
         return self.paths.tables / f"scale-{self.scale_factor}"
