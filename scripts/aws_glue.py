@@ -2,12 +2,12 @@ import sys
 import time
 
 from awsglue.context import GlueContext
-from awsglue.transforms import *
+from awsglue.transforms import *  # noqa: F403
 from awsglue.utils import getResolvedOptions
 from pyspark.context import SparkContext
 
 # @params: [JOB_NAME]
-args = getResolvedOptions(sys.argv, ['JOB_NAME'])
+args = getResolvedOptions(sys.argv, ["JOB_NAME"])
 
 # sc = SparkContext()
 # glueContext = GlueContext(sc)
@@ -25,49 +25,49 @@ spark = glueContext.spark_session
 lineitem = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/lineitem/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 customer = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/customer/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 nation = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/nation/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 orders = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/orders/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 part = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/part/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 partsupp = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/partsupp/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 region = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/region/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 supplier = glueContext.create_dynamic_frame.from_options(
     connection_type="s3",
     connection_options={"paths": ["s3://polars-pdsh/scale-factor-100.0/200/supplier/"]},
-    format="parquet"  # Change to "json", "csv", etc.
+    format="parquet",  # Change to "json", "csv", etc.
 ).toDF()
 
 
@@ -785,10 +785,33 @@ q22 = """
 
 # Execute the SQL query
 
-queries = [q1, q2, q3, q4, q5, q6, q7, q8, q9, q10, q11, q12, q13, q14, q15, q16, q17, q18, q19, q20, q21, q22]
+queries = [
+    q1,
+    q2,
+    q3,
+    q4,
+    q5,
+    q6,
+    q7,
+    q8,
+    q9,
+    q10,
+    q11,
+    q12,
+    q13,
+    q14,
+    q15,
+    q16,
+    q17,
+    q18,
+    q19,
+    q20,
+    q21,
+    q22,
+]
 
 timings = []
-for (i, q) in enumerate(queries):
+for i, q in enumerate(queries):
     start_time = time.time()
     result = spark.sql(q)
     result.show()

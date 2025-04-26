@@ -1,8 +1,7 @@
-import polars as pl
-import polars_cloud as pc
 import time
 
-pc.login()
+import polars as pl
+import polars_cloud as pc
 
 from queries.polars.q1 import q as q1
 from queries.polars.q2 import q as q2
@@ -27,6 +26,8 @@ from queries.polars.q20 import q as q20
 from queries.polars.q21 import q as q21
 from queries.polars.q22 import q as q22
 
+pc.login()
+
 
 def _scan_ds(table_name: str) -> pl.LazyFrame:
     path = f"s3://polars-pdsh/scale-factor-100.0/200/{table_name}/"
@@ -50,46 +51,53 @@ kwargs = {
     "nation": nation,
     "supplier": supplier,
     "part": part,
-    "partsupp": part_supp
+    "partsupp": part_supp,
 }
 
-queries = [q1(**kwargs),
-           q2(**kwargs),
-           q3(**kwargs),
-           q4(**kwargs),
-           q5(**kwargs),
-           q6(**kwargs),
-           q7(**kwargs),
-           q8(**kwargs),
-           q9(**kwargs),
-           q10(**kwargs),
-           q11(**kwargs),
-           q12(**kwargs),
-           q13(**kwargs),
-           q14(**kwargs),
-           q15(**kwargs),
-           q16(**kwargs),
-           q17(**kwargs),
-           q18(**kwargs),
-           q19(**kwargs),
-           q20(**kwargs),
-           q21(**kwargs),
-           q22(**kwargs)]
+queries = [
+    q1(**kwargs),
+    q2(**kwargs),
+    q3(**kwargs),
+    q4(**kwargs),
+    q5(**kwargs),
+    q6(**kwargs),
+    q7(**kwargs),
+    q8(**kwargs),
+    q9(**kwargs),
+    q10(**kwargs),
+    q11(**kwargs),
+    q12(**kwargs),
+    q13(**kwargs),
+    q14(**kwargs),
+    q15(**kwargs),
+    q16(**kwargs),
+    q17(**kwargs),
+    q18(**kwargs),
+    q19(**kwargs),
+    q20(**kwargs),
+    q21(**kwargs),
+    q22(**kwargs),
+]
 
 
-ctx = pc.ComputeContext(workspace="ritchie-workspace", instance_type="t3.xlarge", cluster_size=10, log_level=pc.LogLevelSchema.Debug)
+ctx = pc.ComputeContext(
+    workspace="ritchie-workspace",
+    instance_type="t3.xlarge",
+    cluster_size=10,
+    interactive=True,
+)
 ctx.start(wait=True)
 
 print("started cluster")
 
 
-timings = []
-for (i, q) in enumerate(queries):
+timings: list[float | None] = []
+for i, q in enumerate(queries):
     i += 1
     print(f"run q{i}")
     start_time = time.time()
     try:
-        print(q.remote(ctx, engine="streaming").distributed().show())
+        print(q.remote(ctx).distributed().show())
         execution_time = time.time() - start_time
         print(f"q{i} executed in: {execution_time:.2f} seconds")
         timings.append(execution_time)

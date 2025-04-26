@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import polars as pl
 
@@ -7,7 +8,7 @@ from queries.polars import utils
 Q_NUM = 1
 
 
-def q(lineitem: None | pl.LazyFrame, **kwargs) -> pl.LazyFrame:
+def q(lineitem: None | pl.LazyFrame = None, **kwargs: Any) -> pl.LazyFrame:
     if lineitem is None:
         lineitem = utils.get_line_item_ds()
 

@@ -1,3 +1,5 @@
+from typing import Any
+
 import polars as pl
 
 from queries.polars import utils
@@ -6,21 +8,21 @@ Q_NUM = 16
 
 
 def q(
-    customer: None | pl.LazyFrame,
-    lineitem: None | pl.LazyFrame,
-    nation: None | pl.LazyFrame,
-    orders: None | pl.LazyFrame,
-    partsupp: None | pl.LazyFrame,
-    supplier: None | pl.LazyFrame,
-    region: None | pl.LazyFrame,
-    part: None | pl.LazyFrame,
-    **kwargs
-
+    partsupp: None | pl.LazyFrame = None,
+    customer: None | pl.LazyFrame = None,
+    supplier: None | pl.LazyFrame = None,
+    part: None | pl.LazyFrame = None,
+    **kwargs: Any,
 ) -> pl.LazyFrame:
     if customer is None:
         part = utils.get_part_ds()
         partsupp = utils.get_part_supp_ds()
         supplier = utils.get_supplier_ds()
+
+    assert customer is not None
+    assert part is not None
+    assert partsupp is not None
+    assert supplier is not None
 
     var1 = "Brand#45"
 

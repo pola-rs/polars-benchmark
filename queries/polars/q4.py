@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import polars as pl
 
@@ -8,20 +9,16 @@ Q_NUM = 4
 
 
 def q(
-    customer: None | pl.LazyFrame,
-    lineitem: None | pl.LazyFrame,
-    nation: None | pl.LazyFrame,
-    orders: None | pl.LazyFrame,
-    partsupp: None | pl.LazyFrame,
-    supplier: None | pl.LazyFrame,
-    region: None | pl.LazyFrame,
-    part: None | pl.LazyFrame,
-    **kwargs
-
+    lineitem: None | pl.LazyFrame = None,
+    orders: None | pl.LazyFrame = None,
+    **kwargs: Any,
 ) -> pl.LazyFrame:
     if lineitem is None:
         lineitem = utils.get_line_item_ds()
         orders = utils.get_orders_ds()
+
+    assert lineitem is not None
+    assert orders is not None
 
     var1 = date(1993, 7, 1)
     var2 = date(1993, 10, 1)
