@@ -1,3 +1,5 @@
+from typing import Any
+
 import polars as pl
 
 from queries.polars import utils
@@ -5,10 +7,20 @@ from queries.polars import utils
 Q_NUM = 11
 
 
-def q() -> None:
-    nation = utils.get_nation_ds()
-    partsupp = utils.get_part_supp_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    nation: None | pl.LazyFrame = None,
+    partsupp: None | pl.LazyFrame = None,
+    supplier: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if nation is None:
+        nation = utils.get_nation_ds()
+        partsupp = utils.get_part_supp_ds()
+        supplier = utils.get_supplier_ds()
+
+    assert nation is not None
+    assert partsupp is not None
+    assert supplier is not None
 
     var1 = "GERMANY"
     var2 = 0.0001
@@ -23,7 +35,7 @@ def q() -> None:
         * var2
     )
 
-    q_final = (
+    return (
         q1.group_by("ps_partkey")
         .agg(
             (pl.col("ps_supplycost") * pl.col("ps_availqty"))
@@ -37,8 +49,6 @@ def q() -> None:
         .sort("value", descending=True)
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

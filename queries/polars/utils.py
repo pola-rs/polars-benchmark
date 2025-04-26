@@ -161,23 +161,23 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     if cloud:
         import os
 
-        import polars_cloud as pc  # type: ignore[import-not-found]
+        import polars_cloud as pc
 
         os.environ["POLARS_SKIP_CLIENT_CHECK"] = "1"
 
-        class PatchedComputeContext(pc.ComputeContext):  # type: ignore[misc]
+        class PatchedComputeContext(pc.ComputeContext):
             def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
                 self._interactive = True
                 self._compute_address = "localhost:5051"
                 self._compute_public_key = b""
-                self._compute_id = "1"
+                self._compute_id = "1"  # type: ignore[assignment]
 
             def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:
                 """Get the status of the compute cluster."""
                 return pc.ComputeContextStatus.RUNNING
 
-        pc.ComputeContext.__init__ = PatchedComputeContext.__init__
-        pc.ComputeContext.get_status = PatchedComputeContext.get_status
+        pc.ComputeContext.__init__ = PatchedComputeContext.__init__  # type: ignore[assignment]
+        pc.ComputeContext.get_status = PatchedComputeContext.get_status  # type: ignore[method-assign]
 
         def query():  # type: ignore[no-untyped-def]
             result = pc.spawn(

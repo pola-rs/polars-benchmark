@@ -1,3 +1,5 @@
+from typing import Any
+
 import polars as pl
 
 from queries.polars import utils
@@ -5,15 +7,32 @@ from queries.polars import utils
 Q_NUM = 9
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
-    nation = utils.get_nation_ds()
-    orders = utils.get_orders_ds()
-    part = utils.get_part_ds()
-    partsupp = utils.get_part_supp_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    customer: None | pl.LazyFrame = None,
+    lineitem: None | pl.LazyFrame = None,
+    nation: None | pl.LazyFrame = None,
+    orders: None | pl.LazyFrame = None,
+    partsupp: None | pl.LazyFrame = None,
+    supplier: None | pl.LazyFrame = None,
+    region: None | pl.LazyFrame = None,
+    part: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
+        nation = utils.get_nation_ds()
+        orders = utils.get_orders_ds()
+        part = utils.get_part_ds()
+        partsupp = utils.get_part_supp_ds()
+        supplier = utils.get_supplier_ds()
+    assert lineitem is not None
+    assert nation is not None
+    assert orders is not None
+    assert part is not None
+    assert partsupp is not None
+    assert supplier is not None
 
-    q_final = (
+    return (
         part.join(partsupp, left_on="p_partkey", right_on="ps_partkey")
         .join(supplier, left_on="ps_suppkey", right_on="s_suppkey")
         .join(
@@ -37,8 +56,6 @@ def q() -> None:
         .sort(by=["nation", "o_year"], descending=[False, True])
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

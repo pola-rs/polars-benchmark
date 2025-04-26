@@ -82,6 +82,8 @@ module = [
   "cudf.*",
   "rmm.*",
   "pylibcudf.*",
+  "awsglue.*",
+  "scripts/aws_glue.py"
 ]
 ignore_missing_imports = true
 

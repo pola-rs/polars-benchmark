@@ -1,3 +1,5 @@
+from typing import Any
+
 import polars as pl
 
 from queries.polars import utils
@@ -5,10 +7,22 @@ from queries.polars import utils
 Q_NUM = 16
 
 
-def q() -> None:
-    part = utils.get_part_ds()
-    partsupp = utils.get_part_supp_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    partsupp: None | pl.LazyFrame = None,
+    customer: None | pl.LazyFrame = None,
+    supplier: None | pl.LazyFrame = None,
+    part: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if customer is None:
+        part = utils.get_part_ds()
+        partsupp = utils.get_part_supp_ds()
+        supplier = utils.get_supplier_ds()
+
+    assert customer is not None
+    assert part is not None
+    assert partsupp is not None
+    assert supplier is not None
 
     var1 = "Brand#45"
 
@@ -16,7 +30,7 @@ def q() -> None:
         pl.col("s_comment").str.contains(".*Customer.*Complaints.*")
     ).select(pl.col("s_suppkey"), pl.col("s_suppkey").alias("ps_suppkey"))
 
-    q_final = (
+    return (
         part.join(partsupp, left_on="p_partkey", right_on="ps_partkey")
         .filter(pl.col("p_brand") != var1)
         .filter(pl.col("p_type").str.contains("MEDIUM POLISHED*").not_())
@@ -31,8 +45,6 @@ def q() -> None:
         )
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

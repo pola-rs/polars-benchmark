@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import polars as pl
 
@@ -7,14 +8,32 @@ from queries.polars import utils
 Q_NUM = 8
 
 
-def q() -> None:
-    customer = utils.get_customer_ds()
-    lineitem = utils.get_line_item_ds()
-    nation = utils.get_nation_ds()
-    orders = utils.get_orders_ds()
-    part = utils.get_part_ds()
-    region = utils.get_region_ds()
-    supplier = utils.get_supplier_ds()
+def q(
+    customer: None | pl.LazyFrame = None,
+    lineitem: None | pl.LazyFrame = None,
+    nation: None | pl.LazyFrame = None,
+    orders: None | pl.LazyFrame = None,
+    partsupp: None | pl.LazyFrame = None,
+    supplier: None | pl.LazyFrame = None,
+    region: None | pl.LazyFrame = None,
+    part: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if customer is None:
+        customer = utils.get_customer_ds()
+        lineitem = utils.get_line_item_ds()
+        nation = utils.get_nation_ds()
+        orders = utils.get_orders_ds()
+        part = utils.get_part_ds()
+        region = utils.get_region_ds()
+        supplier = utils.get_supplier_ds()
+    assert lineitem is not None
+    assert nation is not None
+    assert orders is not None
+    assert part is not None
+    assert partsupp is not None
+    assert supplier is not None
+    assert region is not None
 
     var1 = "BRAZIL"
     var2 = "AMERICA"
@@ -25,7 +44,7 @@ def q() -> None:
     n1 = nation.select("n_nationkey", "n_regionkey")
     n2 = nation.select("n_nationkey", "n_name")
 
-    q_final = (
+    return (
         part.join(lineitem, left_on="p_partkey", right_on="l_partkey")
         .join(supplier, left_on="l_suppkey", right_on="s_suppkey")
         .join(orders, left_on="l_orderkey", right_on="o_orderkey")
@@ -52,8 +71,6 @@ def q() -> None:
         .sort("o_year")
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import polars as pl
 
@@ -7,12 +8,13 @@ from queries.polars import utils
 Q_NUM = 1
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
+def q(lineitem: None | pl.LazyFrame = None, **kwargs: Any) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
 
     var1 = date(1998, 9, 2)
 
-    q_final = (
+    return (
         lineitem.filter(pl.col("l_shipdate") <= var1)
         .group_by("l_returnflag", "l_linestatus")
         .agg(
@@ -36,8 +38,6 @@ def q() -> None:
         .sort("l_returnflag", "l_linestatus")
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

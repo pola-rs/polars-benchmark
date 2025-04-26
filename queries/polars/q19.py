@@ -1,3 +1,5 @@
+from typing import Any
+
 import polars as pl
 
 from queries.polars import utils
@@ -5,11 +7,19 @@ from queries.polars import utils
 Q_NUM = 19
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
-    part = utils.get_part_ds()
+def q(
+    lineitem: None | pl.LazyFrame = None,
+    part: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
+        part = utils.get_part_ds()
 
-    q_final = (
+    assert lineitem is not None
+    assert part is not None
+
+    return (
         part.join(lineitem, left_on="p_partkey", right_on="l_partkey")
         .filter(pl.col("l_shipmode").is_in(["AIR", "AIR REG"]))
         .filter(pl.col("l_shipinstruct") == "DELIVER IN PERSON")
@@ -47,8 +57,6 @@ def q() -> None:
         )
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

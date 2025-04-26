@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import polars as pl
 
@@ -7,14 +8,22 @@ from queries.polars import utils
 Q_NUM = 14
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
-    part = utils.get_part_ds()
+def q(
+    lineitem: None | pl.LazyFrame = None,
+    part: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
+        part = utils.get_part_ds()
+
+    assert lineitem is not None
+    assert part is not None
 
     var1 = date(1995, 9, 1)
     var2 = date(1995, 10, 1)
 
-    q_final = (
+    return (
         lineitem.join(part, left_on="l_partkey", right_on="p_partkey")
         .filter(pl.col("l_shipdate").is_between(var1, var2, closed="left"))
         .select(
@@ -31,8 +40,6 @@ def q() -> None:
         )
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

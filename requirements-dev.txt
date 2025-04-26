@@ -2,17 +2,17 @@
 #    uv pip compile requirements-dev.in
 mypy==1.15.0
     # via -r requirements-dev.in
-mypy-extensions==1.0.0
+mypy-extensions==1.1.0
     # via mypy
-numpy==2.2.4
+numpy==2.2.5
     # via pandas-stubs
 pandas-stubs==2.2.3.250308
     # via -r requirements-dev.in
-ruff==0.11.2
+ruff==0.11.7
     # via -r requirements-dev.in
 tomli==2.2.1
     # via mypy
-types-pytz==2025.1.0.20250318
+types-pytz==2025.2.0.20250326
     # via pandas-stubs
-typing-extensions==4.12.2
+typing-extensions==4.13.2
     # via mypy

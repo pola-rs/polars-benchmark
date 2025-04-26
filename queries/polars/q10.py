@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import polars as pl
 
@@ -7,16 +8,28 @@ from queries.polars import utils
 Q_NUM = 10
 
 
-def q() -> None:
-    customer = utils.get_customer_ds()
-    lineitem = utils.get_line_item_ds()
-    nation = utils.get_nation_ds()
-    orders = utils.get_orders_ds()
+def q(
+    customer: None | pl.LazyFrame = None,
+    lineitem: None | pl.LazyFrame = None,
+    nation: None | pl.LazyFrame = None,
+    orders: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if customer is None:
+        customer = utils.get_customer_ds()
+        lineitem = utils.get_line_item_ds()
+        nation = utils.get_nation_ds()
+        orders = utils.get_orders_ds()
+
+    assert customer is not None
+    assert lineitem is not None
+    assert nation is not None
+    assert orders is not None
 
     var1 = date(1993, 10, 1)
     var2 = date(1994, 1, 1)
 
-    q_final = (
+    return (
         customer.join(orders, left_on="c_custkey", right_on="o_custkey")
         .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
         .join(nation, left_on="c_nationkey", right_on="n_nationkey")
@@ -51,8 +64,6 @@ def q() -> None:
         .head(20)
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())

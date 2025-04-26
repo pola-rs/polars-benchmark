@@ -1,4 +1,5 @@
 from datetime import date
+from typing import Any
 
 import polars as pl
 
@@ -7,14 +8,22 @@ from queries.polars import utils
 Q_NUM = 4
 
 
-def q() -> None:
-    lineitem = utils.get_line_item_ds()
-    orders = utils.get_orders_ds()
+def q(
+    lineitem: None | pl.LazyFrame = None,
+    orders: None | pl.LazyFrame = None,
+    **kwargs: Any,
+) -> pl.LazyFrame:
+    if lineitem is None:
+        lineitem = utils.get_line_item_ds()
+        orders = utils.get_orders_ds()
+
+    assert lineitem is not None
+    assert orders is not None
 
     var1 = date(1993, 7, 1)
     var2 = date(1993, 10, 1)
 
-    q_final = (
+    return (
         # SQL exists translates to semi join in Polars API
         orders.join(
             (lineitem.filter(pl.col("l_commitdate") < pl.col("l_receiptdate"))),
@@ -28,8 +37,6 @@ def q() -> None:
         .sort("o_orderpriority")
     )
 
-    utils.run_query(Q_NUM, q_final)
-
 
 if __name__ == "__main__":
-    q()
+    utils.run_query(Q_NUM, q())
