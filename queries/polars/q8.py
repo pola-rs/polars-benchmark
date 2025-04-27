@@ -13,7 +13,6 @@ def q(
     lineitem: None | pl.LazyFrame = None,
     nation: None | pl.LazyFrame = None,
     orders: None | pl.LazyFrame = None,
-    partsupp: None | pl.LazyFrame = None,
     supplier: None | pl.LazyFrame = None,
     region: None | pl.LazyFrame = None,
     part: None | pl.LazyFrame = None,
@@ -31,7 +30,6 @@ def q(
     assert nation is not None
     assert orders is not None
     assert part is not None
-    assert partsupp is not None
     assert supplier is not None
     assert region is not None
 

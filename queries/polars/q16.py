@@ -9,17 +9,15 @@ Q_NUM = 16
 
 def q(
     partsupp: None | pl.LazyFrame = None,
-    customer: None | pl.LazyFrame = None,
     supplier: None | pl.LazyFrame = None,
     part: None | pl.LazyFrame = None,
     **kwargs: Any,
 ) -> pl.LazyFrame:
-    if customer is None:
+    if part is None:
         part = utils.get_part_ds()
         partsupp = utils.get_part_supp_ds()
         supplier = utils.get_supplier_ds()
 
-    assert customer is not None
     assert part is not None
     assert partsupp is not None
     assert supplier is not None
