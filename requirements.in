@@ -1,3 +1,4 @@
+tpchgen-cli
 dask[dataframe]
 dask-expr
 duckdb
