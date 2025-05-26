@@ -78,9 +78,9 @@ def _preload_engine(
 def obtain_engine_config() -> (
     pl.GPUEngine | Literal["in-memory", "streaming", "old-streaming"]
 ):
-    if settings.run.polars_streaming:
+    if settings.run.polars_old_streaming:
         return "old-streaming"
-    if settings.run.polars_new_streaming:
+    if settings.run.polars_streaming:
         return "streaming"
     if not settings.run.polars_gpu:
         return "in-memory"
@@ -135,8 +135,8 @@ def obtain_engine_config() -> (
 
 
 def run_query(query_number: int, lf: pl.LazyFrame) -> None:
-    streaming = settings.run.polars_streaming
-    new_streaming = settings.run.polars_new_streaming
+    streaming = settings.run.polars_old_streaming
+    new_streaming = settings.run.polars_streaming
     eager = settings.run.polars_eager
     gpu = settings.run.polars_gpu
     cloud = settings.run.polars_cloud
