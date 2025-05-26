@@ -32,17 +32,13 @@ def q(
         .filter(pl.col("l_shipdate") < pl.col("l_commitdate"))
         .filter(pl.col("l_receiptdate").is_between(var3, var4, closed="left"))
         .with_columns(
-            pl.when(pl.col("o_orderpriority").is_in(["1-URGENT", "2-HIGH"]))
-            .then(1)
-            .otherwise(0)
-            .alias("high_line_count"),
-            pl.when(pl.col("o_orderpriority").is_in(["1-URGENT", "2-HIGH"]).not_())
-            .then(1)
-            .otherwise(0)
-            .alias("low_line_count"),
+            line_count=pl.col("o_orderpriority").is_in(["1-URGENT", "2-HIGH"])
         )
         .group_by("l_shipmode")
-        .agg(pl.col("high_line_count").sum(), pl.col("low_line_count").sum())
+        .agg(
+            high_line_count=pl.col.line_count.sum(),
+            low_line_count=pl.col.line_count.not_().sum(),
+        )
         .sort("l_shipmode")
     )
 
