@@ -37,7 +37,7 @@ def q(
         .group_by("l_shipmode")
         .agg(
             high_line_count=pl.col.line_count.sum(),
-            low_line_count=pl.col.line_count._not().sum(),
+            low_line_count=pl.col.line_count.not_().sum(),
         )
         .sort("l_shipmode")
     )
