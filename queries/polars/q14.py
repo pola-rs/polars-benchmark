@@ -29,7 +29,7 @@ def q(
         .select(
             (
                 100.00
-                * pl.when(pl.col("p_type").str.contains("PROMO*"))
+                * pl.when(pl.col("p_type").str.starts_with("PROMO"))
                 .then(pl.col("l_extendedprice") * (1 - pl.col("l_discount")))
                 .otherwise(0)
                 .sum()
