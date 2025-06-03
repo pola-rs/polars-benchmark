@@ -41,6 +41,10 @@ def q(
             (pl.col("ps_supplycost") * pl.col("ps_availqty"))
             .sum()
             .round(2)
+            # TODO: Explicit cast required to align decimal scales.
+            # This cast avoids ComputeError: decimal[*,4] vs decimal[*,8]
+            # Remove once https://github.com/pola-rs/polars/issues/23063 is implemented.
+            .cast(pl.Decimal(20, 4))
             .alias("value")
         )
         .join(q2, how="cross")
