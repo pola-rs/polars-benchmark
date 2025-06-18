@@ -3,6 +3,9 @@ from typing import Any
 import polars as pl
 
 from queries.polars import utils
+from settings import Settings
+
+settings = Settings()
 
 Q_NUM = 11
 
@@ -23,7 +26,7 @@ def q(
     assert supplier is not None
 
     var1 = "GERMANY"
-    var2 = 0.0001
+    var2 = 0.0001 / settings.scale_factor
 
     q1 = (
         partsupp.join(supplier, left_on="ps_suppkey", right_on="s_suppkey")
