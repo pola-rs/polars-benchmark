@@ -1,10 +1,16 @@
 from queries.pyspark import utils
+from settings import Settings
+
+settings = Settings()
 
 Q_NUM = 11
 
 
 def q() -> None:
-    query_str = """
+    scale_factor = settings.scale_factor
+    fraction = 0.0001 / scale_factor
+
+    query_str = f"""
     select
         ps_partkey,
         round(sum(ps_supplycost * ps_availqty), 2) as value
@@ -20,7 +26,7 @@ def q() -> None:
         ps_partkey having
                 sum(ps_supplycost * ps_availqty) > (
             select
-                sum(ps_supplycost * ps_availqty) * 0.0001
+                sum(ps_supplycost * ps_availqty) * {fraction}
             from
                 partsupp,
                 supplier,
