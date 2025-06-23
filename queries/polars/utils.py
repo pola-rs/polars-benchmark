@@ -4,19 +4,37 @@ from functools import partial
 from typing import Literal
 
 import polars as pl
-
 from queries.common_utils import (
     check_query_result_pl,
+    execute_all as common_execute_all,
     get_table_path,
     run_query_generic,
 )
+from queries.polars.cloud_utils import get_compute_context, stop_compute_context
 from settings import Settings
 
 settings = Settings()
 
 
+def execute_all() -> None:
+    if not settings.run.polars_cloud:
+        return execute_all("polars")
+
+    # for polars cloud we have to create the compute context,
+    # reuse it across the queries, and stop it in the end
+    ctx = get_compute_context(log_create=True, log_reuse=True)
+    try:
+        common_execute_all("polars")
+    finally:
+        print(f"Stopping compute context: {ctx._compute_id}")
+        stop_compute_context(ctx)
+
+
 def _scan_ds(table_name: str) -> pl.LazyFrame:
     path = get_table_path(table_name)
+    # pathlib.Path normalizes consecutive slashes, unless Path.from_uri is used (Python >= 3.13)
+    if isinstance(path, pathlib.Path) and str(path).startswith("s3:/") and not str(path).startswith("s3://"):
+        path = f"s3://{str(path)[4:]}"
 
     if settings.run.io_type == "skip":
         return pl.read_parquet(path, rechunk=True).lazy()
@@ -161,28 +179,12 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     if cloud:
         import os
 
-        import polars_cloud as pc
-
         os.environ["POLARS_SKIP_CLIENT_CHECK"] = "1"
 
-        class PatchedComputeContext(pc.ComputeContext):
-            def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
-                self._interactive = True
-                self._compute_address = "localhost:5051"
-                self._compute_public_key = b""
-                self._compute_id = "1"  # type: ignore[assignment]
-
-            def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:
-                """Get the status of the compute cluster."""
-                return pc.ComputeContextStatus.RUNNING
-
-        pc.ComputeContext.__init__ = PatchedComputeContext.__init__  # type: ignore[assignment]
-        pc.ComputeContext.get_status = PatchedComputeContext.get_status  # type: ignore[method-assign]
+        ctx = get_compute_context(create_if_no_reuse=False)
 
         def query():  # type: ignore[no-untyped-def]
-            result = pc.spawn(
-                lf, dst="file:///tmp/dst/", distributed=True
-            ).await_result()
+            result = lf.remote(context=ctx).distributed().collect()
 
             if settings.run.show_results:
                 print(result.plan())
