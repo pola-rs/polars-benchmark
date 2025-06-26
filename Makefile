@@ -4,6 +4,7 @@ PYTHONPATH=
 SHELL=/bin/bash
 VENV=.venv
 VENV_BIN=$(VENV)/bin
+NUM_PARTITIONS=10
 
 .venv:  ## Set up Python virtual environment and install dependencies
 	python3 -m venv $(VENV)
@@ -33,21 +34,20 @@ pre-commit: fmt  ## Run all code quality checks
 
 ifndef SCALE_FACTOR
 
-data/tables/.generated:
+.PHONY: data-tables
+data-tables:
 	@echo "SCALE_FACTOR not set, skipping data table generation"
-	@touch $@
 
-data/tables/:
+.PHONY: data-tables-partitioned
+data-tables-partitioned:
 	@echo "SCALE_FACTOR not set, skipping data table generation"
-	@mkdir -p $@
-
-data/tables/partitioned/:
-	@echo "SCALE_FACTOR not set, skipping data table generation"
-	@mkdir -p $@
 
 else
 
-data/tables/.generated: .venv  ## Generate data tables
+.PHONY: data-tables
+data-tables: data/tables/scale-$(SCALE_FACTOR)
+
+data/tables/scale-$(SCALE_FACTOR): .venv  ## Generate data tables
 	# use tpch-cli
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	$(VENV_BIN)/tpchgen-cli --output-dir="data/tables/scale-$(SCALE_FACTOR)" --format=tbl -s $(SCALE_FACTOR)
@@ -60,24 +60,23 @@ data/tables/.generated: .venv  ## Generate data tables
 	# mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
 	# $(VENV_BIN)/python -m scripts.prepare_data --num-parts=1 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
-	touch $@
 
-data/tables/: data/tables/.generated
-	@true
+.PHONY: data-tables-partitioned
+data-tables-partitioned: data/tables/scale-$(SCALE_FACTOR)/${NUM_PARTITIONS}
 
-data/tables/partitioned/: .venv  ## Generate partitioned data tables (these are not yet runnable with current repo)
+data/tables/scale-$(SCALE_FACTOR)/${NUM_PARTITIONS}: .venv  ## Generate partitioned data tables (these are not yet runnable with current repo)
 	$(MAKE) -C tpch-dbgen dbgen
-	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=10 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
+	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=${NUM_PARTITIONS} --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 
 
 endif
 
 .PHONY: run-polars
-run-polars: .venv data/tables/.generated  ## Run Polars benchmarks
+run-polars: .venv data-tables  ## Run Polars benchmarks
 	$(VENV_BIN)/python -m queries.polars
 
 .PHONY: run-polars-no-env
-run-polars-no-env: data/tables/ ## Run Polars benchmarks
+run-polars-no-env: data-tables ## Run Polars benchmarks
 	$(MAKE) -C tpch-dbgen dbgen
 	cd tpch-dbgen && ./dbgen -f -s $(SCALE_FACTOR) && cd ..
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
@@ -91,23 +90,23 @@ run-polars-gpu-no-env: run-polars-no-env data/tables/ ## Run Polars CPU and GPU 
 	RUN_POLARS_GPU=true CUDA_MODULE_LOADING=EAGER python -m queries.polars
 
 .PHONY: run-duckdb
-run-duckdb: .venv data/tables/.generated ## Run DuckDB benchmarks
+run-duckdb: .venv data-tables ## Run DuckDB benchmarks
 	$(VENV_BIN)/python -m queries.duckdb
 
 .PHONY: run-pandas
-run-pandas: .venv data/tables/.generated ## Run pandas benchmarks
+run-pandas: .venv data-tables ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
 .PHONY: run-pyspark
-run-pyspark: .venv data/tables/.generated ## Run PySpark benchmarks
+run-pyspark: .venv data-tables ## Run PySpark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark
 
 .PHONY: run-dask
-run-dask: .venv data/tables/.generated ## Run Dask benchmarks
+run-dask: .venv data-tables ## Run Dask benchmarks
 	$(VENV_BIN)/python -m queries.dask
 
 .PHONY: run-modin
-run-modin: .venv data/tables/.generated ## Run Modin benchmarks
+run-modin: .venv data-tables ## Run Modin benchmarks
 	$(VENV_BIN)/python -m queries.modin
 
 .PHONY: run-all
