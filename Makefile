@@ -50,7 +50,7 @@ else
 data/tables/.generated: .venv  ## Generate data tables
 	# use tpch-cli
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
-	tpchgen-cli --output-dir="data/tables/scale-$(SCALE_FACTOR)" --format=tbl -s $(SCALE_FACTOR)
+	$(VENV_BIN)/tpchgen-cli --output-dir="data/tables/scale-$(SCALE_FACTOR)" --format=tbl -s $(SCALE_FACTOR)
 	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=1 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 
 	# use tpch-dbgen
