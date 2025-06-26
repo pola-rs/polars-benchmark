@@ -4,6 +4,8 @@ import time
 from awsglue.context import GlueContext
 from awsglue.transforms import *  # noqa: F403
 from awsglue.utils import getResolvedOptions
+
+# this requires PySpark<4
 from pyspark.context import SparkContext
 
 # @params: [JOB_NAME]

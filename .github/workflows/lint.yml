@@ -46,5 +46,12 @@ jobs:
           pip install -r requirements-dev.txt
 
       # Allow untyped calls for older Python versions
-      - name: Run mypy
-        run: mypy
+      # Code in scripts/aws_glue.py requires PySpark<4
+      - name: Run mypy (PySpark from requirements.txt)
+        run: |
+          mypy --exclude scripts/aws_glue.py
+
+      - name: Run mypy (PySpark<4)
+        run: |
+          pip install "pyspark<4"
+          mypy

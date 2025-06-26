@@ -97,7 +97,7 @@ for i, q in enumerate(queries):
     print(f"run q{i}")
     start_time = time.time()
     try:
-        print(q.remote(ctx).distributed().show())  # type: ignore[attr-defined]
+        print(q.remote(ctx).distributed().show())
         execution_time = time.time() - start_time
         print(f"q{i} executed in: {execution_time:.2f} seconds")
         timings.append(execution_time)
