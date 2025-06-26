@@ -51,7 +51,8 @@ class Run(BaseSettings):
 
     polars_cloud_cpus: int | None = 1  ## CPUs per node
     polars_cloud_memory: int | None = 2  # GB per node
-    polars_cloud_instance_type: str | None = None  # use instance_type instead of cpus and memory, e.g. "t2.micro"
+    # use instance_type instead of cpus and memory, e.g. "t2.micro"
+    polars_cloud_instance_type: str | None = None
     polars_cloud_cluster_size: int = 1  ## nodes in the cluster
     polars_cloud_workspace: str | None = None
 

@@ -4,11 +4,14 @@ from functools import partial
 from typing import Literal
 
 import polars as pl
+
 from queries.common_utils import (
     check_query_result_pl,
-    execute_all as common_execute_all,
     get_table_path,
     run_query_generic,
+)
+from queries.common_utils import (
+    execute_all as common_execute_all,
 )
 from queries.polars.cloud_utils import get_compute_context, stop_compute_context
 from settings import Settings
@@ -18,7 +21,7 @@ settings = Settings()
 
 def execute_all() -> None:
     if not settings.run.polars_cloud:
-        return execute_all("polars")
+        return common_execute_all("polars")
 
     # for polars cloud we have to create the compute context,
     # reuse it across the queries, and stop it in the end
@@ -32,18 +35,20 @@ def execute_all() -> None:
 
 def _scan_ds(table_name: str) -> pl.LazyFrame:
     path = get_table_path(table_name)
-    # pathlib.Path normalizes consecutive slashes, unless Path.from_uri is used (Python >= 3.13)
-    if isinstance(path, pathlib.Path) and str(path).startswith("s3:/") and not str(path).startswith("s3://"):
-        path = f"s3://{str(path)[4:]}"
+    # pathlib.Path normalizes consecutive slashes,
+    # unless Path.from_uri is used (Python >= 3.13)
+    path_str = str(path)
+    if path_str.startswith("s3:/") and not path_str.startswith("s3://"):
+        path_str = f"s3://{str(path)[4:]}"
 
     if settings.run.io_type == "skip":
-        return pl.read_parquet(path, rechunk=True).lazy()
+        return pl.read_parquet(path_str, rechunk=True).lazy()
     if settings.run.io_type == "parquet":
-        return pl.scan_parquet(path)
+        return pl.scan_parquet(path_str)
     elif settings.run.io_type == "feather":
-        return pl.scan_ipc(path)
+        return pl.scan_ipc(path_str)
     elif settings.run.io_type == "csv":
-        return pl.scan_csv(path, try_parse_dates=True)
+        return pl.scan_csv(path_str, try_parse_dates=True)
     else:
         msg = f"unsupported file type: {settings.run.io_type!r}"
         raise ValueError(msg)
@@ -184,11 +189,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         ctx = get_compute_context(create_if_no_reuse=False)
 
         def query():  # type: ignore[no-untyped-def]
-            result = lf.remote(context=ctx).distributed().collect()
-
-            if settings.run.show_results:
-                print(result.plan())
-            return result.lazy().collect()
+            return lf.remote(context=ctx).distributed().collect()
     else:
         query = partial(
             lf.collect,
