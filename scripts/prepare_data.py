@@ -72,7 +72,9 @@ def pipelined_data_generation(
     base_path.mkdir(parents=True, exist_ok=True)
 
     num_dbgen_partitions = num_batches * parallelism
-    for batch_idx, part_indices in enumerate(batch(range(1, num_dbgen_partitions + 1), n=parallelism)):
+    for batch_idx, part_indices in enumerate(
+        batch(range(1, num_dbgen_partitions + 1), n=parallelism)
+    ):
         logger.info("Partition %s: Generating CSV files", part_indices)
         with Pool(parallelism) as process_pool:
             process_pool.starmap(
@@ -209,13 +211,18 @@ def gen_parquet(
         lf = lf.select(columns)
 
         if partitioned:
-            def partition_file_name(ctx):
+
+            def partition_file_name(ctx: pl.BasePartitionContext) -> pathlib.Path:
                 partition = f"{batch_idx}_{ctx.file_idx}"
                 (base_path / table_name / partition).mkdir(parents=True, exist_ok=True)  # noqa: B023
                 return pathlib.Path(partition) / "part.parquet"
 
             path = base_path / table_name
-            lf.sink_parquet(pl.PartitionMaxSize(path, file_path=partition_file_name, max_size=rows_per_file))
+            lf.sink_parquet(
+                pl.PartitionMaxSize(
+                    path, file_path=partition_file_name, max_size=rows_per_file
+                )
+            )
         else:
             path = base_path / f"{table_name}.parquet"
             lf.sink_parquet(path)
@@ -241,7 +248,11 @@ if __name__ == "__main__":
         type=int,
     )
     parser.add_argument(
-        "--num-batches", default=None, help="Number of batches used to generate the data", type=int, nargs="?"
+        "--num-batches",
+        default=None,
+        help="Number of batches used to generate the data",
+        type=int,
+        nargs="?",
     )
     parser.add_argument(
         "--aws-s3-sync-location",
