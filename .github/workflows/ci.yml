@@ -1,0 +1,24 @@
+name: CI
+
+on:
+  pull_request:
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build tpch-dbgen
+        working-directory: tpch-dbgen
+        run: make
+
+      - name: Run benchmark
+        run: ./run.sh
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: Benchmark
+          path: output/**
+
