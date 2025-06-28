@@ -60,26 +60,27 @@ def gen_csv(part_idx: int, cachedir: str, scale_factor: float, num_parts: int) -
 def pipelined_data_generation(
     scratch_dir: str,
     scale_factor: float,
-    num_parts: int,
+    num_batches: int,
     aws_s3_sync_location: str,
     parallelism: int = 4,
     rows_per_file: int = 500_000,
 ) -> None:
-    assert num_parts > 1, "script should only be used if num_parts > 1"
-
     if aws_s3_sync_location.endswith("/"):
         aws_s3_sync_location = aws_s3_sync_location[:-1]
 
-    base_path = pathlib.Path(scratch_dir) / str(num_parts)
+    base_path = pathlib.Path(scratch_dir) / str(num_batches)
     base_path.mkdir(parents=True, exist_ok=True)
 
-    for i, part_indices in enumerate(batch(range(1, num_parts + 1), n=parallelism)):
+    num_dbgen_partitions = num_batches * parallelism
+    for batch_idx, part_indices in enumerate(
+        batch(range(1, num_dbgen_partitions + 1), n=parallelism)
+    ):
         logger.info("Partition %s: Generating CSV files", part_indices)
         with Pool(parallelism) as process_pool:
             process_pool.starmap(
                 gen_csv,
                 [
-                    (part_idx, base_path, scale_factor, num_parts)
+                    (part_idx, base_path, scale_factor, num_dbgen_partitions)
                     for part_idx in part_indices
                 ],
             )
@@ -88,20 +89,13 @@ def pipelined_data_generation(
         for f in csv_files:
             shutil.move(f, base_path / pathlib.Path(f).name)
 
-        gen_parquet(base_path, rows_per_file, partitioned=True, iteration_offset=i)
+        gen_parquet(base_path, rows_per_file, partitioned=True, batch_idx=batch_idx)
         parquet_files = glob.glob(f"{base_path}/*.parquet")  # noqa: PTH207
-
-        # Exclude static tables except for first iteration
-        exclude_static_tables = (
-            ""
-            if i == 0
-            else " ".join([f'--exclude "*/{tbl}/*"' for tbl in STATIC_TABLES])
-        )
 
         if len(aws_s3_sync_location):
             subprocess.check_output(
                 shlex.split(
-                    f'aws s3 sync {scratch_dir} {aws_s3_sync_location}/scale-factor-{scale_factor} --exclude "*" --include "*.parquet" {exclude_static_tables}'
+                    f'aws s3 sync {scratch_dir} {aws_s3_sync_location}/scale-{scale_factor} --exclude "*" --include "*.parquet"'
                 )
             )
             for parquet_file in parquet_files:
@@ -197,9 +191,12 @@ def gen_parquet(
     base_path: pathlib.Path,
     rows_per_file: int = 500_000,
     partitioned: bool = False,
-    iteration_offset: int = 0,
+    batch_idx: int = 0,
 ) -> None:
     for table_name, columns in table_columns.items():
+        if table_name in STATIC_TABLES and batch_idx != 0:
+            continue
+
         path = base_path / f"{table_name}.tbl*"
 
         lf = pl.scan_csv(
@@ -214,9 +211,18 @@ def gen_parquet(
         lf = lf.select(columns)
 
         if partitioned:
-            (base_path / table_name).mkdir(parents=True, exist_ok=True)
-            path = base_path / table_name / f"{iteration_offset}_{{part}}.parquet"
-            lf.sink_parquet(pl.PartitionMaxSize(path, max_size=rows_per_file))
+
+            def partition_file_name(ctx: pl.BasePartitionContext) -> pathlib.Path:
+                partition = f"{batch_idx}_{ctx.file_idx}"
+                (base_path / table_name / partition).mkdir(parents=True, exist_ok=True)  # noqa: B023
+                return pathlib.Path(partition) / "part.parquet"
+
+            path = base_path / table_name
+            lf.sink_parquet(
+                pl.PartitionMaxSize(
+                    path, file_path=partition_file_name, max_size=rows_per_file
+                )
+            )
         else:
             path = base_path / f"{table_name}.parquet"
             lf.sink_parquet(path)
@@ -242,7 +248,11 @@ if __name__ == "__main__":
         type=int,
     )
     parser.add_argument(
-        "--num-parts", default=32, help="Number of parts to generate", type=int
+        "--num-batches",
+        default=None,
+        help="Number of batches used to generate the data",
+        type=int,
+        nargs="?",
     )
     parser.add_argument(
         "--aws-s3-sync-location",
@@ -257,7 +267,7 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    if args.num_parts == 1:
+    if args.num_batches is None:
         # Assumes the tables are already created by the Makefile
         gen_parquet(
             pathlib.Path(args.tpch_gen_folder),
@@ -268,7 +278,7 @@ if __name__ == "__main__":
         pipelined_data_generation(
             args.tpch_gen_folder,
             args.scale_factor,
-            args.num_parts,
+            args.num_batches,
             args.aws_s3_sync_location,
             parallelism=args.parallelism,
             rows_per_file=args.rows_per_file,

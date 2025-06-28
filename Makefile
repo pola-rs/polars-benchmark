@@ -6,6 +6,10 @@ VENV=.venv
 VENV_BIN=$(VENV)/bin
 NUM_PARTITIONS=10
 
+# for data-table-partitioned
+NUM_BATCHES?=1  ## data split into this number of batches, more batches reduce disk space required for temporary tbl files
+PARALLELISM?=8  ## number of parallel data generation processes, can be 1, unless NUM_BATCHES is 1
+
 .venv:  ## Set up Python virtual environment and install dependencies
 	python3 -m venv $(VENV)
 	$(MAKE) install-deps
@@ -51,14 +55,14 @@ data/tables/scale-$(SCALE_FACTOR): .venv  ## Generate data tables
 	# use tpch-cli
 	mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	$(VENV_BIN)/tpchgen-cli --output-dir="data/tables/scale-$(SCALE_FACTOR)" --format=tbl -s $(SCALE_FACTOR)
-	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=1 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
+	$(VENV_BIN)/python -m scripts.prepare_data --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 
 	# use tpch-dbgen
 	# $(MAKE) -C tpch-dbgen dbgen
 	# cd tpch-dbgen && ./dbgen -vf -s $(SCALE_FACTOR) && cd ..
 	# mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	# mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
-	# $(VENV_BIN)/python -m scripts.prepare_data --num-parts=1 --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
+	# $(VENV_BIN)/python -m scripts.prepare_data --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 
 .PHONY: data-tables-partitioned
@@ -66,7 +70,7 @@ data-tables-partitioned: data/tables/scale-$(SCALE_FACTOR)/${NUM_PARTITIONS}
 
 data/tables/scale-$(SCALE_FACTOR)/${NUM_PARTITIONS}: .venv  ## Generate partitioned data tables (these are not yet runnable with current repo)
 	$(MAKE) -C tpch-dbgen dbgen
-	$(VENV_BIN)/python -m scripts.prepare_data --num-parts=${NUM_PARTITIONS} --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
+	$(VENV_BIN)/python -m scripts.prepare_data --num-batches=${NUM_BATCHES} --parallelism=${PARALLELISM} --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
 
 
 endif

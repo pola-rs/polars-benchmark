@@ -23,7 +23,15 @@ settings = Settings()
 def get_table_path(table_name: str) -> Path:
     """Return the path to the given table."""
     ext = settings.run.io_type if settings.run.include_io else "parquet"
-    return settings.dataset_base_dir / f"{table_name}.{ext}"
+    if settings.num_batches is None:
+        return settings.dataset_base_dir / f"{table_name}.{ext}"
+    return (
+        settings.dataset_base_dir
+        / str(settings.num_batches)
+        / table_name
+        / "*"
+        / f"part.{ext}"
+    )
 
 
 def log_query_timing(

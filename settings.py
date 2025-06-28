@@ -77,6 +77,7 @@ class Plot(BaseSettings):
 
 class Settings(BaseSettings):
     scale_factor: float = 1.0
+    num_batches: int | None = None
 
     paths: Paths = Paths()
     plot: Plot = Plot()
