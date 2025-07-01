@@ -30,8 +30,12 @@ This benchmark is currently in active development and not yet ready for benchmar
 ## Generate TPC-DS datasets
 
 ```bash
-# create a folder for data and set scaling factor with -scale
-
 >>> mkdir -p ../data/
 >>> ./dsdgen -scale 1 -dir ../data/
+```
+
+## Convert generated dat files to parquet format
+
+```bash
+>>> python3 scripts/convert_to_parquet.py data/ data/
 ```
