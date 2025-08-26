@@ -1,5 +1,7 @@
+
+from pathlib import Path
+
 import duckdb
-from duckdb import DuckDBPyRelation
 
 from queries.common_utils import (
     check_query_result_pl,
@@ -7,7 +9,6 @@ from queries.common_utils import (
     run_query_generic,
 )
 from settings import Settings
-import os
 
 settings = Settings()
 _connection = None
@@ -18,9 +19,7 @@ def _scan_ds(table_name: str) -> str:
 
     if settings.run.io_type == "skip":
         return table_name
-    elif settings.run.io_type == "parquet":
-        return f"'{path_str}'"
-    elif settings.run.io_type == "csv":
+    elif settings.run.io_type == "parquet" or settings.run.io_type == "csv":
         return f"'{path_str}'"
     else:
         msg = f"unsupported file type: {settings.run.io_type!r}"
@@ -59,7 +58,7 @@ def get_part_supp_ds() -> str:
     return _scan_ds("partsupp")
 
 def get_persistent_path() -> str:
-    return os.path.join(os.path.dirname(get_table_path('lineitem')), 'tpch.db')
+    return Path(get_table_path('lineitem')).parent / Path('tpch.db')
 
 def get_connection():
     global _connection
