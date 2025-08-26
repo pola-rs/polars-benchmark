@@ -1,4 +1,3 @@
-
 from pathlib import Path
 from typing import Any
 
@@ -13,6 +12,7 @@ from settings import Settings
 
 settings = Settings()
 _connection = None
+
 
 def _scan_ds(table_name: str) -> str:
     path = get_table_path(table_name)
@@ -64,8 +64,10 @@ def get_part_ds() -> str:
 def get_part_supp_ds() -> str:
     return _scan_ds("partsupp")
 
+
 def get_persistent_path() -> str:
-    return str(Path(get_table_path('lineitem')).parent / Path('tpch.db'))
+    return str(Path(get_table_path("lineitem")).parent / Path("tpch.db"))
+
 
 def get_connection() -> duckdb.DuckDBPyConnection:
     global _connection
@@ -74,23 +76,28 @@ def get_connection() -> duckdb.DuckDBPyConnection:
             # connect to persistent db
             _connection = duckdb.connect(get_persistent_path())
         elif settings.run.io_type == "skip":
-            _connection = duckdb.connect(':default:')
+            _connection = duckdb.connect(":default:")
         else:
             # connect to in-memory db
             _connection = duckdb.connect()
     return _connection
 
+
 def run_query(query_number: int, query: str) -> None:
     conn = get_connection()
     if settings.run.show_results:
+
         def execute() -> Any:
             print(conn.sql(query))
     elif settings.run.check_results:
+
         def execute() -> Any:
             return conn.sql(query).pl()
     else:
+
         def execute() -> Any:
             conn.sql(query).fetchall()
+
     run_query_generic(
         execute, query_number, "duckdb", query_checker=check_query_result_pl
     )

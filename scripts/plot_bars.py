@@ -49,7 +49,7 @@ Y_LIMIT_MAP = {
     "parquet": 20.0,
     "csv": 25.0,
     "feather": 20.0,
-    "duckdb": 10.0
+    "duckdb": 10.0,
 }
 LIMIT = settings.plot.y_limit or Y_LIMIT_MAP[settings.run.io_type]
 
@@ -151,7 +151,12 @@ def get_title(io_type: IoType) -> str:
     if io_type == "skip":
         title = "Runtime excluding data read from disk"
     else:
-        file_type_map = {"parquet": "Parquet", "csv": "CSV", "feather": "Feather", "duckdb": "DuckDB"}
+        file_type_map = {
+            "parquet": "Parquet",
+            "csv": "CSV",
+            "feather": "Feather",
+            "duckdb": "DuckDB",
+        }
         file_type_formatted = file_type_map[io_type]
         title = f"Runtime including data read from disk ({file_type_formatted})"
 

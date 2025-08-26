@@ -1,4 +1,3 @@
-
 from queries.duckdb import utils
 
 Q_NUM = 4

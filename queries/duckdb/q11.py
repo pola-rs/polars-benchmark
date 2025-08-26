@@ -1,4 +1,3 @@
-
 from queries.duckdb import utils
 from settings import Settings
 
