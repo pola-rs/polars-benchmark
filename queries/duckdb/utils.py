@@ -1,5 +1,6 @@
 
 from pathlib import Path
+from typing import Any
 
 import duckdb
 
@@ -58,9 +59,9 @@ def get_part_supp_ds() -> str:
     return _scan_ds("partsupp")
 
 def get_persistent_path() -> str:
-    return Path(get_table_path('lineitem')).parent / Path('tpch.db')
+    return str(Path(get_table_path('lineitem')).parent / Path('tpch.db'))
 
-def get_connection() -> duckdb.duckdb.DuckDBPyConnection:
+def get_connection() -> duckdb.DuckDBPyConnection:
     global _connection
     if _connection is None:
         if settings.run.io_type == "skip":
@@ -74,13 +75,13 @@ def get_connection() -> duckdb.duckdb.DuckDBPyConnection:
 def run_query(query_number: int, query: str) -> None:
     conn = get_connection()
     if settings.run.show_results:
-        def execute():
+        def execute() -> Any:
             print(conn.sql(query))
     elif settings.run.check_results:
-        def execute():
+        def execute() -> Any:
             return conn.sql(query).pl()
     else:
-        def execute():
+        def execute() -> Any:
             conn.sql(query).fetchall()
     execute()
     run_query_generic(
