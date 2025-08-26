@@ -4,7 +4,7 @@ from typing import Literal, TypeAlias
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv"]
+IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv", "duckdb"]
 
 
 # Set via PATH_<NAME>

@@ -19,6 +19,12 @@ def _scan_ds(table_name: str) -> str:
     path_str = str(path)
 
     if settings.run.io_type == "skip":
+        name = path_str.replace("/", "_").replace(".", "_").replace("-", "_")
+        duckdb.sql(
+            f"create temp table if not exists {name} as select * from read_parquet('{path_str}');"
+        )
+        return name
+    elif settings.run.io_type == "duckdb":
         return table_name
     elif settings.run.io_type == "parquet" or settings.run.io_type == "csv":
         return f"'{path_str}'"
@@ -64,9 +70,11 @@ def get_persistent_path() -> str:
 def get_connection() -> duckdb.DuckDBPyConnection:
     global _connection
     if _connection is None:
-        if settings.run.io_type == "skip":
+        if settings.run.io_type == "duckdb":
             # connect to persistent db
             _connection = duckdb.connect(get_persistent_path())
+        elif settings.run.io_type == "skip":
+            _connection = duckdb.connect(':default:')
         else:
             # connect to in-memory db
             _connection = duckdb.connect()
