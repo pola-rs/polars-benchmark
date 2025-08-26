@@ -60,7 +60,7 @@ def get_part_supp_ds() -> str:
 def get_persistent_path() -> str:
     return Path(get_table_path('lineitem')).parent / Path('tpch.db')
 
-def get_connection():
+def get_connection() -> duckdb.duckdb.DuckDBPyConnection:
     global _connection
     if _connection is None:
         if settings.run.io_type == "skip":
@@ -74,14 +74,14 @@ def get_connection():
 def run_query(query_number: int, query: str) -> None:
     conn = get_connection()
     if settings.run.show_results:
-        def execute() -> None:
+        def execute():
             print(conn.sql(query))
     elif settings.run.check_results:
-        def execute() -> None:
+        def execute():
             return conn.sql(query).pl()
     else:
-        def execute() -> None:
-            return conn.sql(query).fetchall()
+        def execute():
+            conn.sql(query).fetchall()
     execute()
     run_query_generic(
         execute, query_number, "duckdb", query_checker=check_query_result_pl
