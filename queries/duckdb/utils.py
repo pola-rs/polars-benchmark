@@ -83,7 +83,6 @@ def run_query(query_number: int, query: str) -> None:
     else:
         def execute() -> Any:
             conn.sql(query).fetchall()
-    execute()
     run_query_generic(
         execute, query_number, "duckdb", query_checker=check_query_result_pl
     )
