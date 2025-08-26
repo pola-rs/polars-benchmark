@@ -9,8 +9,8 @@ def q() -> None:
     line_item_ds = utils.get_line_item_ds()
     supplier_ds = utils.get_supplier_ds()
 
-    ddl = f"""
-    create or replace temporary view revenue (supplier_no, total_revenue) as
+    query_str = f"""
+    with revenue (supplier_no, total_revenue) as (
         select
             l_suppkey,
             sum(l_extendedprice * (1 - l_discount))
@@ -21,9 +21,7 @@ def q() -> None:
             and l_shipdate < date '1996-01-01' + interval '3' month
         group by
             l_suppkey
-    """
-
-    query_str = f"""
+    )
     select
         s_suppkey,
         s_name,
@@ -45,11 +43,7 @@ def q() -> None:
         s_suppkey
 	"""
 
-    _ = duckdb.execute(ddl)
-    q_final = duckdb.sql(query_str)
-
-    utils.run_query(Q_NUM, q_final)
-    duckdb.execute("DROP VIEW IF EXISTS revenue")
+    utils.run_query(Q_NUM, query_str)
 
 
 if __name__ == "__main__":

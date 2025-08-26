@@ -25,9 +25,7 @@ def q() -> None:
         and l_shipdate < date '1995-09-01' + interval '1' month
 	"""
 
-    q_final = duckdb.sql(query_str)
-
-    utils.run_query(Q_NUM, q_final)
+    utils.run_query(Q_NUM, query_str)
 
 
 if __name__ == "__main__":
