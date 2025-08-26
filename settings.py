@@ -24,7 +24,7 @@ class Paths(BaseSettings):
 
 # Set via RUN_<NAME>
 class Run(BaseSettings):
-    io_type: IoType = "skip"
+    io_type: IoType = "parquet"
 
     iterations: int = 1
     log_timings: bool = False
