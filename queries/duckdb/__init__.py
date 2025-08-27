@@ -1,6 +1,6 @@
 from queries.duckdb import utils
 
-if utils.settings.run.io_type == "skip":
+if utils.settings.run.io_type == "duckdb":
     from pathlib import Path
 
     import duckdb
