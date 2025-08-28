@@ -75,6 +75,20 @@ class Plot(BaseSettings):
     )
 
 
+class Exasol(BaseSettings):
+    """Settings for connecting to an Exasol database."""
+
+    host: str
+    port: int = 8563
+    user: str
+    password: str
+    schema_name: str = "tpc"
+
+    model_config = SettingsConfigDict(
+        env_prefix="exasol_", env_file=".env", extra="ignore"
+    )
+
+
 class Settings(BaseSettings):
     scale_factor: float = 1.0
     num_batches: int | None = None
@@ -82,6 +96,11 @@ class Settings(BaseSettings):
     paths: Paths = Paths()
     plot: Plot = Plot()
     run: Run = Run()
+
+    @computed_field  # type: ignore[prop-decorator]
+    @property
+    def exasol(self) -> Exasol:
+        return Exasol()
 
     @computed_field  # type: ignore[prop-decorator]
     @property

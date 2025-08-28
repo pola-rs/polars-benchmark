@@ -43,3 +43,30 @@ This will do the following,
 - Create a new virtual environment with all required dependencies.
 - Generate data for benchmarks.
 - Run the benchmark suite.
+
+> **Note:** To run the Exasol benchmarks, ensure your Exasol database is configured via environment variables (or a `.env` file) with the following settings:
+>
+> ```
+> EXASOL_HOST=<host>
+> EXASOL_USER=<user>
+> EXASOL_PASSWORD=<password>
+> (optional) EXASOL_PORT=<port>          # default: 8563
+> (optional) EXASOL_SCHEMA_NAME=<schema> # default: tpc
+> ```
+>
+> You can set SCALE_FACTOR=<scale> (default: 1.0) to control the data scale.
+> Then execute:
+>
+> ```shell
+> make run-exasol
+> ```
+>
+> The Exasol runner executes the DDL scripts in three phases:
+>
+> 1. `create_schema.sql` to create empty TPC-H tables.
+> 2. Import data files into these tables from the local filesystem using Exasol's
+>    `IMPORT FROM` functionality (via `pyexasol.import_from_file`).
+> 3. Run `create_indices_1node.sql` and `analyze_database.sql` to enforce indices
+>    and collect statistics.
+>
+> Finally, it executes the 22 TPC-H queries.

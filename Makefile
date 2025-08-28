@@ -10,6 +10,9 @@ NUM_PARTITIONS=10
 NUM_BATCHES?=1  ## data split into this number of batches, more batches reduce disk space required for temporary tbl files
 PARALLELISM?=8  ## number of parallel data generation processes, can be 1, unless NUM_BATCHES is 1
 
+# Default scale factor for data generation (set to override via environment)
+SCALE_FACTOR ?= 1.0
+
 .venv:  ## Set up Python virtual environment and install dependencies
 	python3 -m venv $(VENV)
 	$(MAKE) install-deps
@@ -63,7 +66,6 @@ data/tables/scale-$(SCALE_FACTOR): .venv  ## Generate data tables
 	# mkdir -p "data/tables/scale-$(SCALE_FACTOR)"
 	# mv tpch-dbgen/*.tbl data/tables/scale-$(SCALE_FACTOR)/
 	# $(VENV_BIN)/python -m scripts.prepare_data --tpch_gen_folder="data/tables/scale-$(SCALE_FACTOR)"
-	rm -rf data/tables/scale-$(SCALE_FACTOR)/*.tbl
 
 .PHONY: data-tables-partitioned
 data-tables-partitioned: data/tables/scale-$(SCALE_FACTOR)/${NUM_PARTITIONS}
@@ -113,8 +115,12 @@ run-dask: .venv data-tables ## Run Dask benchmarks
 run-modin: .venv data-tables ## Run Modin benchmarks
 	$(VENV_BIN)/python -m queries.modin
 
+.PHONY: run-exasol
+run-exasol: .venv data-tables ## Run Exasol benchmarks
+	$(VENV_BIN)/python -m queries.exasol
+
 .PHONY: run-all
-run-all: run-polars run-duckdb run-pandas run-pyspark run-dask run-modin  ## Run all benchmarks
+run-all: run-polars run-duckdb run-pandas run-pyspark run-dask run-modin run-exasol  ## Run all benchmarks
 
 .PHONY: plot
 plot: .venv  ## Plot results

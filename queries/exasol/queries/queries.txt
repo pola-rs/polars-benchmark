@@ -1,0 +1,1531 @@
+==============================
+= Logfile for query stream 0 =
+==============================
+
+-- using 925162709 as a seed to the RNG
+OPEN SCHEMA tpc;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437112 s, 117014 usec), finished at (epoch: 1750437112 s, 158447 usec), time used: 0.04 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437112 s, 158469 usec), finished at (epoch: 1750437112 s, 160051 usec), time used: 0.00 s
+
+********************
+* TPC-H Query 1 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Pricing Summary Query (Q1)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 1 0
+    select
+        l_returnflag,
+        l_linestatus,
+        sum(l_quantity) as sum_qty,
+        sum(l_extendedprice) as sum_base_price,
+        sum(l_extendedprice * (1 - l_discount)) as sum_disc_price,
+        sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge,
+        avg(l_quantity) as avg_qty,
+        avg(l_extendedprice) as avg_price,
+        avg(l_discount) as avg_disc,
+        count(*) as count_order
+    from
+        {line_item_ds}
+    where
+        l_shipdate <= '1998-09-02'
+    group by
+        l_returnflag,
+        l_linestatus
+    order by
+        l_returnflag,
+        l_linestatus
+    ;
+
+********************
+* TPC-H Query 14 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Promotion Effect Query (Q14)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 14 0
+
+
+    
+    
+    
+    select
+        round(100.00 * sum(case
+            when p_type like 'PROMO%'
+                then l_extendedprice * (1 - l_discount)
+            else 0
+        end) / sum(l_extendedprice * (1 - l_discount)), 2) as promo_revenue
+    from
+        {line_item_ds},
+        {part_ds}
+    where
+        l_partkey = p_partkey
+        and l_shipdate >= date '1995-09-01'
+        and l_shipdate < date '1995-09-01' + interval '1' month
+    ;
+
+
+===============
+
+resultset consists of 1 rows in 1 columns
+
+-- current part timing: started at (epoch: 1750437112 s, 160086 usec), finished at (epoch: 1750437113 s, 131363 usec), time used: 0.97 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437113 s, 131375 usec), finished at (epoch: 1750437113 s, 149961 usec), time used: 0.02 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:31:52 2025
+ (epoch: 1750437112 s, 160086 usec)
+finished at: Fri Jun 20 18:31:53 2025
+ (epoch: 1750437113 s, 149961 usec)
+time used  : 0.99 s
+
+*******************
+* TPC-H Query 2 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R Minimum Cost Supplier Query (Q2)
+-- Functional Query Definition
+-- Approved February 1998
+-- Minor modification - result set limit ( 2.1.2.9.3 )
+-- TPC-H Query 2 0
+
+
+    
+    
+    
+    select
+        s_acctbal,
+        s_name,
+        n_name,
+        p_partkey,
+        p_mfgr,
+        s_address,
+        s_phone,
+        s_comment
+    from
+        {part_ds},
+        {supplier_ds},
+        {part_supp_ds},
+        {nation_ds},
+        {region_ds}
+    where
+        p_partkey = ps_partkey
+        and s_suppkey = ps_suppkey
+        and p_size = 15
+        and p_type like '%BRASS'
+        and s_nationkey = n_nationkey
+        and n_regionkey = r_regionkey
+        and r_name = 'EUROPE'
+        and ps_supplycost = (
+            select
+                min(ps_supplycost)
+            from
+                {part_supp_ds},
+                {supplier_ds},
+                {nation_ds},
+                {region_ds}
+            where
+                p_partkey = ps_partkey
+                and s_suppkey = ps_suppkey
+                and s_nationkey = n_nationkey
+                and n_regionkey = r_regionkey
+                and r_name = 'EUROPE'
+        )
+    order by
+        s_acctbal desc,
+        n_name,
+        s_name,
+        p_partkey
+    limit 100
+    ;
+
+
+======================================================================
+
+resultset consists of 100 rows in 8 columns
+
+-- current part timing: started at (epoch: 1750437113 s, 150921 usec), finished at (epoch: 1750437113 s, 627181 usec), time used: 0.48 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437113 s, 627204 usec), finished at (epoch: 1750437113 s, 848167 usec), time used: 0.22 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:31:53 2025
+ (epoch: 1750437113 s, 150921 usec)
+finished at: Fri Jun 20 18:31:53 2025
+ (epoch: 1750437113 s, 848167 usec)
+time used  : 0.70 s
+
+*******************
+* TPC-H Query 9 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R Product Type Profit Measure Query (Q9)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 9 0
+
+
+    
+    
+    
+    select
+        nation,
+        o_year,
+        round(sum(amount), 2) as sum_profit
+    from
+        (
+            select
+                n_name as nation,
+                year(o_orderdate) as o_year,
+                l_extendedprice * (1 - l_discount) - ps_supplycost * l_quantity as amount
+            from
+                {part_ds},
+                {supplier_ds},
+                {line_item_ds},
+                {part_supp_ds},
+                {orders_ds},
+                {nation_ds}
+            where
+                s_suppkey = l_suppkey
+                and ps_suppkey = l_suppkey
+                and ps_partkey = l_partkey
+                and p_partkey = l_partkey
+                and o_orderkey = l_orderkey
+                and s_nationkey = n_nationkey
+                and p_name like '%green%'
+        ) as profit
+    group by
+        nation,
+        o_year
+    order by
+        nation,
+        o_year desc
+    ;
+
+
+==========================
+
+resultset consists of 175 rows in 3 columns
+
+-- current part timing: started at (epoch: 1750437113 s, 848240 usec), finished at (epoch: 1750437118 s, 491998 usec), time used: 4.64 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437118 s, 492013 usec), finished at (epoch: 1750437118 s, 559360 usec), time used: 0.07 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:31:53 2025
+ (epoch: 1750437113 s, 848240 usec)
+finished at: Fri Jun 20 18:31:58 2025
+ (epoch: 1750437118 s, 559360 usec)
+time used  : 4.71 s
+
+********************
+* TPC-H Query 20 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Potential Part Promotion Query (Q20)
+-- Function Query Definition
+-- Approved February 1998
+-- TPC-H Query 20 0
+
+
+    
+    
+    
+    select
+        s_name,
+        s_address
+    from
+        {supplier_ds},
+        {nation_ds}
+    where
+        s_suppkey in (
+            select
+                ps_suppkey
+            from
+                {part_supp_ds}
+            where
+                ps_partkey in (
+                    select
+                        p_partkey
+                    from
+                        {part_ds}
+                    where
+                        p_name like 'forest%'
+                )
+                and ps_availqty > (
+                    select
+                        0.5 * sum(l_quantity)
+                    from
+                        {line_item_ds}
+                    where
+                        l_partkey = ps_partkey
+                        and l_suppkey = ps_suppkey
+                        and l_shipdate >= date '1994-01-01'
+                        and l_shipdate < date '1994-01-01' + interval '1' year
+                )
+        )
+        and s_nationkey = n_nationkey
+        and n_name = 'CANADA'
+    order by
+        s_name
+    ;
+
+
+==================
+
+resultset consists of 225456 rows in 2 columns
+
+-- current part timing: started at (epoch: 1750437118 s, 560298 usec), finished at (epoch: 1750437120 s, 197444 usec), time used: 1.64 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437120 s, 197465 usec), finished at (epoch: 1750437120 s, 224104 usec), time used: 0.03 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:31:58 2025
+ (epoch: 1750437118 s, 560298 usec)
+finished at: Fri Jun 20 18:32:00 2025
+ (epoch: 1750437120 s, 224104 usec)
+time used  : 1.66 s
+
+*******************
+* TPC-H Query 6 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R Forecasting Revenue Change Query (Q6)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 6 0
+
+
+    
+    
+    
+    select
+        sum(l_extendedprice * l_discount) as revenue
+    from
+        {line_item_ds}
+    where
+        l_shipdate >= timestamp '1994-01-01'
+        and l_shipdate < timestamp '1994-01-01' + interval '1' year
+        and l_discount between .06 - 0.01 and .06 + 0.01
+        and l_quantity < 24
+    ;
+
+
+=========
+
+resultset consists of 1 rows in 1 columns
+
+-- current part timing: started at (epoch: 1750437120 s, 224157 usec), finished at (epoch: 1750437121 s, 65863 usec), time used: 0.84 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437121 s, 65875 usec), finished at (epoch: 1750437121 s, 84345 usec), time used: 0.02 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:00 2025
+ (epoch: 1750437120 s, 224157 usec)
+finished at: Fri Jun 20 18:32:01 2025
+ (epoch: 1750437121 s, 84345 usec)
+time used  : 0.86 s
+
+********************
+* TPC-H Query 17 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Small-Quantity-Order Revenue Query (Q17)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 17 0
+
+
+    
+    
+    
+    select
+        round(sum(l_extendedprice) / 7.0, 2) as avg_yearly
+    from
+        {line_item_ds},
+        {part_ds}
+    where
+        p_partkey = l_partkey
+        and p_brand = 'Brand#23'
+        and p_container = 'MED BOX'
+        and l_quantity < (
+            select
+                0.2 * avg(l_quantity)
+            from
+                {line_item_ds}
+            where
+                l_partkey = p_partkey
+        )
+    ;
+
+
+============
+
+resultset consists of 1 rows in 1 columns
+
+-- current part timing: started at (epoch: 1750437121 s, 84405 usec), finished at (epoch: 1750437121 s, 271458 usec), time used: 0.19 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437121 s, 271463 usec), finished at (epoch: 1750437121 s, 303083 usec), time used: 0.03 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:01 2025
+ (epoch: 1750437121 s, 84405 usec)
+finished at: Fri Jun 20 18:32:01 2025
+ (epoch: 1750437121 s, 303083 usec)
+time used  : 0.22 s
+
+********************
+* TPC-H Query 18 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Large Volume Customer Query (Q18)
+-- Function Query Definition
+-- Approved February 1998
+-- Minor modification - result set limit ( 2.1.2.9.3 )
+-- TPC-H Query 18 0
+
+
+    
+    
+    
+    select
+        c_name,
+        c_custkey,
+        o_orderkey,
+        o_orderdate as o_orderdat,
+        o_totalprice,
+        sum(l_quantity) as col6
+    from
+        {customer_ds},
+        {orders_ds},
+        {line_item_ds}
+    where
+        o_orderkey in (
+            select
+                l_orderkey
+            from
+                {line_item_ds}
+            group by
+                l_orderkey having
+                    sum(l_quantity) > 300
+        )
+        and c_custkey = o_custkey
+        and o_orderkey = l_orderkey
+    group by
+        c_name,
+        c_custkey,
+        o_orderkey,
+        o_orderdate,
+        o_totalprice
+    order by
+        o_totalprice desc,
+        o_orderdate
+    limit 100
+    ;
+
+
+===============================================================================
+
+resultset consists of 100 rows in 6 columns
+
+-- current part timing: started at (epoch: 1750437121 s, 303141 usec), finished at (epoch: 1750437148 s, 891075 usec), time used: 27.59 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437148 s, 891093 usec), finished at (epoch: 1750437148 s, 909931 usec), time used: 0.02 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:01 2025
+ (epoch: 1750437121 s, 303141 usec)
+finished at: Fri Jun 20 18:32:28 2025
+ (epoch: 1750437148 s, 909931 usec)
+time used  : 27.61 s
+
+*******************
+* TPC-H Query 8 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R National Market Share Query (Q8)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 8 0
+
+
+    
+    
+    
+    select
+        o_year,
+        round(
+            sum(case
+                when nation = 'BRAZIL' then volume
+                else 0
+            end) / sum(volume)
+        , 2) as mkt_share
+    from
+        (
+            select
+                extract(year from o_orderdate) as o_year,
+                l_extendedprice * (1 - l_discount) as volume,
+                n2.n_name as nation
+            from
+                {part_ds},
+                {supplier_ds},
+                {line_item_ds},
+                {orders_ds},
+                {customer_ds},
+                {nation_ds} n1,
+                {nation_ds} n2,
+                {region_ds}
+            where
+                p_partkey = l_partkey
+                and s_suppkey = l_suppkey
+                and l_orderkey = o_orderkey
+                and o_custkey = c_custkey
+                and c_nationkey = n1.n_nationkey
+                and n1.n_regionkey = r_regionkey
+                and r_name = 'AMERICA'
+                and s_nationkey = n2.n_nationkey
+                and o_orderdate between timestamp '1995-01-01' and timestamp '1996-12-31'
+                and p_type = 'ECONOMY ANODIZED STEEL'
+        ) as all_nations
+    group by
+        o_year
+    order by
+        o_year
+    ;
+
+
+==================
+
+resultset consists of 2 rows in 2 columns
+
+-- current part timing: started at (epoch: 1750437148 s, 910732 usec), finished at (epoch: 1750437149 s, 325239 usec), time used: 0.41 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437149 s, 325247 usec), finished at (epoch: 1750437149 s, 377605 usec), time used: 0.05 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:28 2025
+ (epoch: 1750437148 s, 910732 usec)
+finished at: Fri Jun 20 18:32:29 2025
+ (epoch: 1750437149 s, 377605 usec)
+time used  : 0.47 s
+
+********************
+* TPC-H Query 21 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Suppliers Who Kept Orders Waiting Query (Q21)
+-- Functional Query Definition
+-- Approved February 1998
+-- Minor modification - result set limit ( 2.1.2.9.3 )
+-- TPC-H Query 21 0
+
+
+    
+    
+    
+    select
+        s_name,
+        count(*) as numwait
+    from
+        {supplier_ds},
+        {line_item_ds} l1,
+        {orders_ds},
+        {nation_ds}
+    where
+        s_suppkey = l1.l_suppkey
+        and o_orderkey = l1.l_orderkey
+        and o_orderstatus = 'F'
+        and l1.l_receiptdate > l1.l_commitdate
+        and exists (
+            select
+                *
+            from
+                {line_item_ds} l2
+            where
+                l2.l_orderkey = l1.l_orderkey
+                and l2.l_suppkey <> l1.l_suppkey
+        )
+        and not exists (
+            select
+                *
+            from
+                {line_item_ds} l3
+            where
+                l3.l_orderkey = l1.l_orderkey
+                and l3.l_suppkey <> l1.l_suppkey
+                and l3.l_receiptdate > l3.l_commitdate
+        )
+        and s_nationkey = n_nationkey
+        and n_name = 'SAUDI ARABIA'
+    group by
+        s_name
+    order by
+        numwait desc,
+        s_name
+    limit 100
+    ;
+
+
+================
+
+resultset consists of 100 rows in 2 columns
+
+-- current part timing: started at (epoch: 1750437149 s, 377693 usec), finished at (epoch: 1750437151 s, 792788 usec), time used: 2.42 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437151 s, 792806 usec), finished at (epoch: 1750437151 s, 830652 usec), time used: 0.04 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:29 2025
+ (epoch: 1750437149 s, 377693 usec)
+finished at: Fri Jun 20 18:32:31 2025
+ (epoch: 1750437151 s, 830652 usec)
+time used  : 2.45 s
+
+********************
+* TPC-H Query 13 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Customer Distribution Query (Q13)
+-- Functional Query Definition
+-- Approved February 1998
+-- Minor modification - Naming of the columns of the sub select - different syntax for select-list AS clause ( 2.2.3.3 b) )
+-- TPC-H Query 13 0
+
+
+    
+    
+    
+    select
+        c_count, count(*) as custdist
+    from (
+        select
+            c_custkey,
+            count(o_orderkey)
+        from
+            {customer_ds} left outer join {orders_ds} on
+            c_custkey = o_custkey
+            and o_comment not like '%special%requests%'
+        group by
+            c_custkey
+        )as c_orders (c_custkey, c_count)
+    group by
+        c_count
+    order by
+        custdist desc,
+        c_count desc
+    ;
+
+
+==================
+
+resultset consists of 28 rows in 2 columns
+
+-- current part timing: started at (epoch: 1750437151 s, 830724 usec), finished at (epoch: 1750437159 s, 548532 usec), time used: 7.72 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437159 s, 548550 usec), finished at (epoch: 1750437159 s, 582539 usec), time used: 0.03 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:31 2025
+ (epoch: 1750437151 s, 830724 usec)
+finished at: Fri Jun 20 18:32:39 2025
+ (epoch: 1750437159 s, 582539 usec)
+time used  : 7.75 s
+
+*******************
+* TPC-H Query 3 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R Shipping Priority Query (Q3)
+-- Functional Query Definition
+-- Approved February 1998
+-- Minor modification - result set limit ( 2.1.2.9.3 )
+-- TPC-H Query 3 0
+
+
+    
+    
+    
+    select
+        l_orderkey,
+        sum(l_extendedprice * (1 - l_discount)) as revenue,
+        o_orderdate,
+        o_shippriority
+    from
+        {customer_ds},
+        {orders_ds},
+        {line_item_ds}
+    where
+        c_mktsegment = 'BUILDING'
+        and c_custkey = o_custkey
+        and l_orderkey = o_orderkey
+        and o_orderdate < '1995-03-15'
+        and l_shipdate > '1995-03-15'
+    group by
+        l_orderkey,
+        o_orderdate,
+        o_shippriority
+    order by
+        revenue desc,
+        o_orderdate
+    limit 10
+    ;
+
+
+===============================================
+
+resultset consists of 10 rows in 4 columns
+
+-- current part timing: started at (epoch: 1750437159 s, 583518 usec), finished at (epoch: 1750437161 s, 963666 usec), time used: 2.38 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437161 s, 963680 usec), finished at (epoch: 1750437162 s, 10920 usec), time used: 0.05 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:39 2025
+ (epoch: 1750437159 s, 583518 usec)
+finished at: Fri Jun 20 18:32:42 2025
+ (epoch: 1750437162 s, 10920 usec)
+time used  : 2.43 s
+
+********************
+* TPC-H Query 22 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Global Sales Opportunity Query (Q22)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 22 0
+
+
+    
+    
+    
+    select
+        cntrycode,
+        count(*) as numcust,
+        sum(c_acctbal) as totacctbal
+    from (
+        select
+            substring(c_phone from 1 for 2) as cntrycode,
+            c_acctbal
+        from
+            {customer_ds}
+        where
+            substring(c_phone from 1 for 2) in
+                (13, 31, 23, 29, 30, 18, 17)
+            and c_acctbal > (
+                select
+                    avg(c_acctbal)
+                from
+                    {customer_ds}
+                where
+                    c_acctbal > 0.00
+                    and substring (c_phone from 1 for 2) in
+                        (13, 31, 23, 29, 30, 18, 17)
+            )
+            and not exists (
+                select
+                    *
+                from
+                    {orders_ds}
+                where
+                    o_custkey = c_custkey
+            )
+        ) as custsale
+    group by
+        cntrycode
+    order by
+        cntrycode
+    ;
+
+
+==============================
+
+resultset consists of 7 rows in 3 columns
+
+-- current part timing: started at (epoch: 1750437162 s, 10994 usec), finished at (epoch: 1750437162 s, 532905 usec), time used: 0.52 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437162 s, 532917 usec), finished at (epoch: 1750437162 s, 541486 usec), time used: 0.01 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:42 2025
+ (epoch: 1750437162 s, 10994 usec)
+finished at: Fri Jun 20 18:32:42 2025
+ (epoch: 1750437162 s, 541486 usec)
+time used  : 0.53 s
+
+********************
+* TPC-H Query 16 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Parts/Supplier Relationship Query (Q16)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 16 0
+
+
+    
+    
+    
+    select
+        p_brand,
+        p_type,
+        p_size,
+        count(distinct ps_suppkey) as supplier_cnt
+    from
+        {part_supp_ds},
+        {part_ds}
+    where
+        p_partkey = ps_partkey
+        and p_brand <> 'Brand#45'
+        and p_type not like 'MEDIUM POLISHED%'
+        and p_size in (49, 14, 23, 45, 19, 3, 36, 9)
+        and ps_suppkey not in (
+            select
+                s_suppkey
+            from
+                {supplier_ds}
+            where
+                s_comment like '%Customer%Complaints%'
+        )
+    group by
+        p_brand,
+        p_type,
+        p_size
+    order by
+        supplier_cnt desc,
+        p_brand,
+        p_type,
+        p_size
+    ;
+
+
+====================================
+
+resultset consists of 27840 rows in 4 columns
+
+-- current part timing: started at (epoch: 1750437162 s, 542600 usec), finished at (epoch: 1750437167 s, 398568 usec), time used: 4.86 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437167 s, 398588 usec), finished at (epoch: 1750437167 s, 404365 usec), time used: 0.01 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:42 2025
+ (epoch: 1750437162 s, 542600 usec)
+finished at: Fri Jun 20 18:32:47 2025
+ (epoch: 1750437167 s, 404365 usec)
+time used  : 4.86 s
+
+*******************
+* TPC-H Query 4 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R Order Priority Checking Query (Q4)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 4 0
+
+
+    
+    
+    
+    select
+        o_orderpriority,
+        count(*) as order_count
+    from
+        {orders_ds}
+    where
+        o_orderdate >= timestamp '1993-07-01'
+        and o_orderdate < timestamp '1993-07-01' + interval '3' month
+        and exists (
+            select
+                *
+            from
+                {line_item_ds}
+            where
+                l_orderkey = o_orderkey
+                and l_commitdate < l_receiptdate
+        )
+    group by
+        o_orderpriority
+    order by
+        o_orderpriority
+    ;
+
+
+=============================
+
+resultset consists of 5 rows in 2 columns
+
+-- current part timing: started at (epoch: 1750437167 s, 404427 usec), finished at (epoch: 1750437167 s, 879949 usec), time used: 0.48 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437167 s, 879970 usec), finished at (epoch: 1750437167 s, 891741 usec), time used: 0.01 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:47 2025
+ (epoch: 1750437167 s, 404427 usec)
+finished at: Fri Jun 20 18:32:47 2025
+ (epoch: 1750437167 s, 891741 usec)
+time used  : 0.49 s
+
+********************
+* TPC-H Query 11 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Important Stock Identification Query (Q11)
+-- Functional Query Definition
+-- Approved February 1998
+-- Minor modification - Quoting keyword value ( 2.2.3.3 k) )
+-- TPC-H Query 11 0
+
+
+    
+    
+    
+    select
+        ps_partkey,
+        round(sum(ps_supplycost * ps_availqty), 2) as value
+    from
+        {part_supp_ds},
+        {supplier_ds},
+        {nation_ds}
+    where
+        ps_suppkey = s_suppkey
+        and s_nationkey = n_nationkey
+        and n_name = 'GERMANY'
+    group by
+        ps_partkey having
+                sum(ps_supplycost * ps_availqty) > (
+            select
+                sum(ps_supplycost * ps_availqty) * 0.0001
+            from
+                {part_supp_ds},
+                {supplier_ds},
+                {nation_ds}
+            where
+                ps_suppkey = s_suppkey
+                and s_nationkey = n_nationkey
+                and n_name = 'GERMANY'
+            )
+        order by
+            value desc
+    ;
+
+
+==================
+
+resultset consists of 2849331 rows in 2 columns
+
+-- current part timing: started at (epoch: 1750437167 s, 892636 usec), finished at (epoch: 1750437171 s, 903481 usec), time used: 4.01 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437171 s, 903495 usec), finished at (epoch: 1750437171 s, 908493 usec), time used: 0.00 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:47 2025
+ (epoch: 1750437167 s, 892636 usec)
+finished at: Fri Jun 20 18:32:51 2025
+ (epoch: 1750437171 s, 908493 usec)
+time used  : 4.02 s
+
+********************
+* TPC-H Query 15 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Top Supplier Query (Q15)
+-- Functional Query Definition
+-- Approved February 1998
+-- Using approved Variant A of Q15 (Appendix B) - 'with clause' instead of 'create view/drop view'
+-- Variant allowed because of 2.2.4.2 and 2.2.4.3
+-- TPC-H Query 15 0
+
+
+
+with revenue0 (supplier_no, total_revenue) as
+(
+    
+    select
+        s_suppkey,
+        s_name,
+        s_address,
+        s_phone,
+        total_revenue
+    from
+        {supplier_ds},
+        revenue
+    where
+        s_suppkey = supplier_no
+        and total_revenue = (
+            select
+                max(total_revenue)
+            from
+                revenue
+        )
+    order by
+        s_suppkey
+    ;
+
+
+===================================================================================================================
+
+resultset consists of 4 rows in 10 columns
+
+-- current part timing: started at (epoch: 1750437178 s, 690669 usec), finished at (epoch: 1750437182 s, 549689 usec), time used: 3.86 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437182 s, 549695 usec), finished at (epoch: 1750437182 s, 577175 usec), time used: 0.03 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:32:58 2025
+ (epoch: 1750437178 s, 690669 usec)
+finished at: Fri Jun 20 18:33:02 2025
+ (epoch: 1750437182 s, 577175 usec)
+time used  : 3.89 s
+
+********************
+* TPC-H Query 10 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Returned Item Reporting Query (Q10)
+-- Functional Query Definition
+-- Approved February 1998
+-- Minor modification - result set limit ( 2.1.2.9.3 )
+-- TPC-H Query 10 0
+
+
+    
+    
+    
+    select
+        c_custkey,
+        c_name,
+        round(sum(l_extendedprice * (1 - l_discount)), 2) as revenue,
+        c_acctbal,
+        n_name,
+        c_address,
+        c_phone,
+        c_comment
+    from
+        {customer_ds},
+        {orders_ds},
+        {line_item_ds},
+        {nation_ds}
+    where
+        c_custkey = o_custkey
+        and l_orderkey = o_orderkey
+        and o_orderdate >= date '1993-10-01'
+        and o_orderdate < date '1993-10-01' + interval '3' month
+        and l_returnflag = 'R'
+        and c_nationkey = n_nationkey
+    group by
+        c_custkey,
+        c_name,
+        c_acctbal,
+        c_phone,
+        n_name,
+        c_address,
+        c_comment
+    order by
+        revenue desc
+    limit 20
+    ;
+
+
+=======================================================================
+
+resultset consists of 20 rows in 8 columns
+
+-- current part timing: started at (epoch: 1750437182 s, 577940 usec), finished at (epoch: 1750437188 s, 893659 usec), time used: 6.32 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437188 s, 893673 usec), finished at (epoch: 1750437188 s, 962393 usec), time used: 0.07 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:33:02 2025
+ (epoch: 1750437182 s, 577940 usec)
+finished at: Fri Jun 20 18:33:08 2025
+ (epoch: 1750437188 s, 962393 usec)
+time used  : 6.38 s
+
+********************
+* TPC-H Query 19 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Discounted Revenue Query (Q19)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 19 0
+
+
+    
+    
+    
+    select
+        round(sum(l_extendedprice* (1 - l_discount)), 2) as revenue
+    from
+        {line_item_ds},
+        {part_ds}
+    where
+        (
+            p_partkey = l_partkey
+            and p_brand = 'Brand#12'
+            and p_container in ('SM CASE', 'SM BOX', 'SM PACK', 'SM PKG')
+            and l_quantity >= 1 and l_quantity <= 1 + 10
+            and p_size between 1 and 5
+            and l_shipmode in ('AIR', 'AIR REG')
+            and l_shipinstruct = 'DELIVER IN PERSON'
+        )
+        or
+        (
+            p_partkey = l_partkey
+            and p_brand = 'Brand#23'
+            and p_container in ('MED BAG', 'MED BOX', 'MED PKG', 'MED PACK')
+            and l_quantity >= 10 and l_quantity <= 20
+            and p_size between 1 and 10
+            and l_shipmode in ('AIR', 'AIR REG')
+            and l_shipinstruct = 'DELIVER IN PERSON'
+        )
+        or
+        (
+            p_partkey = l_partkey
+            and p_brand = 'Brand#34'
+            and p_container in ('LG CASE', 'LG BOX', 'LG PACK', 'LG PKG')
+            and l_quantity >= 20 and l_quantity <= 30
+            and p_size between 1 and 15
+            and l_shipmode in ('AIR', 'AIR REG')
+            and l_shipinstruct = 'DELIVER IN PERSON'
+        )
+    ;
+
+
+=========
+
+resultset consists of 1 rows in 1 columns
+
+-- current part timing: started at (epoch: 1750437188 s, 963356 usec), finished at (epoch: 1750437189 s, 143713 usec), time used: 0.18 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437189 s, 143726 usec), finished at (epoch: 1750437189 s, 220857 usec), time used: 0.08 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:33:08 2025
+ (epoch: 1750437188 s, 963356 usec)
+finished at: Fri Jun 20 18:33:09 2025
+ (epoch: 1750437189 s, 220857 usec)
+time used  : 0.26 s
+
+*******************
+* TPC-H Query 5 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R Local Supplier Volume Query (Q5)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 5 0
+
+
+    
+    
+    
+    select
+        n_name,
+        sum(l_extendedprice * (1 - l_discount)) as revenue
+    from
+        {customer_ds},
+        {orders_ds},
+        {line_item_ds},
+        {supplier_ds},
+        {nation_ds},
+        {region_ds}
+    where
+        c_custkey = o_custkey
+        and l_orderkey = o_orderkey
+        and l_suppkey = s_suppkey
+        and c_nationkey = s_nationkey
+        and s_nationkey = n_nationkey
+        and n_regionkey = r_regionkey
+        and r_name = 'ASIA'
+        and o_orderdate >= timestamp '1994-01-01'
+        and o_orderdate < timestamp '1994-01-01' + interval '1' year
+    group by
+        n_name
+    order by
+        revenue desc
+    ;
+
+
+================
+
+resultset consists of 5 rows in 2 columns
+
+-- current part timing: started at (epoch: 1750437189 s, 220929 usec), finished at (epoch: 1750437190 s, 801745 usec), time used: 1.58 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437190 s, 801762 usec), finished at (epoch: 1750437190 s, 877866 usec), time used: 0.08 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:33:09 2025
+ (epoch: 1750437189 s, 220929 usec)
+finished at: Fri Jun 20 18:33:10 2025
+ (epoch: 1750437190 s, 877866 usec)
+time used  : 1.66 s
+
+*******************
+* TPC-H Query 7 0 *
+*******************
+
+-- $ID$
+-- TPC-H/TPC-R Volume Shipping Query (Q7)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 7 0
+
+
+    
+    
+    
+    select
+        supp_nation,
+        cust_nation,
+        l_year,
+        sum(volume) as revenue
+    from
+        (
+            select
+                n1.n_name as supp_nation,
+                n2.n_name as cust_nation,
+                year(l_shipdate) as l_year,
+                l_extendedprice * (1 - l_discount) as volume
+            from
+                {supplier_ds},
+                {line_item_ds},
+                {orders_ds},
+                {customer_ds},
+                {nation_ds} n1,
+                {nation_ds} n2
+            where
+                s_suppkey = l_suppkey
+                and o_orderkey = l_orderkey
+                and c_custkey = o_custkey
+                and s_nationkey = n1.n_nationkey
+                and c_nationkey = n2.n_nationkey
+                and (
+                    (n1.n_name = 'FRANCE' and n2.n_name = 'GERMANY')
+                    or (n1.n_name = 'GERMANY' and n2.n_name = 'FRANCE')
+                )
+                and l_shipdate between timestamp '1995-01-01' and timestamp '1996-12-31'
+        ) as shipping
+    group by
+        supp_nation,
+        cust_nation,
+        l_year
+    order by
+        supp_nation,
+        cust_nation,
+        l_year
+    ;
+
+
+========================================
+
+resultset consists of 4 rows in 4 columns
+
+-- current part timing: started at (epoch: 1750437190 s, 877952 usec), finished at (epoch: 1750437192 s, 917013 usec), time used: 2.04 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437192 s, 917028 usec), finished at (epoch: 1750437192 s, 983548 usec), time used: 0.07 s
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:33:10 2025
+ (epoch: 1750437190 s, 877952 usec)
+finished at: Fri Jun 20 18:33:12 2025
+ (epoch: 1750437192 s, 983548 usec)
+time used  : 2.11 s
+
+********************
+* TPC-H Query 12 0 *
+********************
+
+-- $ID$
+-- TPC-H/TPC-R Shipping Modes and Order Priority Query (Q12)
+-- Functional Query Definition
+-- Approved February 1998
+-- TPC-H Query 12 0
+
+
+    
+    
+    
+    select
+        l_shipmode,
+        sum(case
+            when o_orderpriority = '1-URGENT'
+                or o_orderpriority = '2-HIGH'
+                then 1
+            else 0
+        end) as high_line_count,
+        sum(case
+            when o_orderpriority <> '1-URGENT'
+                and o_orderpriority <> '2-HIGH'
+                then 1
+            else 0
+        end) as low_line_count
+    from
+        {orders_ds},
+        {line_item_ds}
+    where
+        o_orderkey = l_orderkey
+        and l_shipmode in ('MAIL', 'SHIP')
+        and l_commitdate < l_receiptdate
+        and l_shipdate < l_commitdate
+        and l_receiptdate >= date '1994-01-01'
+        and l_receiptdate < date '1994-01-01' + interval '1' year
+    group by
+        l_shipmode
+    order by
+        l_shipmode
+    ;
+
+
+===========================================
+
+resultset consists of 2 rows in 3 columns
+
+-- current part timing: started at (epoch: 1750437192 s, 984520 usec), finished at (epoch: 1750437194 s, 33122 usec), time used: 1.05 s
+
+COMMIT;
+
+affected rows: 0
+
+-- current part timing: started at (epoch: 1750437194 s, 33140 usec), finished at (epoch: 1750437194 s, 60886 usec), time used: 0.03 s
+
+
+
+
+-----------
+- Summary -
+-----------
+
+started  at: Fri Jun 20 18:33:12 2025
+ (epoch: 1750437192 s, 984520 usec)
+finished at: Fri Jun 20 18:33:14 2025
+ (epoch: 1750437194 s, 60886 usec)
+time used  : 1.08 s
+
+*************
+* TPC-H End *
+*************
+
+---------------------------
+- Summary of querystream 0 -
+---------------------------
+
+started  at: Fri Jun 20 18:31:52 2025
+ (epoch: 1750437112 s, 81911 usec)
+finished at: Fri Jun 20 18:33:14 2025
+ (epoch: 1750437194 s, 62087 usec)
+time used  : 81.98 s
+
