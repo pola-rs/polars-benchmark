@@ -10,22 +10,45 @@ from queries.common_utils import (
     get_table_path,
     run_query_generic,
 )
+from queries.common_utils import (
+    execute_all as common_execute_all,
+)
+from queries.polars.cloud_utils import get_compute_context, stop_compute_context
 from settings import Settings
 
 settings = Settings()
 
 
+def execute_all() -> None:
+    if not settings.run.polars_cloud:
+        return common_execute_all("polars")
+
+    # for polars cloud we have to create the compute context,
+    # reuse it across the queries, and stop it in the end
+    ctx = get_compute_context(log_create=True, log_reuse=True)
+    try:
+        common_execute_all("polars")
+    finally:
+        print(f"Stopping compute context: {ctx._compute_id}")
+        stop_compute_context(ctx)
+
+
 def _scan_ds(table_name: str) -> pl.LazyFrame:
     path = get_table_path(table_name)
+    # pathlib.Path normalizes consecutive slashes,
+    # unless Path.from_uri is used (Python >= 3.13)
+    path_str = str(path)
+    if path_str.startswith("s3:/") and not path_str.startswith("s3://"):
+        path_str = f"s3://{str(path)[4:]}"
 
     if settings.run.io_type == "skip":
-        return pl.read_parquet(path, rechunk=True).lazy()
+        return pl.read_parquet(path_str, rechunk=True).lazy()
     if settings.run.io_type == "parquet":
-        return pl.scan_parquet(path)
+        return pl.scan_parquet(path_str)
     elif settings.run.io_type == "feather":
-        return pl.scan_ipc(path)
+        return pl.scan_ipc(path_str)
     elif settings.run.io_type == "csv":
-        return pl.scan_csv(path, try_parse_dates=True)
+        return pl.scan_csv(path_str, try_parse_dates=True)
     else:
         msg = f"unsupported file type: {settings.run.io_type!r}"
         raise ValueError(msg)
@@ -161,32 +184,12 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     if cloud:
         import os
 
-        import polars_cloud as pc
-
         os.environ["POLARS_SKIP_CLIENT_CHECK"] = "1"
 
-        class PatchedComputeContext(pc.ComputeContext):
-            def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
-                self._interactive = True
-                self._compute_address = "localhost:5051"
-                self._compute_public_key = b""
-                self._compute_id = "1"  # type: ignore[assignment]
-
-            def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:
-                """Get the status of the compute cluster."""
-                return pc.ComputeContextStatus.RUNNING
-
-        pc.ComputeContext.__init__ = PatchedComputeContext.__init__  # type: ignore[assignment]
-        pc.ComputeContext.get_status = PatchedComputeContext.get_status  # type: ignore[method-assign]
+        ctx = get_compute_context(create_if_no_reuse=False)
 
         def query():  # type: ignore[no-untyped-def]
-            result = pc.spawn(
-                lf, dst="file:///tmp/dst/", distributed=True
-            ).await_result()
-
-            if settings.run.show_results:
-                print(result.plan())
-            return result.lazy().collect()
+            return lf.remote(context=ctx).distributed().collect()
     else:
         query = partial(
             lf.collect,

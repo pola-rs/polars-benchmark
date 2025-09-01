@@ -49,6 +49,13 @@ class Run(BaseSettings):
         "cuda", "cuda-pool", "managed", "managed-pool", "cuda-async"
     ] = "cuda-async"
 
+    polars_cloud_cpus: int | None = 1  ## CPUs per node
+    polars_cloud_memory: int | None = 2  # GB per node
+    # use instance_type instead of cpus and memory, e.g. "t2.micro"
+    polars_cloud_instance_type: str | None = None
+    polars_cloud_cluster_size: int = 1  ## nodes in the cluster
+    polars_cloud_workspace: str | None = None
+
     modin_memory: int = 8_000_000_000  # Tune as needed for optimal performance
 
     spark_driver_memory: str = "2g"  # Tune as needed for optimal performance
