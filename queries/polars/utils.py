@@ -189,7 +189,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
             ).await_result()
 
             if settings.run.show_results:
-                print(result.plan())  # type: ignore[attr-defined]
+                print(result.plan())
             return result.lazy().collect()
     else:
         query = partial(
