@@ -172,7 +172,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
                 client_options = pc.polars_cloud.ClientOptions()
                 client_options.insecure = True
                 self._compute_id = "1"  # type: ignore[assignment]
-                self._interactive_client = pc.polars_cloud.SchedulerClient(
+                self._interactive_client = pc.polars_cloud.SchedulerClient(  # type: ignore[attr-defined]
                     compute_address, client_options
                 )
 
@@ -189,7 +189,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
             ).await_result()
 
             if settings.run.show_results:
-                print(result.plan())
+                print(result.plan())  # type: ignore[attr-defined]
             return result.lazy().collect()
     else:
         query = partial(
