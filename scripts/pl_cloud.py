@@ -26,11 +26,11 @@ from queries.polars.q20 import q as q20
 from queries.polars.q21 import q as q21
 from queries.polars.q22 import q as q22
 
-pc.login()
+pc.authenticate()
 
 
 def _scan_ds(table_name: str) -> pl.LazyFrame:
-    path = f"s3://polars-pdsh/scale-factor-100.0/200/{table_name}/"
+    path = f"s3://polars-pdsh/scale-factor-1000.0/200/{table_name}/"
     return pl.scan_parquet(path)
 
 
@@ -81,10 +81,10 @@ queries = [
 
 
 ctx = pc.ComputeContext(
-    workspace="ritchie-workspace",
-    instance_type="t3.xlarge",
-    cluster_size=10,
-    interactive=True,
+    workspace="polars-ritchie-dev",
+    instance_type="m6i.xlarge",
+    cluster_size=32,
+    storage=128,
 )
 ctx.start(wait=True)
 
@@ -97,11 +97,18 @@ for i, q in enumerate(queries):
     print(f"run q{i}")
     start_time = time.time()
     try:
-        print(q.remote(ctx).distributed().show())
+        result = (
+            q.remote(ctx)
+            .distributed(shuffle_compression="zstd")
+            .execute()
+            .await_result()
+        )
+        print(result.head)
         execution_time = time.time() - start_time
         print(f"q{i} executed in: {execution_time:.2f} seconds")
         timings.append(execution_time)
-    except pl.exceptions.ComputeError:
+    except pl.exceptions.ComputeError as e:
+        print("remote query failed:", e)
         timings.append(None)
 
 print("timings: ", timings)

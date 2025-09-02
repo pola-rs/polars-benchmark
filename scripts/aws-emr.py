@@ -1,123 +1,49 @@
-import sys
 import time
 
-from awsglue.context import GlueContext
-from awsglue.transforms import *  # noqa: F403
-from awsglue.utils import getResolvedOptions
+from pyspark.sql import SparkSession
 
-# this requires PySpark<4
-from pyspark.context import SparkContext
-
-# @params: [JOB_NAME]
-args = getResolvedOptions(sys.argv, ["JOB_NAME"])
-
-# sc = SparkContext()
-# glueContext = GlueContext(sc)
-# spark = glueContext.spark_session
-# job = Job(glueContext)
-# job.init(args['JOB_NAME'], args)
-# job.commit()
+spark = SparkSession.builder.appName("TPC-H BENCH").getOrCreate()
 
 
-sc = SparkContext()
-glueContext = GlueContext(sc)
-spark = glueContext.spark_session
-
-# Read arbitrary dataset from S3
-lineitem = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={
-        "paths": ["s3://polars-pdsh/scale-factor-1000.0/200/lineitem/"]
-    },
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
-
-customer = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={
-        "paths": ["s3://polars-pdsh/scale-factor-1000.0/200/customer/"]
-    },
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
-
-nation = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={"paths": ["s3://polars-pdsh/scale-factor-1000.0/200/nation/"]},
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
-
-orders = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={"paths": ["s3://polars-pdsh/scale-factor-1000.0/200/orders/"]},
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
-
-part = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={"paths": ["s3://polars-pdsh/scale-factor-1000.0/200/part/"]},
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
-
-partsupp = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={
-        "paths": ["s3://polars-pdsh/scale-factor-1000.0/200/partsupp/"]
-    },
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
-
-region = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={"paths": ["s3://polars-pdsh/scale-factor-1000.0/200/region/"]},
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
-
-supplier = glueContext.create_dynamic_frame.from_options(
-    connection_type="s3",
-    connection_options={
-        "paths": ["s3://polars-pdsh/scale-factor-1000.0/200/supplier/"]
-    },
-    format="parquet",  # Change to "json", "csv", etc.
-).toDF()
+def register_table(spark, name):
+    path = "s3://polars-pdsh/scale-factor-1000.0/200/"
+    df = spark.read.parquet(path + name)
+    df.createOrReplaceTempView(name)
 
 
-# Register DataFrames as temporary views for SQL queries
-lineitem.createOrReplaceTempView("lineitem")
-customer.createOrReplaceTempView("customer")
-nation.createOrReplaceTempView("nation")
-orders.createOrReplaceTempView("orders")
-part.createOrReplaceTempView("part")
-partsupp.createOrReplaceTempView("partsupp")
-region.createOrReplaceTempView("region")
-supplier.createOrReplaceTempView("supplier")
+def test_query_1():
+    register_table(spark, "lineitem")
 
-# Run queries
-q1 = """
-    SELECT
-        l_returnflag,
-        l_linestatus,
-        SUM(l_quantity) AS sum_qty,
-        SUM(l_extendedprice) AS sum_base_price,
-        SUM(l_extendedprice * (1 - l_discount)) AS sum_disc_price,
-        SUM(l_extendedprice * (1 - l_discount) * (1 + l_tax)) AS sum_charge,
-        AVG(l_quantity) AS avg_qty,
-        AVG(l_extendedprice) AS avg_price,
-        AVG(l_discount) AS avg_disc,
-        COUNT(*) AS count_order
-    FROM
-        lineitem
-    WHERE
-        DATE(l_shipdate) <= DATE('1998-09-02')
-    GROUP BY
-        l_returnflag,
-        l_linestatus
-    ORDER BY
-        l_returnflag,
-        l_linestatus
-"""
+    query = """select
+            l_returnflag,
+            l_linestatus,
+            sum(l_quantity) as sum_qty,
+            sum(l_extendedprice) as sum_base_price,
+            sum(l_extendedprice * (1 - l_discount)) as sum_disc_price,
+            sum(l_extendedprice * (1 - l_discount) * (1 + l_tax)) as sum_charge,
+            avg(l_quantity) as avg_qty,
+            avg(l_extendedprice) as avg_price,
+            avg(l_discount) as avg_disc,
+            count(*) as count_order
+        from
+            lineitem
+        where
+            l_shipdate <= date('1998-09-02')
+        group by
+            l_returnflag,
+            l_linestatus
+        order by
+            l_returnflag,
+            l_linestatus
+    """
+    return spark.sql(query).collect()
 
 
-q2 = """
+def test_query_2():
+    for name in ("part", "supplier", "partsupp", "nation", "region"):
+        register_table(spark, name)
+
+    query = """
     select
         s_acctbal,
         s_name,
@@ -164,97 +90,137 @@ q2 = """
     limit 100
     """
 
-q3 = """
-    select
-        l_orderkey,
-        sum(l_extendedprice * (1 - l_discount)) as revenue,
-        date(o_orderdate),
-        o_shippriority
-    from
-        customer,
-        orders,
-        lineitem
-    where
-        c_mktsegment = 'BUILDING'
-        and c_custkey = o_custkey
-        and l_orderkey = o_orderkey
-        and o_orderdate < date '1995-03-15'
-        and l_shipdate > date '1995-03-15'
-    group by
-        l_orderkey,
-        o_orderdate,
-        o_shippriority
-    order by
-        revenue desc,
-        o_orderdate
-    limit 10
+    return spark.sql(query).collect()
+
+
+def test_query_3():
+    for name in ("customer", "orders", "lineitem"):
+        register_table(spark, name)
+
+    query = """
+        select
+            l_orderkey,
+            sum(l_extendedprice * (1 - l_discount)) as revenue,
+            o_orderdate,
+            o_shippriority
+        from
+            customer,
+            orders,
+            lineitem
+        where
+            c_mktsegment = 'BUILDING'
+            and c_custkey = o_custkey
+            and l_orderkey = o_orderkey
+            and o_orderdate < date '1995-03-15'
+            and l_shipdate > date '1995-03-15'
+        group by
+            l_orderkey,
+            o_orderdate,
+            o_shippriority
+        order by
+            revenue desc,
+            o_orderdate
+        limit 10
     """
 
+    return spark.sql(query).collect()
 
-q4 = """
-    select
-        o_orderpriority,
-        count(*) as order_count
-    from
-        orders
-    where
-        o_orderdate >= date '1993-07-01'
-        and o_orderdate < date '1993-07-01' + interval '3' month
-        and exists (
-            select
-                *
-            from
-                lineitem
-            where
-                l_orderkey = o_orderkey
-                and l_commitdate < l_receiptdate
-        )
-    group by
-        o_orderpriority
-    order by
-        o_orderpriority
+
+def test_query_4():
+    for name in ("orders", "lineitem"):
+        register_table(spark, name)
+
+    query = """
+        select
+            o_orderpriority,
+            count(*) as order_count
+        from
+            orders
+        where
+            o_orderdate >= date '1993-07-01'
+            and o_orderdate < date '1993-07-01' + interval '3' month
+            and exists (
+                select
+                    *
+                from
+                    lineitem
+                where
+                    l_orderkey = o_orderkey
+                    and l_commitdate < l_receiptdate
+            )
+        group by
+            o_orderpriority
+        order by
+            o_orderpriority
     """
 
-q5 = """
+    return spark.sql(query).collect()
+
+
+def test_query_5():
+    for name in (
+        "customer",
+        "orders",
+        "lineitem",
+        "supplier",
+        "nation",
+        "region",
+    ):
+        register_table(spark, name)
+
+    query = """
+        select
+            n_name,
+            sum(l_extendedprice * (1 - l_discount)) as revenue
+        from
+            customer,
+            orders,
+            lineitem,
+            supplier,
+            nation,
+            region
+        where
+            c_custkey = o_custkey
+            and l_orderkey = o_orderkey
+            and l_suppkey = s_suppkey
+            and c_nationkey = s_nationkey
+            and s_nationkey = n_nationkey
+            and n_regionkey = r_regionkey
+            and r_name = 'ASIA'
+            and o_orderdate >= date '1994-01-01'
+            and o_orderdate < date '1994-01-01' + interval '1' year
+        group by
+            n_name
+        order by
+            revenue desc
+    """
+    return spark.sql(query).collect()
+
+
+def test_query_6():
+    for name in ("lineitem",):
+        register_table(spark, name)
+
+    query = """
     select
-        n_name,
-        sum(l_extendedprice * (1 - l_discount)) as revenue
-    from
-        customer,
-        orders,
-        lineitem,
-        supplier,
-        nation,
-        region
-    where
-        c_custkey = o_custkey
-        and l_orderkey = o_orderkey
-        and l_suppkey = s_suppkey
-        and c_nationkey = s_nationkey
-        and s_nationkey = n_nationkey
-        and n_regionkey = r_regionkey
-        and r_name = 'ASIA'
-        and o_orderdate >= date '1994-01-01'
-        and o_orderdate < date '1994-01-01' + interval '1' year
-    group by
-        n_name
-    order by
-        revenue desc
+            sum(l_extendedprice * l_discount) as revenue
+        from
+            lineitem
+        where
+            l_shipdate >= date '1994-01-01'
+            and l_shipdate < date '1994-01-01' + interval '1' year
+            and l_discount between .06 - 0.01 and .06 + 0.01
+            and l_quantity < 24
     """
 
-q6 = """
-    select
-        sum(l_extendedprice * l_discount) as revenue
-    from
-        lineitem
-    where
-        l_shipdate >= date '1994-01-01'
-        and l_shipdate < date '1994-01-01' + interval '1' year
-        and l_discount between .06 - 0.01 and .06 + 0.01
-        and l_quantity < 24
-    """
+    return spark.sql(query).collect()
 
-q7 = """
+
+def test_query_7():
+    for name in ("supplier", "lineitem", "orders", "customer", "nation"):
+        register_table(spark, name)
+
+    query = """
     select
         supp_nation,
         cust_nation,
@@ -284,7 +250,7 @@ q7 = """
                     (n1.n_name = 'FRANCE' and n2.n_name = 'GERMANY')
                     or (n1.n_name = 'GERMANY' and n2.n_name = 'FRANCE')
                 )
-                and date(l_shipdate) between date '1995-01-01' and date '1996-12-31'
+                and l_shipdate between date '1995-01-01' and date '1996-12-31'
         ) as shipping
     group by
         supp_nation,
@@ -296,7 +262,22 @@ q7 = """
         l_year
     """
 
-q8 = """
+    return spark.sql(query).collect()
+
+
+def test_query_8():
+    for name in (
+        "part",
+        "supplier",
+        "lineitem",
+        "orders",
+        "customer",
+        "nation",
+        "region",
+    ):
+        register_table(spark, name)
+
+    query = """
     select
         o_year,
         round(
@@ -336,9 +317,16 @@ q8 = """
         o_year
     order by
         o_year
-"""
+    """
 
-q9 = """
+    return spark.sql(query).collect()
+
+
+def test_query_9():
+    for name in ("part", "supplier", "lineitem", "partsupp", "orders", "nation"):
+        register_table(spark, name)
+
+    query = """
     select
         nation,
         o_year,
@@ -371,9 +359,16 @@ q9 = """
     order by
         nation,
         o_year desc
-"""
+    """
 
-q10 = """
+    return spark.sql(query).collect()
+
+
+def test_query_10():
+    for name in ("customer", "orders", "lineitem", "nation"):
+        register_table(spark, name)
+
+    query = """
     select
         c_custkey,
         c_name,
@@ -406,9 +401,16 @@ q10 = """
     order by
         revenue desc
     limit 20
-"""
+    """
 
-q11 = """
+    return spark.sql(query).collect()
+
+
+def test_query_11():
+    for name in ("partsupp", "supplier", "nation"):
+        register_table(spark, name)
+
+    query = """
     select
         ps_partkey,
         round(sum(ps_supplycost * ps_availqty), 2) as value
@@ -436,9 +438,16 @@ q11 = """
             )
         order by
             value desc
-"""
+    """
 
-q12 = """
+    return spark.sql(query).collect()
+
+
+def test_query_12():
+    for name in ("orders", "lineitem"):
+        register_table(spark, name)
+
+    query = """
     select
         l_shipmode,
         sum(case
@@ -469,7 +478,14 @@ q12 = """
         l_shipmode
     """
 
-q13 = """
+    return spark.sql(query).collect()
+
+
+def test_query_13():
+    for name in ("customer", "orders"):
+        register_table(spark, name)
+
+    query = """
     select
         c_count, count(*) as custdist
     from (
@@ -488,9 +504,16 @@ q13 = """
     order by
         custdist desc,
         c_count desc
-	"""
+    """
 
-q14 = """
+    return spark.sql(query).collect()
+
+
+def test_query_14():
+    for name in ("lineitem", "part"):
+        register_table(spark, name)
+
+    query = """
     select
         round(100.00 * sum(case
             when p_type like 'PROMO%'
@@ -504,9 +527,16 @@ q14 = """
         l_partkey = p_partkey
         and l_shipdate >= date '1995-09-01'
         and l_shipdate < date '1995-09-01' + interval '1' month
-	"""
+    """
 
-view_revenue = """
+    return spark.sql(query).collect()
+
+
+def test_query_15():
+    for name in ("lineitem", "supplier"):
+        register_table(spark, name)
+
+    ddl = """
     create temp view revenue (supplier_no, total_revenue) as
         select
             l_suppkey,
@@ -519,10 +549,9 @@ view_revenue = """
         group by
             l_suppkey
     """
+    spark.sql(ddl)
 
-_ = spark.sql(view_revenue)
-
-q15 = """
+    query = """
     select
         s_suppkey,
         s_name,
@@ -542,9 +571,18 @@ q15 = """
         )
     order by
         s_suppkey
-	"""
+    """
 
-q16 = """
+    result = spark.sql(query).collect()
+    spark.sql("drop view revenue")
+    return result
+
+
+def test_query_16():
+    for name in ("partsupp", "part", "supplier"):
+        register_table(spark, name)
+
+    query = """
     select
         p_brand,
         p_type,
@@ -575,9 +613,16 @@ q16 = """
         p_brand,
         p_type,
         p_size
-	"""
+    """
 
-q17 = """
+    return spark.sql(query).collect()
+
+
+def test_query_17():
+    for name in ("lineitem", "part"):
+        register_table(spark, name)
+
+    query = """
     select
         round(sum(l_extendedprice) / 7.0, 2) as avg_yearly
     from
@@ -595,9 +640,16 @@ q17 = """
             where
                 l_partkey = p_partkey
         )
-	"""
+    """
 
-q18 = """
+    return spark.sql(query).collect()
+
+
+def test_query_18():
+    for name in ("customer", "orders", "lineitem"):
+        register_table(spark, name)
+
+    query = """
     select
         c_name,
         c_custkey,
@@ -631,9 +683,16 @@ q18 = """
         o_totalprice desc,
         o_orderdate
     limit 100
-	"""
+    """
 
-q19 = """
+    return spark.sql(query).collect()
+
+
+def test_query_19():
+    for name in ("lineitem", "part"):
+        register_table(spark, name)
+
+    query = """
     select
         round(sum(l_extendedprice* (1 - l_discount)), 2) as revenue
     from
@@ -669,9 +728,16 @@ q19 = """
             and l_shipmode in ('AIR', 'AIR REG')
             and l_shipinstruct = 'DELIVER IN PERSON'
         )
-	"""
+    """
 
-q20 = """
+    return spark.sql(query).collect()
+
+
+def test_query_20():
+    for name in ("supplier", "nation", "partsupp", "part", "lineitem"):
+        register_table(spark, name)
+
+    query = """
     select
         s_name,
         s_address
@@ -709,9 +775,16 @@ q20 = """
         and n_name = 'CANADA'
     order by
         s_name
-	"""
+    """
 
-q21 = """
+    return spark.sql(query).collect()
+
+
+def test_query_21():
+    for name in ("supplier", "lineitem", "orders", "nation"):
+        register_table(spark, name)
+
+    query = """
     select
         s_name,
         count(*) as numwait
@@ -752,9 +825,16 @@ q21 = """
         numwait desc,
         s_name
     limit 100
-	"""
+    """
 
-q22 = """
+    return spark.sql(query).collect()
+
+
+def test_query_22():
+    for name in ("customer", "orders"):
+        register_table(spark, name)
+
+    query = """
     select
         cntrycode,
         count(*) as numcust,
@@ -791,40 +871,15 @@ q22 = """
         cntrycode
     order by
         cntrycode
-	"""
+    """
 
-# Execute the SQL query
+    return spark.sql(query).collect()
 
-queries = [
-    q1,
-    q2,
-    q3,
-    q4,
-    q5,
-    q6,
-    q7,
-    q8,
-    q9,
-    q10,
-    q11,
-    q12,
-    q13,
-    q14,
-    q15,
-    q16,
-    q17,
-    q18,
-    q19,
-    q20,
-    q21,
-    q22,
-]
 
 timings = []
-for i, q in enumerate(queries):
+for i in range(1, 23):
     start_time = time.time()
-    result = spark.sql(q)
-    result.show()
+    print(eval(f"test_query_{i}()"))
     execution_time = time.time() - start_time
     print(f"q{i} executed in: {execution_time:.2f} seconds")
     timings.append(execution_time)

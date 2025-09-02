@@ -10,7 +10,7 @@ IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv"]
 # Set via PATH_<NAME>
 class Paths(BaseSettings):
     answers: Path = Path("data/answers")
-    tables: Path = Path("data/tables")
+    tables: Path = Path("data/tables").absolute()
 
     timings: Path = Path("output/run")
     timings_filename: str = "timings.csv"
