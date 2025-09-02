@@ -71,6 +71,7 @@ enable_error_code = [
   "ignore-without-code",
 ]
 plugins = ["pydantic.mypy"]
+exclude = ["scripts.aws_emr", "scripts.aws_glue"]
 
 
 [[tool.mypy.overrides]]
