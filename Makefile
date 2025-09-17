@@ -101,12 +101,6 @@ run-duckdb: .venv data-tables ## Run DuckDB benchmarks
 run-pandas: .venv data-tables ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
-.PHONY: run-pandas-gpu
-run-pandas-gpu: .venv ## Run cudf.pandas benchmarks
-	# TODO: Change this to use $(PYTHON) once
-	# https://github.com/pola-rs/polars-benchmark/pull/146 is merged
-	RUN_PANDAS_GPU=true $(VENV_BIN)/python -m queries.pandas
-
 .PHONY: run-pandas-no-env
 run-pandas-no-env: ## Run pandas benchmarks
 	python -m queries.pandas

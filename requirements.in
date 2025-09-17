@@ -7,8 +7,6 @@ pandas>=2.0
 polars
 polars_cloud
 pyspark
-cudf-cu12
-cudf-polars-cu12
 
 pyarrow  # Required by duckdb/pandas
 fastparquet  # Required by pandas
