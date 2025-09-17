@@ -6,8 +6,6 @@ attrs==25.3.0
     # via
     #   jsonschema
     #   referencing
-cachetools==6.2.0
-    # via cudf-cu12
 certifi==2025.8.3
     # via requests
 charset-normalizer==3.4.3
@@ -17,50 +15,29 @@ click==8.2.1
     #   dask
     #   ray
 cloudpickle==3.1.1
-    # via
-    #   dask
-    #   polars-u64-idx
+    # via dask
 contourpy==1.3.3
     # via matplotlib
 cramjam==2.11.0
     # via fastparquet
-cuda-bindings==12.9.2
-    # via cuda-python
-cuda-pathfinder==1.2.2
-    # via cuda-bindings
-cuda-python==12.9.2
-    # via
-    #   cudf-cu12
-    #   numba-cuda
-    #   pylibcudf-cu12
-    #   rmm-cu12
-cudf-cu12==25.8.0
-    # via -r requirements.in
-cudf-polars-cu12==25.8.0
-    # via -r requirements.in
-cupy-cuda12x==13.6.0
-    # via cudf-cu12
 cycler==0.12.1
     # via matplotlib
-dask==2025.9.1
+dask==2025.7.0
     # via
     #   -r requirements.in
     #   dask-expr
 dask-expr==2.0.0
     # via -r requirements.in
-duckdb==1.4.0
+duckdb==1.3.2
     # via -r requirements.in
 fastparquet==2024.11.0
     # via -r requirements.in
-fastrlock==0.8.3
-    # via cupy-cuda12x
 filelock==3.19.1
     # via ray
-fonttools==4.60.0
+fonttools==4.59.2
     # via matplotlib
-fsspec==2025.9.0
+fsspec==2025.7.0
     # via
-    #   cudf-cu12
     #   dask
     #   fastparquet
     #   modin
@@ -68,96 +45,49 @@ idna==3.10
     # via requests
 jsonschema==4.25.1
     # via ray
-jsonschema-specifications==2025.9.1
+jsonschema-specifications==2025.4.1
     # via jsonschema
 kiwisolver==1.4.9
     # via matplotlib
-libcudf-cu12==25.8.0
-    # via
-    #   cudf-cu12
-    #   pylibcudf-cu12
-libkvikio-cu12==25.8.0
-    # via libcudf-cu12
-librmm-cu12==25.8.0
-    # via
-    #   libcudf-cu12
-    #   rmm-cu12
 linetimer==0.1.5
     # via -r requirements.in
-llvmlite==0.44.0
-    # via numba
 locket==1.0.0
     # via partd
-markdown-it-py==4.0.0
-    # via rich
 matplotlib==3.10.6
     # via plotnine
-mdurl==0.1.2
-    # via markdown-it-py
 mizani==0.14.2
     # via plotnine
-modin==0.36.0
+modin==0.35.0
     # via -r requirements.in
 msgpack==1.1.1
     # via ray
-narwhals==2.5.0
+narwhals==2.3.0
     # via plotly
-numba==0.61.2
-    # via
-    #   cudf-cu12
-    #   numba-cuda
-numba-cuda==0.14.1
-    # via cudf-cu12
-numpy==2.2.6
+numpy==2.3.2
     # via
     #   contourpy
-    #   cudf-cu12
-    #   cupy-cuda12x
     #   dask
     #   fastparquet
     #   matplotlib
     #   mizani
     #   modin
-    #   numba
     #   pandas
     #   patsy
     #   plotnine
-    #   rmm-cu12
     #   scipy
     #   statsmodels
-nvidia-cuda-cccl-cu12==12.9.27
-    # via numba-cuda
-nvidia-cuda-nvcc-cu12==12.9.86
-    # via
-    #   cudf-cu12
-    #   numba-cuda
-nvidia-cuda-nvrtc-cu12==12.9.86
-    # via
-    #   cudf-cu12
-    #   numba-cuda
-nvidia-cuda-runtime-cu12==12.9.79
-    # via numba-cuda
-nvidia-ml-py==13.580.82
-    # via cudf-polars-cu12
-nvtx==0.2.13
-    # via
-    #   cudf-cu12
-    #   pylibcudf-cu12
 packaging==25.0
     # via
-    #   cudf-cu12
     #   dask
     #   fastparquet
     #   matplotlib
     #   modin
     #   plotly
-    #   pylibcudf-cu12
     #   ray
     #   statsmodels
 pandas==2.3.2
     # via
     #   -r requirements.in
-    #   cudf-cu12
     #   dask
     #   fastparquet
     #   mizani
@@ -174,27 +104,24 @@ plotly==6.3.0
     # via -r requirements.in
 plotnine==0.15.0
     # via -r requirements.in
-polars==1.31.0
+polars==1.32.0
     # via
     #   -r requirements.in
-    #   cudf-polars-cu12
-polars-cloud==0.2.0
+    #   polars-cloud
+polars-cloud==0.0.11
     # via -r requirements.in
-polars-u64-idx==1.33.1
-    # via polars-cloud
-protobuf==6.32.1
+protobuf==6.32.0
     # via ray
-psutil==7.1.0
+psutil==7.0.0
     # via modin
 py4j==0.10.9.9
     # via pyspark
-pyarrow==19.0.1
+pyarrow==21.0.0
     # via
     #   -r requirements.in
-    #   cudf-cu12
     #   dask
     #   modin
-pydantic==2.11.9
+pydantic==2.11.7
     # via
     #   -r requirements.in
     #   pydantic-settings
@@ -202,17 +129,9 @@ pydantic-core==2.33.2
     # via pydantic
 pydantic-settings==2.10.1
     # via -r requirements.in
-pygments==2.19.2
-    # via rich
-pylibcudf-cu12==25.8.0
-    # via
-    #   cudf-cu12
-    #   cudf-polars-cu12
-pynvjitlink-cu12==0.7.0
-    # via cudf-cu12
-pyparsing==3.2.4
+pyparsing==3.2.3
     # via matplotlib
-pyspark==4.0.1
+pyspark==4.0.0
     # via -r requirements.in
 python-dateutil==2.9.0.post0
     # via
@@ -226,11 +145,7 @@ pyyaml==6.0.2
     # via
     #   dask
     #   ray
-rapids-logger==0.1.1
-    # via
-    #   libcudf-cu12
-    #   librmm-cu12
-ray==2.49.1
+ray==2.49.0
     # via modin
 referencing==0.36.2
     # via
@@ -238,17 +153,11 @@ referencing==0.36.2
     #   jsonschema-specifications
 requests==2.32.5
     # via ray
-rich==14.1.0
-    # via cudf-cu12
-rmm-cu12==25.8.0
-    # via
-    #   cudf-cu12
-    #   pylibcudf-cu12
 rpds-py==0.27.1
     # via
     #   jsonschema
     #   referencing
-scipy==1.16.2
+scipy==1.16.1
     # via
     #   mizani
     #   plotnine
@@ -263,14 +172,14 @@ toolz==1.0.0
     # via
     #   dask
     #   partd
-tpchgen-cli==2.0.1
+tpchgen-cli==2.0.0
     # via -r requirements.in
 typing-extensions==4.15.0
     # via
-    #   cudf-cu12
+    #   polars-cloud
     #   pydantic
     #   pydantic-core
-    #   pylibcudf-cu12
+    #   referencing
     #   typing-inspection
 typing-inspection==0.4.1
     # via
