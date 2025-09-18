@@ -107,6 +107,14 @@ run-duckdb: .venv data-tables ## Run DuckDB benchmarks
 run-pandas: .venv data-tables ## Run pandas benchmarks
 	$(VENV_BIN)/python -m queries.pandas
 
+.PHONY: run-pandas-no-env
+run-pandas-no-env: ## Run pandas benchmarks
+	python -m queries.pandas
+
+.PHONY: run-pandas-gpu-no-env
+run-pandas-gpu-no-env: ## Run pandas benchmarks
+	RUN_PANDAS_GPU=true python -m queries.pandas
+
 .PHONY: run-pyspark
 run-pyspark: .venv data-tables ## Run PySpark benchmarks
 	$(VENV_BIN)/python -m queries.pyspark

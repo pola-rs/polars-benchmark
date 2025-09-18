@@ -1,7 +1,7 @@
 import pathlib
 import tempfile
 from functools import partial
-from typing import Literal
+from typing import Literal, cast
 
 import polars as pl
 
@@ -172,13 +172,13 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
                 client_options = pc.polars_cloud.ClientOptions()
                 client_options.insecure = True
                 self._compute_id = "1"  # type: ignore[assignment]
-                self._interactive_client = pc.polars_cloud.SchedulerClient(  # type: ignore[attr-defined]
+                self._interactive_client = pc.polars_cloud.SchedulerClient(
                     compute_address, client_options
                 )
 
-        def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:
-            """Get the status of the compute cluster."""
-            return pc.ComputeContextStatus.RUNNING
+            def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:
+                """Get the status of the compute cluster."""
+                return pc.ComputeContextStatus.RUNNING
 
         pc.ComputeContext.__init__ = PatchedComputeContext.__init__  # type: ignore[assignment]
         pc.ComputeContext.get_status = PatchedComputeContext.get_status  # type: ignore[method-assign]
@@ -189,7 +189,9 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
             ).await_result()
 
             if settings.run.show_results:
-                print(result.plan())
+                # casting the result is necessary because in proxy mode the ProxyQuery
+                # does not support getting a plan out.
+                print(cast("pc.DirectQuery", result).plan())
             return result.lazy().collect()
     else:
         query = partial(
