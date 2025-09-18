@@ -191,7 +191,7 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
             if settings.run.show_results:
                 # casting the result is necessary because in proxy mode the ProxyQuery
                 # does not support getting a plan out.
-                print(cast(pc.DirectQuery, result).plan())
+                print(cast("pc.DirectQuery", result).plan())
             return result.lazy().collect()
     else:
         query = partial(
