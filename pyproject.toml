@@ -86,8 +86,6 @@ module = [
   "awsglue.*",
   "scripts/aws_glue.py",
   "scripts/aws_emr.py",
-  # TODO: Remove after https://github.com/duckdb/duckdb-python/issues/57 is resolved
-  "duckdb.*",
 ]
 ignore_missing_imports = true
 
