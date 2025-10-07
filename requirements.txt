@@ -30,7 +30,7 @@ dask==2025.9.1
     #   dask-expr
 dask-expr==2.0.0
     # via -r requirements.in
-duckdb==1.4.0
+duckdb==1.4.1
     # via -r requirements.in
 fastparquet==2024.11.0
     # via -r requirements.in
