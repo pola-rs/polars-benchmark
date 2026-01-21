@@ -10,14 +10,13 @@ Q_NUM = 6
 
 
 def q() -> None:
-    line_item_ds = utils.get_line_item_ds
+    line_item_ds_fn = utils.get_line_item_ds
 
     # first call one time to cache in case we don't include the IO times
-    line_item_ds()
+    line_item_ds_fn()
 
     def query() -> pd.DataFrame:
-        nonlocal line_item_ds
-        line_item_ds = line_item_ds()
+        line_item_ds = line_item_ds_fn()
 
         var1 = date(1994, 1, 1)
         var2 = date(1995, 1, 1)

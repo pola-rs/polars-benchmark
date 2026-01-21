@@ -10,18 +10,16 @@ Q_NUM = 4
 
 
 def q() -> None:
-    line_item_ds = utils.get_line_item_ds
-    orders_ds = utils.get_orders_ds
+    line_item_ds_fn = utils.get_line_item_ds
+    orders_ds_fn = utils.get_orders_ds
 
     # first call one time to cache in case we don't include the IO times
-    line_item_ds()
-    orders_ds()
+    line_item_ds_fn()
+    orders_ds_fn()
 
     def query() -> pd.DataFrame:
-        nonlocal line_item_ds
-        nonlocal orders_ds
-        line_item_ds = line_item_ds()
-        orders_ds = orders_ds()
+        line_item_ds = line_item_ds_fn()
+        orders_ds = orders_ds_fn()
 
         var1 = date(1993, 7, 1)
         var2 = date(1993, 10, 1)
