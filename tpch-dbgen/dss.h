@@ -177,8 +177,8 @@ typedef struct
    char     *name;
    char     *comment;
    DSS_HUGE      base;
-   int       (*loader) ();
-   long      (*gen_seed)();
+   int       (*loader) (void*, int);
+   long      (*gen_seed)(int, long long int);
    int       child;
    DSS_HUGE vtotal;
 }         tdef;

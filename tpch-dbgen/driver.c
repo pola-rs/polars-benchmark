@@ -54,8 +54,8 @@
 /* main driver for dss banchmark */
 
 #define DECLARER				/* EXTERN references get defined here */
-#define NO_FUNC (int (*) ()) NULL	/* to clean up tdefs */
-#define NO_LFUNC (long (*) ()) NULL		/* to clean up tdefs */
+
+static long no_lfunc(int, long long int) {}
 
 #include "config.h"
 #include "release.h"
@@ -179,25 +179,25 @@ long sd_part_psupp (int child, DSS_HUGE skip_count);
 tdef tdefs[] =
 {
 	{"part.tbl", "part table", 200000,
-		pr_part, sd_part, PSUPP, 0},
+		(int (*)(void *, int))pr_part, sd_part, PSUPP, 0},
 	{"partsupp.tbl", "partsupplier table", 200000,
-		pr_psupp, sd_psupp, NONE, 0},
+		(int (*)(void *, int))pr_psupp, sd_psupp, NONE, 0},
 	{"supplier.tbl", "suppliers table", 10000,
-		pr_supp, sd_supp, NONE, 0},
+		(int (*)(void *, int))pr_supp, sd_supp, NONE, 0},
 	{"customer.tbl", "customers table", 150000,
-		pr_cust, sd_cust, NONE, 0},
+		(int (*)(void *, int))pr_cust, sd_cust, NONE, 0},
 	{"orders.tbl", "order table", 150000,
-		pr_order, sd_order, LINE, 0},
+		(int (*)(void *, int))pr_order, sd_order, LINE, 0},
 	{"lineitem.tbl", "lineitem table", 150000,
-		pr_line, sd_line, NONE, 0},
+		(int (*)(void *, int))pr_line, sd_line, NONE, 0},
 	{"orders.tbl", "orders/lineitem tables", 150000,
-		pr_order_line, sd_order, LINE, 0},
+		(int (*)(void *, int))pr_order_line, sd_order, LINE, 0},
 	{"part.tbl", "part/partsupplier tables", 200000,
-		pr_part_psupp, sd_part, PSUPP, 0},
+		(int (*)(void *, int))pr_part_psupp, sd_part, PSUPP, 0},
 	{"nation.tbl", "nation table", NATIONS_MAX,
-		pr_nation, NO_LFUNC, NONE, 0},
+		(int (*)(void *, int))pr_nation, no_lfunc, NONE, 0},
 	{"region.tbl", "region table", NATIONS_MAX,
-		pr_region, NO_LFUNC, NONE, 0},
+		(int (*)(void *, int))pr_region, no_lfunc, NONE, 0},
 };
 
 /*
