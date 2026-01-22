@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import statistics
 import sys
 from importlib.metadata import version
 from pathlib import Path
@@ -88,9 +89,27 @@ def execute_all(library_name: str) -> None:
 
     query_numbers = _get_query_numbers(library_name)
 
-    with CodeTimer(name=f"Overall execution of ALL {library_name} queries", unit="s"):
+    total_query_s = 0.0
+
+    with CodeTimer(
+        name=f"Overall execution benchmark harness and {library_name} queries", unit="s"
+    ):
         for i in query_numbers:
-            run([sys.executable, "-m", f"queries.{library_name}.q{i}"])
+            out = run(
+                [sys.executable, "-m", f"queries.{library_name}.q{i}"],
+                check=True,
+                capture_output=True,
+            )
+            stdout_str = out.stdout.decode("utf8")
+            sys.stdout.write(stdout_str)
+            times = [
+                float(x.rpartition("took: ")[2])
+                for x in stdout_str.split(" s\n")
+                if x != ""
+            ]
+            total_query_s += statistics.median(times)
+
+        print(f"\nAll queries combined took: {total_query_s:.4} s (median)\n")
 
 
 def _get_query_numbers(library_name: str) -> list[int]:
