@@ -33,31 +33,20 @@ def q(
     var3 = date(1995, 1, 1)
     var4 = date(1996, 12, 31)
 
-    n1 = nation.filter(pl.col("n_name") == var1)
-    n2 = nation.filter(pl.col("n_name") == var2)
-
-    q1 = (
-        customer.join(n1, left_on="c_nationkey", right_on="n_nationkey")
-        .join(orders, left_on="c_custkey", right_on="o_custkey")
-        .rename({"n_name": "cust_nation"})
-        .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
-        .join(supplier, left_on="l_suppkey", right_on="s_suppkey")
-        .join(n2, left_on="s_nationkey", right_on="n_nationkey")
-        .rename({"n_name": "supp_nation"})
-    )
-
-    q2 = (
-        customer.join(n2, left_on="c_nationkey", right_on="n_nationkey")
-        .join(orders, left_on="c_custkey", right_on="o_custkey")
-        .rename({"n_name": "cust_nation"})
-        .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
-        .join(supplier, left_on="l_suppkey", right_on="s_suppkey")
-        .join(n1, left_on="s_nationkey", right_on="n_nationkey")
-        .rename({"n_name": "supp_nation"})
-    )
+    nations = nation.filter(pl.col("n_name").is_in([var1, var2]))
 
     return (
-        pl.concat([q1, q2])
+        customer.join(nations, left_on="c_nationkey", right_on="n_nationkey")
+        .rename({"n_name": "cust_nation"})
+        .join(orders, left_on="c_custkey", right_on="o_custkey")
+        .join(lineitem, left_on="o_orderkey", right_on="l_orderkey")
+        .join(supplier, left_on="l_suppkey", right_on="s_suppkey")
+        .join(nations, left_on="s_nationkey", right_on="n_nationkey")
+        .rename({"n_name": "supp_nation"})
+        .filter(
+            ((pl.col("cust_nation") == var1) & (pl.col("supp_nation") == var2))
+            | ((pl.col("cust_nation") == var2) & (pl.col("supp_nation") == var1))
+        )
         .filter(pl.col("l_shipdate").is_between(var3, var4))
         .with_columns(
             (pl.col("l_extendedprice") * (1 - pl.col("l_discount"))).alias("volume"),
