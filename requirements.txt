@@ -106,11 +106,9 @@ plotly==6.3.0
     # via -r requirements.in
 plotnine==0.15.0
     # via -r requirements.in
-polars==1.33.1
+polars==1.40.1
     # via -r requirements.in
-polars-cloud==0.2.0
-    # via -r requirements.in
-polars-u64-idx==1.33.1
+polars-cloud==0.7.0
     # via polars-cloud
 protobuf==6.32.1
     # via ray
