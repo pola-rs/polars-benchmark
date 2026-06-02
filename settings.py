@@ -33,7 +33,6 @@ class Run(BaseSettings):
 
     polars_show_plan: bool = False
     polars_eager: bool = False
-    polars_old_streaming: bool = False
     polars_streaming: bool = False
     polars_cloud: bool = False
     polars_gpu: bool = False  # Use GPU engine?
