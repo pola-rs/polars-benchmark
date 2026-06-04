@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import os
 import re
 import statistics
 import sys
@@ -21,8 +22,16 @@ if TYPE_CHECKING:
 settings = Settings()
 
 
-def get_table_path(table_name: str) -> Path:
+def get_table_path(table_name: str) -> Path | str:
     """Return the path to the given table."""
+    if settings.run.io_type == "network":
+        return "/".join([
+            settings.paths.network_base_url,
+            f"scale-factor-{settings.scale_factor}",
+            str(settings.num_batches),
+            table_name,
+            "*.parquet",
+        ])
     ext = settings.run.io_type if settings.run.include_io else "parquet"
     if settings.num_batches is None:
         return settings.dataset_base_dir / f"{table_name}.{ext}"
@@ -99,6 +108,7 @@ def execute_all(library_name: str) -> None:
                 [sys.executable, "-m", f"queries.{library_name}.q{i}"],
                 check=True,
                 capture_output=True,
+                env=os.environ,
             )
             stdout_str = out.stdout.decode("utf8")
             sys.stdout.write(stdout_str)
@@ -136,7 +146,7 @@ def run_query_generic(
 ) -> None:
     """Execute a query."""
     # execute the query once to ensure we are getting a hot run
-    query()
+    # query()
     for _ in range(settings.run.iterations):
         with CodeTimer(
             name=f"Run {library_name} query {query_number}", unit="s"

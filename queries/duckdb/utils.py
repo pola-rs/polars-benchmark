@@ -15,6 +15,10 @@ _connection = None
 
 
 def _scan_ds(table_name: str) -> str:
+    if settings.run.io_type == "network":
+        msg = "Network io is not setup for DuckDB"
+        raise ValueError(msg)
+
     path = get_table_path(table_name)
     path_str = str(path)
 

@@ -20,7 +20,7 @@ def _scan_ds(table_name: str) -> pl.LazyFrame:
 
     if settings.run.io_type == "skip":
         return pl.read_parquet(path, rechunk=True).lazy()
-    if settings.run.io_type == "parquet":
+    if settings.run.io_type in ("parquet", "network"):
         return pl.scan_parquet(path)
     elif settings.run.io_type == "feather":
         return pl.scan_ipc(path)

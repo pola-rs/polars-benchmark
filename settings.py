@@ -4,13 +4,14 @@ from typing import Literal, TypeAlias
 from pydantic import computed_field
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv", "duckdb"]
+IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv", "duckdb", "network"]
 
 
 # Set via PATH_<NAME>
 class Paths(BaseSettings):
     answers: Path = Path("data/answers")
     tables: Path = Path("data/tables").absolute()
+    network_base_url: str = "s3://polars-pdsh"
 
     timings: Path = Path("output/run")
     timings_filename: str = "timings.csv"
@@ -78,7 +79,7 @@ class Plot(BaseSettings):
 
 class Settings(BaseSettings):
     scale_factor: float = 1.0
-    num_batches: int | None = None
+    num_batches: int = 200
 
     paths: Paths = Paths()
     plot: Plot = Plot()
