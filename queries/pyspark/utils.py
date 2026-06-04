@@ -26,7 +26,9 @@ def get_or_create_spark() -> SparkSession:
         .config("spark.log.level", settings.run.spark_log_level)
     )
     if settings.run.io_type == "network":
-        builder = builder.config("spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.4.1")
+        builder = builder.config(
+            "spark.jars.packages", "org.apache.hadoop:hadoop-aws:3.4.1"
+        )
     return builder.getOrCreate()
 
 
@@ -39,9 +41,7 @@ def _read_ds(table_name: str) -> DataFrame:
     path = get_table_path(table_name)
 
     if settings.run.io_type in ("parquet", "network"):
-        print(path)
         path_str = str(path).replace("s3://", "s3a://")
-        print(path_str)
         df = get_or_create_spark().read.parquet(path_str)
     elif settings.run.io_type == "csv":
         df = get_or_create_spark().read.csv(str(path), header=True, inferSchema=True)
