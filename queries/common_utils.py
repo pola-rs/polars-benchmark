@@ -11,6 +11,7 @@ from typing import TYPE_CHECKING, Any
 
 from linetimer import CodeTimer
 
+from queries.resource_monitor import ResourceMonitor
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -147,11 +148,14 @@ def run_query_generic(
     """Execute a query."""
     # execute the query once to ensure we are getting a hot run
     # query()
-    for _ in range(settings.run.iterations):
+    for i in range(settings.run.iterations):
+        monitor = ResourceMonitor()
         with CodeTimer(
             name=f"Run {library_name} query {query_number}", unit="s"
         ) as timer:
+            monitor.start()
             result = query()
+            monitor.stop()
 
         if settings.run.log_timings:
             log_query_timing(
@@ -160,6 +164,12 @@ def run_query_generic(
                 query_number=query_number,
                 time=timer.took,
             )
+            monitor_path = (
+                settings.paths.timings
+                / "monitor"
+                / f"{library_name}_q{query_number}_iter{i + 1}.csv"
+            )
+            monitor.write_csv(monitor_path)
 
         if settings.run.check_results:
             if query_checker is None:
