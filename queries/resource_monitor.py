@@ -17,6 +17,13 @@ class ResourceMonitor:
         self._last_bytes_recv: int = 0
         self._last_sample_time: float = 0.0
 
+    def __enter__(self) -> ResourceMonitor:
+        self.start()
+        return self
+
+    def __exit__(self, *_: object) -> None:
+        self.stop()
+
     def start(self) -> None:
         self._samples = []
         self._stop_event.clear()

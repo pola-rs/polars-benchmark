@@ -9,6 +9,8 @@ from pathlib import Path
 from subprocess import run
 from typing import TYPE_CHECKING, Any
 
+from contextlib import nullcontext
+
 from linetimer import CodeTimer
 
 from queries.resource_monitor import ResourceMonitor
@@ -149,13 +151,10 @@ def run_query_generic(
     # execute the query once to ensure we are getting a hot run
     # query()
     for i in range(settings.run.iterations):
-        monitor = ResourceMonitor()
-        with CodeTimer(
-            name=f"Run {library_name} query {query_number}", unit="s"
-        ) as timer:
-            monitor.start()
-            result = query()
-            monitor.stop()
+        monitor = ResourceMonitor() if settings.run.log_timings else nullcontext()
+        with CodeTimer(name=f"Run {library_name} query {query_number}", unit="s") as timer:
+            with monitor:
+                result = query()
 
         if settings.run.log_timings:
             log_query_timing(
@@ -169,7 +168,7 @@ def run_query_generic(
                 / "monitor"
                 / f"{library_name}_q{query_number}_iter{i + 1}.csv"
             )
-            monitor.write_csv(monitor_path)
+            monitor.write_csv(monitor_path)  # type: ignore[union-attr]
 
         if settings.run.check_results:
             if query_checker is None:
