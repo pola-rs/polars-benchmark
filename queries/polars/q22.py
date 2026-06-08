@@ -29,13 +29,8 @@ def q(
         pl.col("c_acctbal").mean().alias("avg_acctbal")
     )
 
-    q3 = orders.select(pl.col("o_custkey").unique()).with_columns(
-        pl.col("o_custkey").alias("c_custkey")
-    )
-
     return (
-        q1.join(q3, on="c_custkey", how="left")
-        .filter(pl.col("o_custkey").is_null())
+        q1.join(orders, left_on="c_custkey", right_on="o_custkey", how="anti")
         .join(q2, how="cross")
         .filter(pl.col("c_acctbal") > pl.col("avg_acctbal"))
         .group_by("cntrycode")
