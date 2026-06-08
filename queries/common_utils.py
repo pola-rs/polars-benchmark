@@ -115,6 +115,8 @@ def execute_all(library_name: str) -> None:
             )
             stdout_str = out.stdout.decode("utf8")
             sys.stdout.write(stdout_str)
+            print("Clearing caches & compacting memory...")
+            run(["sudo", "sh", "-c", "sync && echo 3 > /proc/sys/vm/drop_caches"], check=True)
             times = [
                 float(x.rpartition("took: ")[2])
                 for x in stdout_str.split(" s\n")

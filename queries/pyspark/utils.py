@@ -23,7 +23,7 @@ def get_or_create_spark() -> SparkSession:
         .master("local[*]")
         .config("spark.driver.memory", settings.run.spark_driver_memory)
         .config("spark.executor.memory", settings.run.spark_executor_memory)
-        .config("spark.local.dir", "/nvme")
+        .config("spark.local.dir", "/data")
         .config("spark.log.level", settings.run.spark_log_level)
     )
     if settings.run.io_type == "network":
