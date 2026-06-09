@@ -31,8 +31,8 @@ def q() -> None:
             jn["p_type"].str.startswith("PROMO"), 0
         )
 
-        promo_revenue = (100.0 * jn["promo_revenue"].sum() / jn["revenue"].sum()).round(
-            2
+        promo_revenue = round(
+            100.0 * jn["promo_revenue"].sum() / jn["revenue"].sum(), 2
         )
 
         result_df = pd.DataFrame({"promo_revenue": [promo_revenue]})

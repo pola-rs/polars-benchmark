@@ -37,7 +37,7 @@ def q() -> None:
         jn2 = jn.merge(avg_qty, on="p_partkey")
         jn2 = jn2[jn2["l_quantity"] < jn2["avg_quantity"]]
 
-        avg_yearly = (jn2["l_extendedprice"].sum() / 7.0).round(2)
+        avg_yearly = round(jn2["l_extendedprice"].sum() / 7.0, 2)
 
         result_df = pd.DataFrame({"avg_yearly": [avg_yearly]})
 
