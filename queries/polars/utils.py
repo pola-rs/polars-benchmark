@@ -161,12 +161,15 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
         class PatchedComputeContext(pc.ComputeContext):
             def __init__(self, *args, **kwargs) -> None:  # type: ignore[no-untyped-def]
                 self._interactive = True
-                compute_address = "localhost:5051"
+                compute_address = "localhost"
                 client_options = pc.polars_cloud.ClientOptions()
                 client_options.insecure = True
                 self._compute_id = "1"  # type: ignore[assignment]
                 self._interactive_client = pc.polars_cloud.SchedulerClient(
-                    compute_address, client_options
+                    compute_address,
+                    grpc_port=5051,
+                    observatory_port=3001,
+                    client_options=client_options,
                 )
 
             def get_status(self: pc.ComputeContext) -> pc.ComputeContextStatus:

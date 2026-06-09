@@ -212,15 +212,19 @@ def gen_parquet(
 
         if partitioned:
 
-            def partition_file_name(ctx: pl.BasePartitionContext) -> pathlib.Path:
-                partition = f"{batch_idx}_{ctx.file_idx}"
+            def partition_file_name(
+                args: pl.io.partition.FileProviderArgs,
+            ) -> pathlib.Path:
+                partition = f"{batch_idx}_{args.index_in_partition}"
                 (base_path / table_name / partition).mkdir(parents=True, exist_ok=True)  # noqa: B023
                 return pathlib.Path(partition) / "part.parquet"
 
             path = base_path / table_name
             lf.sink_parquet(
-                pl.PartitionMaxSize(
-                    path, file_path=partition_file_name, max_size=rows_per_file
+                pl.PartitionBy(
+                    path,
+                    file_path_provider=partition_file_name,
+                    max_rows_per_file=rows_per_file,
                 )
             )
         else:

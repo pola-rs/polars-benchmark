@@ -97,12 +97,7 @@ for i, q in enumerate(queries):
     print(f"run q{i}")
     start_time = time.time()
     try:
-        result = (
-            q.remote(ctx)
-            .distributed(shuffle_compression="zstd")
-            .execute()
-            .await_result()
-        )
+        result = q.remote(ctx).distributed(shuffle_compression="zstd").execute()
         print(result.head)
         execution_time = time.time() - start_time
         print(f"q{i} executed in: {execution_time:.2f} seconds")
