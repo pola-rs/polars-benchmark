@@ -28,6 +28,7 @@ class Run(BaseSettings):
     io_type: IoType = "parquet"
 
     iterations: int = 1
+    pre_run: bool = True
     log_timings: bool = False
     show_results: bool = False
     check_results: bool = False  # Only available for SCALE_FACTOR=1
