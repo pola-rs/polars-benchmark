@@ -25,6 +25,7 @@ def get_or_create_spark() -> SparkSession:
         .config("spark.executor.memory", settings.run.spark_executor_memory)
         .config("spark.local.dir", "/data")
         .config("spark.log.level", settings.run.spark_log_level)
+        .config("spark.sql.shuffle.partitions", settings.run.spark_shuffle_partitions)
     )
     if settings.run.io_type == "network":
         builder = builder.config(

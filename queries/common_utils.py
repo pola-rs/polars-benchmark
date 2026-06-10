@@ -9,11 +9,8 @@ from pathlib import Path
 from subprocess import run
 from typing import TYPE_CHECKING, Any
 
-from contextlib import nullcontext
-
 from linetimer import CodeTimer
 
-from queries.resource_monitor import ResourceMonitor
 from settings import Settings
 
 if TYPE_CHECKING:
@@ -28,13 +25,15 @@ settings = Settings()
 def get_table_path(table_name: str) -> Path | str:
     """Return the path to the given table."""
     if settings.run.io_type == "network":
-        return "/".join([
-            settings.paths.network_base_url,
-            f"scale-factor-{settings.scale_factor}",
-            str(settings.num_batches),
-            table_name,
-            "*.parquet",
-        ])
+        return "/".join(
+            [
+                settings.paths.network_base_url,
+                f"scale-factor-{settings.scale_factor}",
+                str(settings.num_batches),
+                table_name,
+                "*.parquet",
+            ]
+        )
     ext = settings.run.io_type if settings.run.include_io else "parquet"
     if settings.num_batches is None:
         return settings.dataset_base_dir / f"{table_name}.{ext}"
@@ -115,8 +114,6 @@ def execute_all(library_name: str) -> None:
             )
             stdout_str = out.stdout.decode("utf8")
             sys.stdout.write(stdout_str)
-            print("Clearing caches & compacting memory...")
-            run(["sudo", "sh", "-c", "sync && echo 3 > /proc/sys/vm/drop_caches"], check=True)
             times = [
                 float(x.rpartition("took: ")[2])
                 for x in stdout_str.split(" s\n")
@@ -151,12 +148,12 @@ def run_query_generic(
 ) -> None:
     """Execute a query."""
     # execute the query once to ensure we are getting a hot run
-    # query()
-    for i in range(settings.run.iterations):
-        monitor = ResourceMonitor() if settings.run.log_timings else nullcontext()
-        with CodeTimer(name=f"Run {library_name} query {query_number}", unit="s") as timer:
-            with monitor:
-                result = query()
+    query()
+    for _ in range(settings.run.iterations):
+        with CodeTimer(
+            name=f"Run {library_name} query {query_number}", unit="s"
+        ) as timer:
+            result = query()
 
         if settings.run.log_timings:
             log_query_timing(
@@ -165,12 +162,6 @@ def run_query_generic(
                 query_number=query_number,
                 time=timer.took,
             )
-            monitor_path = (
-                settings.paths.timings
-                / "monitor"
-                / f"{library_name}_q{query_number}_iter{i + 1}.csv"
-            )
-            monitor.write_csv(monitor_path)  # type: ignore[union-attr]
 
         if settings.run.check_results:
             if query_checker is None:

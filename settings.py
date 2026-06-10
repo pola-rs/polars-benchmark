@@ -11,7 +11,7 @@ IoType: TypeAlias = Literal["skip", "parquet", "feather", "csv", "duckdb", "netw
 class Paths(BaseSettings):
     answers: Path = Path("data/answers")
     tables: Path = Path("data/tables").absolute()
-    network_base_url: str = "s3://polars-pdsh"
+    network_base_url: str = "s3://polars-pdsh-eu-central"
 
     timings: Path = Path("output/run")
     timings_filename: str = "timings.csv"
