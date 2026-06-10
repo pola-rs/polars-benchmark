@@ -1,0 +1,90 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-master
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: spark-master
+  template:
+    metadata:
+      labels:
+        app: spark-master
+    spec:
+      serviceAccountName: default
+      containers:
+        - name: spark-master
+          image: apache/spark:4.1.1
+          env:
+            - name: SPARK_MASTER_OPTS
+              value: "-Dspark.ui.reverseProxy=true -Dspark.ui.reverseProxyUrl=http://localhost:8080"
+          command:
+            - /opt/spark/bin/spark-class
+            - org.apache.spark.deploy.master.Master
+          ports:
+            - name: cluster
+              containerPort: 7077
+            - name: web-ui
+              containerPort: 8080
+          resources:
+            requests:
+              cpu: 500m
+              memory: 1Gi
+            limits:
+              cpu: 1000m
+              memory: 2Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: spark-master-svc
+spec:
+  selector:
+    app: spark-master
+  ports:
+    - name: cluster
+      port: 7077
+      targetPort: 7077
+    - name: web-ui
+      port: 8080
+      targetPort: 8080
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: spark-worker
+spec:
+  replicas: 32
+  selector:
+    matchLabels:
+      app: spark-worker
+  template:
+    metadata:
+      labels:
+        app: spark-worker
+    spec:
+      serviceAccountName: default
+      affinity:
+        podAntiAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            - labelSelector:
+                matchLabels:
+                  app: spark-worker
+              topologyKey: kubernetes.io/hostname
+      containers:
+        - name: spark-worker
+          image: apache/spark:4.1.1
+          command:
+            - /opt/spark/bin/spark-class
+            - org.apache.spark.deploy.worker.Worker
+            - spark://spark-master-svc:7077
+          env:
+            - name: SPARK_WORKER_MEMORY
+              value: "12g"
+            - name: SPARK_WORKER_CORES
+              value: "4"
+          resources:
+            requests:
+              cpu: 3000m
+              memory: 12Gi

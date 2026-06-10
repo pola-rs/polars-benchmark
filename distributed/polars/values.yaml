@@ -1,0 +1,60 @@
+acceptEula: true
+license:
+  onPremEnterprise:
+    enabled: true
+    secretName: license
+    secretProperty: license.json
+scheduler:
+  deployment:
+    affinity:
+      podAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+          - labelSelector:
+              matchLabels:
+                polars-scheduling-target: "true"
+            namespaces:
+              - "kube-system"
+            topologyKey: "kubernetes.io/hostname"
+    runtimeContainer:
+      resources:
+        requests:
+          memory: 12Gi
+        limits:
+          memory: 12Gi
+worker:
+  deployment:
+    affinity:
+      podAntiAffinity:
+        preferredDuringSchedulingIgnoredDuringExecution:
+          - weight: 100
+            podAffinityTerm:
+              labelSelector:
+                matchLabels:
+                  polars-scheduling-target: "true"
+              topologyKey: "kubernetes.io/hostname"
+    replicaCount: 32
+    runtimeContainer:
+      resources:
+        requests:
+          memory: 12Gi
+        limits:
+          memory: 12Gi
+      env:
+        - name: POLARS_MAX_CONCURRENT_SCANS
+          value: "8"
+        - name: POLARS_CONCURRENCY_BUDGET
+          value: "512"
+        - name: POLARS_ROW_GROUP_PREFETCH_SIZE
+          value: "64"
+anonymousResults:
+  s3:
+    enabled: true
+    endpoint: s3://polars-benchmark
+runtime:
+  composed:
+    dist:
+      repository: polarscloud/polars-on-premises
+      tag: "0.5.1"
+      pullPolicy: Always
+    runtime:
+      tag: "3.12.3-slim-bookworm"
