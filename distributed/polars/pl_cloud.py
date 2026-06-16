@@ -1,4 +1,3 @@
-
 import time
 
 import polars as pl
@@ -86,11 +85,7 @@ for i, q in enumerate(queries):
     print(f"run q{i}")
     start_time = time.time()
     try:
-        result = (
-            q.remote(ctx)
-            .distributed()
-            .execute()
-        )
+        result = q.remote(ctx).distributed().execute()
         print(result.head)
         execution_time = time.time() - start_time
         print(f"q{i} executed in: {execution_time:.2f} seconds")
