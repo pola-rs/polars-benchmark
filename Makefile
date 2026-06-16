@@ -30,8 +30,8 @@ install-deps: .venv  ## Install Python project dependencies
 .PHONY: bump-deps
 bump-deps: .venv  ## Bump Python project dependencies
 	$(VENV_BIN)/python -m pip install --upgrade uv
-	$(VENV_BIN)/uv pip compile requirements.in > requirements.txt
-	$(VENV_BIN)/uv pip compile requirements-dev.in > requirements-dev.txt
+	$(VENV_BIN)/uv pip compile --upgrade requirements.in > requirements.txt
+	$(VENV_BIN)/uv pip compile --upgrade requirements-dev.in > requirements-dev.txt
 
 .PHONY: fmt
 fmt:  ## Run autoformatting and linting
