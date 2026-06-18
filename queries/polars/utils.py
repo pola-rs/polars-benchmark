@@ -39,7 +39,7 @@ def _scan_ds(table_name: str) -> pl.LazyFrame:
     # unless Path.from_uri is used (Python >= 3.13)
     path_str = str(path)
     if path_str.startswith("s3:/") and not path_str.startswith("s3://"):
-        path_str = f"s3://{str(path)[4:]}"
+        path_str = f"s3://{path_str[4:]}"
 
     if settings.run.io_type == "skip":
         return pl.read_parquet(path_str, rechunk=True).lazy()
