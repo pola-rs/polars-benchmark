@@ -15,10 +15,6 @@ _connection = None
 
 
 def _scan_ds(table_name: str) -> str:
-    if settings.run.io_type == "network":
-        msg = "Network io is not setup for DuckDB"
-        raise ValueError(msg)
-
     path = get_table_path(table_name)
     path_str = str(path)
 
@@ -30,7 +26,7 @@ def _scan_ds(table_name: str) -> str:
         return name
     elif settings.run.io_type == "duckdb":
         return table_name
-    elif settings.run.io_type == "parquet" or settings.run.io_type == "csv":
+    elif settings.run.io_type in ("parquet", "csv", "network"):
         return f"'{path_str}'"
     else:
         msg = f"unsupported file type: {settings.run.io_type!r}"
@@ -84,6 +80,10 @@ def get_connection() -> duckdb.DuckDBPyConnection:
         else:
             # connect to in-memory db
             _connection = duckdb.connect()
+            if settings.run.io_type == "network":
+                _connection.sql("INSTALL httpfs; LOAD httpfs;")
+                _connection.sql("CALL load_aws_credentials();")
+    _connection.sql("SET enable_progress_bar=false;")
     return _connection
 
 
