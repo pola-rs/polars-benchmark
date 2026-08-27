@@ -5,3 +5,5 @@ plotnine
 plotly
 pydantic
 pydantic-settings
+
+statsmodels==0.14.6  # pinned until 0.15.0 is properly released
