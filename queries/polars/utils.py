@@ -141,8 +141,6 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     if sum([eager, streaming, gpu, cloud]) > 1:
         msg = "Please specify at most one of eager, streaming, cloud or gpu"
         raise ValueError(msg)
-    if settings.run.polars_show_plan:
-        print(lf.explain(streaming=streaming, optimized=eager))
 
     engine = obtain_engine_config()
     if settings.run.polars_show_plan:
@@ -192,9 +190,8 @@ def run_query(query_number: int, lf: pl.LazyFrame) -> None:
     else:
         query = partial(
             lf.collect,
-            streaming=streaming,
-            no_optimization=eager,
             engine=engine,
+            optimizations=pl.QueryOptFlags.none() if eager else pl.QueryOptFlags(),
         )
 
     if gpu:
