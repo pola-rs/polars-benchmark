@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import sys
 from typing import TYPE_CHECKING, Any
 
 import modin.pandas as pd
@@ -20,7 +21,14 @@ settings = Settings()
 
 pd.options.mode.copy_on_write = True
 
-os.environ["MODIN_MEMORY"] = str(settings.run.modin_memory)
+# Ray (Modin's engine) won't start properly on macOS when object store > 2GB;
+# value comes from `ray._private.ray_constants.MAC_DEGRADED_PERF_MMAP_SIZE_LIMIT`
+modin_memory = settings.run.modin_memory
+if sys.platform == "darwin":
+    MAC_OBJECT_STORE_LIMIT = 2_147_483_648
+    modin_memory = min(modin_memory, MAC_OBJECT_STORE_LIMIT)
+
+os.environ["MODIN_MEMORY"] = str(modin_memory)
 
 
 def _read_ds(table_name: str) -> pd.DataFrame:
