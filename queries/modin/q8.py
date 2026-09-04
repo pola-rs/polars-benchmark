@@ -12,38 +12,31 @@ Q_NUM = 8
 
 
 def q() -> None:
-    customer_ds = utils.get_customer_ds
-    line_item_ds = utils.get_line_item_ds
-    nation_ds = utils.get_nation_ds
-    orders_ds = utils.get_orders_ds
-    part_ds = utils.get_part_ds
-    region_ds = utils.get_region_ds
-    supplier_ds = utils.get_supplier_ds
+    customer_ds_fn = utils.get_customer_ds
+    line_item_ds_fn = utils.get_line_item_ds
+    nation_ds_fn = utils.get_nation_ds
+    orders_ds_fn = utils.get_orders_ds
+    part_ds_fn = utils.get_part_ds
+    region_ds_fn = utils.get_region_ds
+    supplier_ds_fn = utils.get_supplier_ds
 
     # first call one time to cache in case we don't include the IO times
-    customer_ds()
-    line_item_ds()
-    nation_ds()
-    orders_ds()
-    part_ds()
-    region_ds()
-    supplier_ds()
+    customer_ds_fn()
+    line_item_ds_fn()
+    nation_ds_fn()
+    orders_ds_fn()
+    part_ds_fn()
+    region_ds_fn()
+    supplier_ds_fn()
 
     def query() -> pd.DataFrame:
-        nonlocal customer_ds
-        nonlocal line_item_ds
-        nonlocal nation_ds
-        nonlocal orders_ds
-        nonlocal part_ds
-        nonlocal region_ds
-        nonlocal supplier_ds
-        customer_ds = customer_ds()
-        line_item_ds = line_item_ds()
-        nation_ds = nation_ds()
-        orders_ds = orders_ds()
-        part_ds = part_ds()
-        region_ds = region_ds()
-        supplier_ds = supplier_ds()
+        customer_ds = customer_ds_fn()
+        line_item_ds = line_item_ds_fn()
+        nation_ds = nation_ds_fn()
+        orders_ds = orders_ds_fn()
+        part_ds = part_ds_fn()
+        region_ds = region_ds_fn()
+        supplier_ds = supplier_ds_fn()
 
         var1 = "BRAZIL"
         var2 = "AMERICA"

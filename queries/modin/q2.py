@@ -11,30 +11,25 @@ Q_NUM = 2
 
 
 def q() -> None:
-    region_ds = utils.get_region_ds
-    nation_ds = utils.get_nation_ds
-    supplier_ds = utils.get_supplier_ds
-    part_ds = utils.get_part_ds
-    part_supp_ds = utils.get_part_supp_ds
+    region_ds_fn = utils.get_region_ds
+    nation_ds_fn = utils.get_nation_ds
+    supplier_ds_fn = utils.get_supplier_ds
+    part_ds_fn = utils.get_part_ds
+    part_supp_ds_fn = utils.get_part_supp_ds
 
     # first call one time to cache in case we don't include the IO times
-    region_ds()
-    nation_ds()
-    supplier_ds()
-    part_ds()
-    part_supp_ds()
+    region_ds_fn()
+    nation_ds_fn()
+    supplier_ds_fn()
+    part_ds_fn()
+    part_supp_ds_fn()
 
     def query() -> pd.DataFrame:
-        nonlocal region_ds
-        nonlocal nation_ds
-        nonlocal supplier_ds
-        nonlocal part_ds
-        nonlocal part_supp_ds
-        region_ds = region_ds()
-        nation_ds = nation_ds()
-        supplier_ds = supplier_ds()
-        part_ds = part_ds()
-        part_supp_ds = part_supp_ds()
+        region_ds = region_ds_fn()
+        nation_ds = nation_ds_fn()
+        supplier_ds = supplier_ds_fn()
+        part_ds = part_ds_fn()
+        part_supp_ds = part_supp_ds_fn()
 
         var1 = 15
         var2 = "BRASS"

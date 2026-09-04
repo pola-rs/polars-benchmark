@@ -12,34 +12,28 @@ Q_NUM = 5
 
 
 def q() -> None:
-    region_ds = utils.get_region_ds
-    nation_ds = utils.get_nation_ds
-    customer_ds = utils.get_customer_ds
-    line_item_ds = utils.get_line_item_ds
-    orders_ds = utils.get_orders_ds
-    supplier_ds = utils.get_supplier_ds
+    region_ds_fn = utils.get_region_ds
+    nation_ds_fn = utils.get_nation_ds
+    customer_ds_fn = utils.get_customer_ds
+    line_item_ds_fn = utils.get_line_item_ds
+    orders_ds_fn = utils.get_orders_ds
+    supplier_ds_fn = utils.get_supplier_ds
 
     # first call one time to cache in case we don't include the IO times
-    region_ds()
-    nation_ds()
-    customer_ds()
-    line_item_ds()
-    orders_ds()
-    supplier_ds()
+    region_ds_fn()
+    nation_ds_fn()
+    customer_ds_fn()
+    line_item_ds_fn()
+    orders_ds_fn()
+    supplier_ds_fn()
 
     def query() -> pd.DataFrame:
-        nonlocal region_ds
-        nonlocal nation_ds
-        nonlocal customer_ds
-        nonlocal line_item_ds
-        nonlocal orders_ds
-        nonlocal supplier_ds
-        region_ds = region_ds()
-        nation_ds = nation_ds()
-        customer_ds = customer_ds()
-        line_item_ds = line_item_ds()
-        orders_ds = orders_ds()
-        supplier_ds = supplier_ds()
+        region_ds = region_ds_fn()
+        nation_ds = nation_ds_fn()
+        customer_ds = customer_ds_fn()
+        line_item_ds = line_item_ds_fn()
+        orders_ds = orders_ds_fn()
+        supplier_ds = supplier_ds_fn()
 
         var1 = "ASIA"
         var2 = date(1994, 1, 1)
