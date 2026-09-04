@@ -6,7 +6,7 @@ import statistics
 import sys
 from importlib.metadata import version
 from pathlib import Path
-from subprocess import run
+from subprocess import CalledProcessError, run
 from typing import TYPE_CHECKING, Any
 
 from linetimer import CodeTimer
@@ -106,12 +106,18 @@ def execute_all(library_name: str) -> None:
         name=f"Overall execution benchmark harness and {library_name} queries", unit="s"
     ):
         for i in query_numbers:
-            out = run(
-                [sys.executable, "-m", f"queries.{library_name}.q{i}"],
-                check=True,
-                capture_output=True,
-                env=os.environ,
-            )
+            try:
+                out = run(
+                    [sys.executable, "-m", f"queries.{library_name}.q{i}"],
+                    check=True,
+                    capture_output=True,
+                    env=os.environ,
+                )
+            except CalledProcessError as err:
+                sys.stdout.write(err.stdout.decode("utf8"))
+                sys.stderr.write(err.stderr.decode("utf8"))
+                raise
+
             stdout_str = out.stdout.decode("utf8")
             sys.stdout.write(stdout_str)
             times = [
