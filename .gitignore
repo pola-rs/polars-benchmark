@@ -25,6 +25,7 @@ perf.*
 **/flamegraph.svg
 
 # Other
+.DS_Store
 .swp
 *.tbl
 *.o

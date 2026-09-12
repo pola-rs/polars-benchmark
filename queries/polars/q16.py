@@ -33,8 +33,7 @@ def q(
         .filter(pl.col("p_brand") != var1)
         .filter(pl.col("p_type").str.contains("MEDIUM POLISHED*").not_())
         .filter(pl.col("p_size").is_in([49, 14, 23, 45, 19, 3, 36, 9]))
-        .join(supplier, left_on="ps_suppkey", right_on="s_suppkey", how="left")
-        .filter(pl.col("ps_suppkey_right").is_null())
+        .join(supplier, left_on="ps_suppkey", right_on="s_suppkey", how="anti")
         .group_by("p_brand", "p_type", "p_size")
         .agg(pl.col("ps_suppkey").n_unique().alias("supplier_cnt"))
         .sort(
