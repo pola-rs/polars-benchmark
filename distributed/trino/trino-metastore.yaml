@@ -32,7 +32,7 @@ data:
       </property>
       <property>
         <name>fs.s3a.endpoint.region</name>
-        <value>eu-central-1</value>
+        <value>eu-west-1</value>
       </property>
     </configuration>
 ---

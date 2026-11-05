@@ -22,7 +22,7 @@ catalogs:
   hive: |
     connector.name=hive
     fs.native-s3.enabled=true
-    s3.region=eu-central-1
+    s3.region=eu-west-1
     hive.metastore=thrift
     hive.metastore.uri=thrift://hive-metastore.default.svc.cluster.local:9083
     hive.non-managed-table-creates-enabled=true
@@ -100,7 +100,7 @@ initContainers:
       command: ["/opt/hive/bin/schematool", "-initSchema", "-dbType", "derby"]
       env:
         - name: AWS_REGION
-          value: eu-central-1
+          value: eu-west-1
       volumeMounts:
         - name: hive-metastore-config
           mountPath: /opt/hive/conf/metastore-site.xml
@@ -114,7 +114,7 @@ sidecarContainers:
       command: ["/opt/hive/bin/hive", "--service", "metastore"]
       env:
         - name: AWS_REGION
-          value: eu-central-1
+          value: eu-west-1
         - name: HADOOP_CLASSPATH
           value: "/opt/jars/aws-sdk-bundle-2.42.17.jar:/opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.4.1.jar"
       ports:

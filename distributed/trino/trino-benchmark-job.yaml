@@ -7,19 +7,19 @@ data:
     #!/usr/bin/env bash
     set -u
 
-    BUCKET="s3://polars-pdsh-eu-central/scale-factor-1000.0/200"
+    BUCKET="s3://polars-cloud-datasets/tpch/sf1000/partitioned"
     TRINO=(trino --server http://trino:8080 --user benchmark)
 
     cat > /tmp/setup.sql <<EOF
     CREATE SCHEMA IF NOT EXISTS hive.benchmark;
-    CREATE TABLE IF NOT EXISTS hive.benchmark.customer (c_custkey BIGINT, c_name VARCHAR, c_address VARCHAR, c_nationkey BIGINT, c_phone VARCHAR, c_acctbal DOUBLE, c_mktsegment VARCHAR, c_comment VARCHAR) WITH (external_location = '${BUCKET}/customer/', format = 'PARQUET');
-    CREATE TABLE IF NOT EXISTS hive.benchmark.lineitem (l_orderkey BIGINT, l_partkey BIGINT, l_suppkey BIGINT, l_linenumber BIGINT, l_quantity BIGINT, l_extendedprice DOUBLE, l_discount DOUBLE, l_tax DOUBLE, l_returnflag VARCHAR, l_linestatus VARCHAR, l_shipdate DATE, l_commitdate DATE, l_receiptdate DATE, l_shipinstruct VARCHAR, l_shipmode VARCHAR, comments VARCHAR) WITH (external_location = '${BUCKET}/lineitem/', format = 'PARQUET');
+    CREATE TABLE IF NOT EXISTS hive.benchmark.customer (c_custkey BIGINT, c_name VARCHAR, c_address VARCHAR, c_nationkey BIGINT, c_phone VARCHAR, c_acctbal DECIMAL(15, 2), c_mktsegment VARCHAR, c_comment VARCHAR) WITH (external_location = '${BUCKET}/customer/', format = 'PARQUET');
+    CREATE TABLE IF NOT EXISTS hive.benchmark.lineitem (l_orderkey BIGINT, l_partkey BIGINT, l_suppkey BIGINT, l_linenumber INTEGER, l_quantity DECIMAL(15, 2), l_extendedprice DECIMAL(15, 2), l_discount DECIMAL(15, 2), l_tax DECIMAL(15, 2), l_returnflag VARCHAR, l_linestatus VARCHAR, l_shipdate DATE, l_commitdate DATE, l_receiptdate DATE, l_shipinstruct VARCHAR, l_shipmode VARCHAR, l_comment VARCHAR) WITH (external_location = '${BUCKET}/lineitem/', format = 'PARQUET');
     CREATE TABLE IF NOT EXISTS hive.benchmark.nation (n_nationkey BIGINT, n_name VARCHAR, n_regionkey BIGINT, n_comment VARCHAR) WITH (external_location = '${BUCKET}/nation/', format = 'PARQUET');
-    CREATE TABLE IF NOT EXISTS hive.benchmark.orders (o_orderkey BIGINT, o_custkey BIGINT, o_orderstatus VARCHAR, o_totalprice DOUBLE, o_orderdate DATE, o_orderpriority VARCHAR, o_clerk VARCHAR, o_shippriority BIGINT, o_comment VARCHAR) WITH (external_location = '${BUCKET}/orders/', format = 'PARQUET');
-    CREATE TABLE IF NOT EXISTS hive.benchmark.part (p_partkey BIGINT, p_name VARCHAR, p_mfgr VARCHAR, p_brand VARCHAR, p_type VARCHAR, p_size BIGINT, p_container VARCHAR, p_retailprice DOUBLE, p_comment VARCHAR) WITH (external_location = '${BUCKET}/part/', format = 'PARQUET');
-    CREATE TABLE IF NOT EXISTS hive.benchmark.partsupp (ps_partkey BIGINT, ps_suppkey BIGINT, ps_availqty BIGINT, ps_supplycost DOUBLE, ps_comment VARCHAR) WITH (external_location = '${BUCKET}/partsupp/', format = 'PARQUET');
+    CREATE TABLE IF NOT EXISTS hive.benchmark.orders (o_orderkey BIGINT, o_custkey BIGINT, o_orderstatus VARCHAR, o_totalprice DECIMAL(15, 2), o_orderdate DATE, o_orderpriority VARCHAR, o_clerk VARCHAR, o_shippriority INTEGER, o_comment VARCHAR) WITH (external_location = '${BUCKET}/orders/', format = 'PARQUET');
+    CREATE TABLE IF NOT EXISTS hive.benchmark.part (p_partkey BIGINT, p_name VARCHAR, p_mfgr VARCHAR, p_brand VARCHAR, p_type VARCHAR, p_size INTEGER, p_container VARCHAR, p_retailprice DECIMAL(15, 2), p_comment VARCHAR) WITH (external_location = '${BUCKET}/part/', format = 'PARQUET');
+    CREATE TABLE IF NOT EXISTS hive.benchmark.partsupp (ps_partkey BIGINT, ps_suppkey BIGINT, ps_availqty INTEGER, ps_supplycost DECIMAL(15, 2), ps_comment VARCHAR) WITH (external_location = '${BUCKET}/partsupp/', format = 'PARQUET');
     CREATE TABLE IF NOT EXISTS hive.benchmark.region (r_regionkey BIGINT, r_name VARCHAR, r_comment VARCHAR) WITH (external_location = '${BUCKET}/region/', format = 'PARQUET');
-    CREATE TABLE IF NOT EXISTS hive.benchmark.supplier (s_suppkey BIGINT, s_name VARCHAR, s_address VARCHAR, s_nationkey BIGINT, s_phone VARCHAR, s_acctbal DOUBLE, s_comment VARCHAR) WITH (external_location = '${BUCKET}/supplier/', format = 'PARQUET');
+    CREATE TABLE IF NOT EXISTS hive.benchmark.supplier (s_suppkey BIGINT, s_name VARCHAR, s_address VARCHAR, s_nationkey BIGINT, s_phone VARCHAR, s_acctbal DECIMAL(15, 2), s_comment VARCHAR) WITH (external_location = '${BUCKET}/supplier/', format = 'PARQUET');
     EOF
 
     echo "Create tables"
