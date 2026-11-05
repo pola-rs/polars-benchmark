@@ -30,7 +30,7 @@ data:
     for i in $(seq 1 22); do
       echo "Submit q$i"
       start=$(date +%s%N)
-      if "${TRINO[@]}" --catalog hive --schema benchmark --output-format NULL --file "/queries/q$i.sql"; then
+      if "${TRINO[@]}" --catalog hive --schema benchmark --output-format NULL --execute "$(cat "/queries/q$i.sql");"; then
         ms=$(( ($(date +%s%N) - start) / 1000000 ))
         t=$(printf "%d.%02d" $((ms / 1000)) $((ms % 1000 / 10)))
         timings+=("$t")
