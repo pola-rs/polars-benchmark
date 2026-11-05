@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: hive-metastore
+data:
+  metastore-site.xml: |
+    <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+    <configuration>
+      <property>
+        <name>javax.jdo.option.ConnectionURL</name>
+        <value>jdbc:derby:/opt/hive/data/metastore_db;create=true</value>
+      </property>
+      <property>
+        <name>javax.jdo.option.ConnectionDriverName</name>
+        <value>org.apache.derby.iapi.jdbc.AutoloadedDriver</value>
+      </property>
+      <property>
+        <name>hive.metastore.warehouse.dir</name>
+        <value>/tmp</value>
+      </property>
+      <property>
+        <name>fs.s3.impl</name>
+        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+      </property>
+      <property>
+        <name>fs.s3a.impl</name>
+        <value>org.apache.hadoop.fs.s3a.S3AFileSystem</value>
+      </property>
+      <property>
+        <name>fs.s3a.aws.credentials.provider</name>
+        <value>com.amazonaws.auth.EnvironmentVariableCredentialsProvider,com.amazonaws.auth.InstanceProfileCredentialsProvider</value>
+      </property>
+      <property>
+        <name>fs.s3a.endpoint.region</name>
+        <value>eu-central-1</value>
+      </property>
+    </configuration>
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: hive-metastore
+spec:
+  selector:
+    app.kubernetes.io/component: coordinator
+    app.kubernetes.io/instance: trino
+  ports:
+    - port: 9083
+      targetPort: 9083

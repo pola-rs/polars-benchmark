@@ -1,0 +1,134 @@
+# Sized for m8i.xlarge (allocatable memory is 13.72 GiB)
+# 16 GiB                Total node memory
+#  └─ ~2.3 GiB          OS + kubelet + kube-proxy + Pod Identity agent
+#  └─ 13.5 GiB          Container limit                               worker.resources.limits.memory
+#      └─ ~1.5 GiB      JVM off-heap + Trino off-heap + container OS
+#      └─ 12 GiB        JVM heap                                      worker.jvm.maxHeapSize
+#          └─ 1.5 GiB   Trino internals + caches                      worker.config.memory.heapHeadroomPerNode
+#          └─ 10.5 GiB  Query memory                                  worker.config.query.maxMemoryPerNode
+
+image:
+  tag: "484"
+
+# https://trinodb.github.io/charts/charts/trino/index.html
+server:
+  workers: 32
+  config:
+    query:
+      maxMemory: 320GB
+
+catalogs:
+  # https://trino.io/docs/current/object-storage/file-system-s3.html
+  hive: |
+    connector.name=hive
+    fs.native-s3.enabled=true
+    s3.region=eu-central-1
+    hive.metastore=thrift
+    hive.metastore.uri=thrift://hive-metastore.default.svc.cluster.local:9083
+    hive.non-managed-table-creates-enabled=true
+    hive.non-managed-table-writes-enabled=true
+    hive.parquet.use-column-names=true
+
+coordinator:
+  # near-full node request so the coordinator gets its own node,
+  # leaving room for the metastore sidecar container
+  resources:
+    requests:
+      cpu: 2500m
+    limits:
+      cpu: 3500m
+  additionalVolumes:
+    - name: hive-metastore-config
+      configMap:
+        name: hive-metastore
+    - name: hive-metastore-derby
+      emptyDir: {}
+    - name: hive-metastore-download
+      emptyDir: {}
+  additionalVolumeMounts:
+    - name: hive-metastore-config
+      mountPath: /opt/hive/conf/metastore-site.xml
+      subPath: metastore-site.xml
+    - name: hive-metastore-derby
+      mountPath: /opt/hive/data
+    - name: hive-metastore-download
+      mountPath: /opt/jars
+
+worker:
+  # one worker pod per node
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchLabels:
+              app: trino
+              component: worker
+          topologyKey: kubernetes.io/hostname
+  resources:
+    requests:
+      cpu: 3000m
+      memory: 12Gi
+    limits:
+      cpu: 3500m
+      memory: 13824Mi
+  config:
+    memory:
+      heapHeadroomPerNode: 1536MB
+    query:
+      maxMemoryPerNode: 10752MB
+  jvm:
+    maxHeapSize: 12G
+    gcMethod:
+      type: UseG1GC
+      g1:
+        heapRegionSize: 32M
+  additionalJVMConfig:
+    - "-XX:+ExplicitGCInvokesConcurrent"
+
+# Hive metastore (Derby-backed) running as a sidecar of the coordinator
+initContainers:
+  # https://github.com/trinodb/trino/discussions/21372
+  coordinator:
+    - name: hive-metastore-download
+      image: busybox
+      command: ["sh", "-c", "wget https://repo1.maven.org/maven2/software/amazon/awssdk/bundle/2.42.17/bundle-2.42.17.jar -O /opt/jars/aws-sdk-bundle-2.42.17.jar"]
+      volumeMounts:
+        - name: hive-metastore-download
+          mountPath: /opt/jars
+    - name: hive-metastore-init
+      image: apache/hive:4.2.0
+      command: ["/opt/hive/bin/schematool", "-initSchema", "-dbType", "derby"]
+      env:
+        - name: AWS_REGION
+          value: eu-central-1
+      volumeMounts:
+        - name: hive-metastore-config
+          mountPath: /opt/hive/conf/metastore-site.xml
+          subPath: metastore-site.xml
+        - name: hive-metastore-derby
+          mountPath: /opt/hive/data
+sidecarContainers:
+  coordinator:
+    - name: hive-metastore
+      image: apache/hive:4.2.0
+      command: ["/opt/hive/bin/hive", "--service", "metastore"]
+      env:
+        - name: AWS_REGION
+          value: eu-central-1
+        - name: HADOOP_CLASSPATH
+          value: "/opt/jars/aws-sdk-bundle-2.42.17.jar:/opt/hadoop/share/hadoop/tools/lib/hadoop-aws-3.4.1.jar"
+      ports:
+        - containerPort: 9083
+      resources:
+        requests:
+          cpu: 500m
+        limits:
+          cpu: 1000m
+      volumeMounts:
+        - name: hive-metastore-config
+          mountPath: /opt/hive/conf/metastore-site.xml
+          subPath: metastore-site.xml
+        - name: hive-metastore-derby
+          mountPath: /opt/hive/data
+        - name: hive-metastore-download
+          mountPath: /opt/jars
