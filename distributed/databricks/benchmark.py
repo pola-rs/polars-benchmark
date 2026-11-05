@@ -7,6 +7,7 @@ import argparse
 import json
 import time
 import types
+from pathlib import Path
 
 import yaml
 from pyspark.sql import SparkSession
@@ -24,12 +25,14 @@ TABLES = [
 
 
 def load_queries(spec_path: str) -> dict[int, types.ModuleType]:
-    with open(spec_path) as f:
+    with Path(spec_path).open() as f:
         docs = list(yaml.safe_load_all(f))
     data = next(
         d["data"]
         for d in docs
-        if d and d.get("kind") == "ConfigMap" and d["metadata"]["name"] == "spark-queries"
+        if d
+        and d.get("kind") == "ConfigMap"
+        and d["metadata"]["name"] == "spark-queries"
     )
     queries = {}
     for filename, source in data.items():
