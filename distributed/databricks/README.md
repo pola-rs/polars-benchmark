@@ -26,7 +26,7 @@ Useful options (`./run.sh --help` for all):
 | `--profile`               | `DEFAULT`        |
 | `--num-workers`           | `32`             |
 | `--node-type`             | `m8i.xlarge`     |
-| `--spark-version`         | `18.x-scala2.13` |
+| `--spark-version`         | `19.x-scala2.13` |
 | `--no-photon`             | Photon enabled   |
 | `--availability`          | `ON_DEMAND`      |
 | `--queries`               | `1-22`           |
@@ -37,4 +37,4 @@ Useful options (`./run.sh --help` for all):
 ## Hardware
 
 Benchmark was run on 32x `m8i.xlarge` workers plus one `m8i.xlarge` driver,
-Databricks Runtime 18 LTS (Spark 4.1.0) with Photon.
+Databricks Runtime 19 (Spark 4.2.0) with Photon.
