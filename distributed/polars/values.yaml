@@ -39,13 +39,6 @@ worker:
           memory: 12Gi
         limits:
           memory: 12Gi
-      env:
-        - name: POLARS_MAX_CONCURRENT_SCANS
-          value: "8"
-        - name: POLARS_CONCURRENCY_BUDGET
-          value: "512"
-        - name: POLARS_ROW_GROUP_PREFETCH_SIZE
-          value: "64"
 anonymousResults:
   s3:
     enabled: true
@@ -53,8 +46,6 @@ anonymousResults:
 runtime:
   composed:
     dist:
-      repository: polarscloud/polars-on-premises
-      tag: "0.5.1"
+      repository: polarsinc/polars-nanook-compute
+      tag: "0.10.1"
       pullPolicy: Always
-    runtime:
-      tag: "3.12.3-slim-bookworm"

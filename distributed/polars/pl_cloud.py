@@ -1,7 +1,7 @@
 import time
 
 import polars as pl
-import polars_cloud as pc
+import polars_nanook as pc
 
 from queries.polars.q1 import q as q1
 from queries.polars.q2 import q as q2
@@ -28,7 +28,7 @@ from queries.polars.q22 import q as q22
 
 
 def _scan_ds(table_name: str) -> pl.LazyFrame:
-    path = f"s3://polars-pdsh-eu-central/scale-factor-1000.0/200/{table_name}/"
+    path = f"s3://polars-cloud-datasets/tpch/sf1000/partitioned/{table_name}/"
     return pl.scan_parquet(path)
 
 
@@ -77,7 +77,7 @@ queries = [
     q22(**kwargs),
 ]
 
-ctx = pc.ClusterContext(compute_address="localhost")
+ctx = pc.ClusterContext("http://localhost")
 
 timings: list[float | None] = []
 for i, q in enumerate(queries):
@@ -90,7 +90,7 @@ for i, q in enumerate(queries):
         execution_time = time.time() - start_time
         print(f"q{i} executed in: {execution_time:.2f} seconds")
         timings.append(execution_time)
-    except pl.exceptions.ComputeError as e:
+    except Exception as e:
         print("remote query failed:", e)
         timings.append(None)
 
